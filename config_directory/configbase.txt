@@ -50,9 +50,7 @@ debugIsOn = True
 viewIsOn =True　
 unittestIsOn = True
 
-
 [lists]
-
 
 [sets]
 tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,rnn,lstm
