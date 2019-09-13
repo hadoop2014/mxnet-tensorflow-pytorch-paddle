@@ -1,0 +1,96 @@
+[strings]
+#data_directory = data_directory
+model_savefile = working_directory/alexnetmodel
+symbol_savefile = working_directory/alexnetsymbol
+checkpoint_filename = alexnet.ckpt
+
+optimizer = sgd
+initializer = kaiming
+
+#lenet parameter　[sigmoid,relu]
+activation = relu
+
+[ints]
+#resize = 224
+resize = 244
+#训练迭代次数
+train_num_epoch = 8
+batch_size =16
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 1
+epochs_per_checkpoint = 2
+
+
+#alexnet parameter
+input_dim_x = 224
+input_dim_y = 224
+input_channels = 3
+conv1_channels = 96
+conv1_kernel_size = 11
+conv1_striders = 4
+conv1_padding = 0
+#input_dim_x = 32
+#input_dim_y = 32
+#input_channels =3
+#conv1_channels = 64
+#conv1_kernel_size = 3
+#conv1_striders = 1
+#conv1_padding = 1
+#pool1_size =3
+#pool1_strides =1
+#pool1_padding=1
+pool1_size = 3
+pool1_strides = 2
+pool1_padding = 0
+conv2_channels = 256
+conv2_kernel_size = 5
+conv2_strides = 1
+conv2_padding = 2
+pool2_size = 3
+pool2_strides = 2
+pool2_padding = 0
+conv3_channels = 384
+conv3_kernel_size = 3
+conv3_strides = 1
+conv3_padding = 1
+conv4_channels = 384
+conv4_kernel_size = 3
+conv4_strides = 1
+conv4_padding = 1
+conv5_channels = 256
+conv5_kernel_size = 3
+conv5_strides = 1
+conv5_padding = 1
+pool3_size = 3
+pool3_strides = 2
+pool3_padding = 0
+dense1_hiddens = 4096
+dense2_hiddens = 4096
+dense3_hiddens = 10
+class_num = 10
+
+[floats]
+init_sigma = 0.01
+init_bias = 0.1
+learning_rate = 0.1
+learning_rate_decay_factor = 0.9
+decay_steps = 5000
+keeps = 0.6
+test_percent = 0.5
+
+#alexnet parameter
+drop1_rate = 0.5
+drop2_rate = 0.5
+
+[bools]
+ckpt_used = False
+debugIsOn =　True
+viewIsOn = True
+tfdbgIsOn = False
+
+[lists]
+
+
+[sets]

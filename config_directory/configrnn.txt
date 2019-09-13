@@ -1,0 +1,51 @@
+[strings]
+#data_directory = data_directory
+model_savefile = working_directory/resnetmodel
+symbol_savefile = working_directory/resnetsymbol
+checkpoint_filename = resnet.ckpt
+
+optimizer =　sgd
+initializer =kaiming
+#ctx = gpu
+
+#lenet parameter　[sigmoid,relu,tanh]
+activation = tanh
+
+[ints]
+resize = 224
+#训练迭代次数
+train_num_epoch = 5
+batch_size = 16
+num_steps = 6
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 1
+epochs_per_checkpoint =5
+
+
+#resnet parameter
+input_dim =  1
+rnn_hiddens = 256
+output_dim = 1
+
+[floats]
+init_sigma = 0.005
+init_bias = 0.0
+learning_rate = 0.1
+learning_rate_decay_factor = 0.9
+keeps = 0.6
+test_percent = 0.1
+clip_gradient = 1e-2
+
+
+[bools]
+ckpt_used =False
+debugIsOn =　True
+viewIsOn = True
+tfdbgIsOn = False
+
+[lists]
+
+
+[sets]

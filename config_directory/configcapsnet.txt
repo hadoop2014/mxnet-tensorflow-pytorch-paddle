@@ -1,0 +1,88 @@
+[strings]
+#data_directory = data_directory
+model_savefile = working_directory/capsnetmodel
+symbol_savefile = working_directory/capsnetsymbol
+checkpoint_filename = capsnet.ckpt
+
+optimizer =   sgd　
+initializer = normal
+#ctx = gpu
+
+#lenet parameter　[sigmoid,relu]
+activation = relu
+
+[ints]
+resize = 0
+#训练迭代次数
+train_num_epoch = 5
+batch_size = 3
+#used for max to keep checkpoint
+max_to_keep = 2
+epoch_per_print = 1
+epochs_per_checkpoint = 2
+debug_per_steps = 500
+#used for capsnets model
+input_channels = 3
+input_dim_x = 244
+input_dim_y = 244
+conv1_channels = 256
+conv1_kernel_size = 9
+conv1_strides = 1
+conv1_padding = 0
+conv2_channels = 256
+conv2_kernel_size = 9
+conv2_strides = 2
+conv2_padding = 0
+
+#caps1_maps = 32
+# 1152 primary capsules,caps1_n_maps * 6 * 6
+caps1_caps = 1152
+#对于cifar10的三通道图片，caps1_dims = 16,对于mnist, caps1_dims = 8
+caps1_dims = 8
+#caps1_dims = 16
+caps2_caps = 10
+#对于cifar10的三通道图片，caps1_dims = 32,对于mnist, caps1_dims = 16
+#caps2_dims = 32
+caps2_dims = 16
+routing_num = 2
+#实际使用的dense2_hiddens　= 512 * input_channels
+dense1_hiddens = 512
+#实际使用的dense2_hiddens　= 1024 * input_channels
+dense2_hiddens = 1024
+#n_output = 28 * 28
+#实际使用的dens3_hiddens = input_dim_x * input_dim_y * input_channels
+dense3_hiddens = 784
+class_num = 10
+
+
+[floats]
+init_sigma = 0.01
+init_bias = 0.1
+#默认learning_rate =0.001
+learning_rate =0.1
+learning_rate_decay_factor = 0.9
+decay_steps = 2000
+keeps = 0.6
+test_percent = 0.16
+
+#used for capsnets model
+epsilon = 1e-7
+m_plus = 0.9
+m_minus = 0.1
+caps_lambda = 0.5
+#alpha 用于图片重构误差所占的比例,默认0.0005
+caps_alpha = 1
+
+
+[bools]
+ckpt_used =False
+debugIsOn =　True
+viewIsOn = True
+tfdbgIsOn = False
+
+#used for capsnet, mask_with_labels = False mean: switch to t_pred
+mask_with_labels = False
+
+[lists]
+
+[sets]

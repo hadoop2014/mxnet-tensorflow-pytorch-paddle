@@ -1,0 +1,61 @@
+[strings]
+#data_directory = data_directory
+model_savefile = working_directory/resnetmodel
+symbol_savefile = working_directory/resnetsymbol
+checkpoint_filename = resnet.ckpt
+
+optimizer =　sgd
+initializer =kaiming
+#ctx = gpu
+
+#lenet parameter　[sigmoid,relu]
+activation = relu
+
+[ints]
+resize = 224
+#训练迭代次数
+train_num_epoch = 5
+batch_size = 16
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 1
+epochs_per_checkpoint =5
+
+
+#resnet parameter
+input_dim_x = 224
+input_dim_y = 224
+input_channels = 1
+conv1_channels = 64
+conv1_kernel_size = 7
+conv1_strides = 2
+conv1_padding = 3
+pool1_size = 3
+pool1_strides=2
+pool1_padding=1
+
+dense1_hiddens =10
+class_num = 10
+#对于训练fashion mnist 数据集,resnet参数规模缩小4倍
+ratio = 4
+
+[floats]
+init_sigma = 0.005
+init_bias = 0.1
+learning_rate = 0.1
+learning_rate_decay_factor = 0.9
+keeps = 0.6
+test_percent = 0.16
+
+
+[bools]
+ckpt_used =False
+debugIsOn =　True
+viewIsOn = True
+tfdbgIsOn = False
+
+[lists]
+residual_arch = ((2, 64), (2, 128), (2, 256), (2, 512))
+
+[sets]

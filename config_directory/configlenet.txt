@@ -1,0 +1,68 @@
+[strings]
+#data_directory = data_directory
+model_savefile = working_directory/lenetmodel
+symbol_savefile = working_directory/lenetsymbol
+checkpoint_filename = lenet.ckpt
+
+optimizer = rmsprop
+initializer =xavier
+
+#lenet parameter　[sigmoid,relu]
+activation =sigmoid
+
+[ints]
+resize = 0
+#训练迭代次数
+train_num_epoch =10
+batch_size = 256
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 1
+epochs_per_checkpoint = 20
+
+
+#lenet parameter
+input_dim_x = 28
+input_dim_y = 28
+input_channels = 1
+conv1_channels = 6
+conv1_kernel_size = 5
+conv1_strides = 1
+conv1_padding = 0
+pool1_size = 2
+pool1_strides = 2
+pool1_padding = 0
+conv2_channels = 16
+conv2_kernel_size = 5
+conv2_striders = 1
+conv2_padding = 0
+pool2_size = 2
+pool2_strides = 2
+pool2_padding = 0
+dense1_hiddens = 120
+dense2_hiddens = 84
+#一共10个分类
+dense3_hiddens = 10
+class_num = 10
+
+
+[floats]
+init_sigma = 0.01
+init_bias = 0.0
+learning_rate = 0.001
+learning_rate_decay_factor = 0.8
+keeps = 1.0
+
+
+[bools]
+ckpt_used = False
+debugIsOn =　True
+viewIsOn =False
+tfdbgIsOn = False
+
+[lists]
+resize = None
+
+
+[sets]

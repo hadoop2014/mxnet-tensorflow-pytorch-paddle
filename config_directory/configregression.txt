@@ -1,0 +1,43 @@
+[strings]
+#data_directory = data_directory/
+model_savefile = working_directory/housemodel
+symbol_savefile = working_directory/housesymbol
+train_file = kaggle_house_pred_train.csv
+test_file = kaggle_house_pred_test.csv
+
+#optimizer = sgd,adam,rmsprop
+optimizer = rmsprop
+initializer = normal
+#ctx = gpu
+activation = 'relu'
+
+[ints]
+#训练迭代次数
+train_num_epoch = 200
+batch_size = 256
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 10
+epochs_per_checkpoint = 200
+
+#用于房价预测的Ｋ折交叉验证,k=5意味着留20%数据用于验证集
+k = 5
+input_dim = 331
+
+
+[floats]
+init_sigma = 0.01
+init_bias = 0.1
+learning_rate = 2
+learning_rate_decay_factor = 0.8
+weight_decay = 0.001
+
+[bools]
+ckpt_used = True
+
+
+[lists]
+
+
+[sets]

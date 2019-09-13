@@ -1,0 +1,78 @@
+[strings]
+#taskname = [regression,lenet,alexnet,vgg,capsnet,convolution,lstm,resnet]
+#frameworklist = mxnet,tensorflow,paddle,pytorch
+#datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric
+#ctxlist = cpu,gpu
+mode = train
+taskname = lenet
+framework = pytorch
+dataset = cifar10
+ctx =gpu
+
+working_directory = working_directory/
+logging_directory = logging_directory/
+config_directory = config_directory/
+data_directory = data_directory/
+model_savefile = working_directory/defaultmodel
+symbol_savefile = working_directory/defaultsymbol
+lybric_filename = jaychou_lyrics.txt.zip
+unittest_logfile = unittest_log.txt
+
+[ints]
+#resize=0 表示不对原始图像做缩放
+resize =0
+cpu_num = 4
+#训练迭代次数
+train_num_epoch = 200
+#used for max to keep checkpoint
+max_to_keep = 2
+#used for max queue of tensorboard logging:default value = 10
+max_queue = 10
+epoch_per_print = 10
+epochs_per_checkpoint = 200
+debug_per_steps = 1000
+batch_size = 64
+#用于paddle的logger.image(tag="input",num_samples=num_samples])
+num_samples = 10
+#用于plt.show()后，在pltsleeptime(单位s)后自动关闭图形
+pltsleeptime =1
+
+[floats]
+learning_rate = 0.005
+learning_rate_decay_factor = 0.9
+decay_steps = 2000
+test_percent = 1.0
+momentum = 0.9
+
+[bools]
+ckpt_used = False
+debugIsOn = True
+viewIsOn =True　
+unittestIsOn = True
+
+
+[lists]
+
+
+[sets]
+tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,rnn,lstm
+optimizerlist = sgd,adam,rmsprop,adagrad,adadelta,momentum
+datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric
+frameworklist = mxnet,tensorflow,paddle,pytorch
+activationlist = sigmoid,relu,tanh
+initializerlist = normal,xavier,kaiming,constant
+ctxlist = gpu,cpu
+
+[attrs]
+#描述数据集的参数
+mnist.channels = 1
+mnist.dim_x = 28
+mnist.dim_y = 28
+cifar10.channels = 3
+cifar10.dim_x = 32
+cifar10.dim_y = 32
+fashionmnist.channels=1
+fashionmnist.dim_x = 28
+fashionmnist.dim_y = 28
+houseprice.dim = 331
+lyric.dim = 1
