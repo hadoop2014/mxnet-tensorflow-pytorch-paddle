@@ -5,8 +5,8 @@
 #ctxlist = cpu,gpu
 mode = train
 taskname = lenet
-framework = pytorch
-dataset = cifar10
+framework =　pytorch
+dataset = mnist
 ctx =gpu
 
 working_directory = working_directory/
@@ -17,6 +17,7 @@ model_savefile = working_directory/defaultmodel
 symbol_savefile = working_directory/defaultsymbol
 lybric_filename = jaychou_lyrics.txt.zip
 unittest_logfile = unittest_log.txt
+check_file = check.json
 
 [ints]
 #resize=0 表示不对原始图像做缩放
@@ -45,10 +46,10 @@ test_percent = 1.0
 momentum = 0.9
 
 [bools]
-ckpt_used = False
+ckpt_used = True
 debugIsOn = True
 viewIsOn =True　
-unittestIsOn = True
+unittestIsOn = False
 
 [lists]
 

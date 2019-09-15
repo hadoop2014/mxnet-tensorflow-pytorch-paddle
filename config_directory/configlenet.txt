@@ -19,7 +19,7 @@ batch_size = 256
 max_to_keep = 2
 
 epoch_per_print = 1
-epochs_per_checkpoint = 20
+epochs_per_checkpoint = 10
 
 
 #lenet parameter

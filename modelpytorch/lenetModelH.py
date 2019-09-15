@@ -68,7 +68,7 @@ class lenet(nn.Module):
 class lenetModel(modelBaseH):
     def __init__(self,gConfig,getdataClass):
         super(lenetModel,self).__init__(gConfig)
-        self.loss = nn.CrossEntropyLoss()
+        self.loss = nn.CrossEntropyLoss().to(self.ctx)
         self.resizedshape = getdataClass.resizedshape
         self.get_net()
         self.optimizer = self.get_optimizer(self.gConfig['optimizer'],self.net.parameters())
@@ -79,22 +79,7 @@ class lenetModel(modelBaseH):
         activation = self.gConfig['activation']#sigmoid
         activation = self.get_activation(activation)
         input_channels, input_dim_x, input_dim_y = self.resizedshape
-        #self.net.add(nn.Conv2D(channels=conv1_channels,kernel_size=conv1_kernel_size,
-        #                       strides=conv1_strides,activation=self.get_activation(activation),
-        #                       bias_initializer=init.Constant(self.init_bias)),
-        #        nn.MaxPool2D(pool_size=pool1_size,strides=pool1_strides),
-        #        nn.Conv2D(channels=conv2_channels,kernel_size=conv2_kernel_size,strides=conv2_strides,
-        #                  activation=self.get_activation(activation),bias_initializer=init.Constant(self.init_bias)),
-        #        nn.MaxPool2D(pool_size=pool2_size,strides=pool2_strides),
-        #        #Dense会默认将（批量大小，通道，高，宽)形状的输入转换成（批量大小，通道＊高＊宽）的形状的输入
-        #        nn.Dense(dense1_hiddens,activation=self.get_activation(activation),
-        #                 bias_initializer=init.Constant(self.init_bias)),
-        #        nn.Dense(dense2_hiddens,activation=self.get_activation(activation),
-        #                 bias_initializer=init.Constant(self.init_bias)),
-        #        nn.Dense(dense3_hiddens,bias_initializer=init.Constant(self.init_bias)))
-        #self.net.add_module(name='lenet',module=lenet(self.gConfig,input_channels,activation))
         self.net = lenet(self.gConfig,input_channels,activation,input_dim_x,input_dim_y)
-
 
     def run_train_loss_acc(self,X,y):
         self.optimizer.zero_grad()

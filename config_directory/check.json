@@ -1,0 +1,299 @@
+{
+  "regression":{
+    "config_file": "configregression.txt",
+    "mxnet": {
+      "model": "modelmxnet.regressionModelM",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": true,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "lenet":{
+    "config_file": "configlenet.txt",
+    "mxnet": {
+      "model": "modelmxnet.lenetModelM",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "modeltensorflow.lenetModelT",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "modelpytorch.lenetModelH",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "alexnet":{
+    "config_file": "configalexnet.txt",
+    "mxnet": {
+      "model": "modelmxnet.alexModelM",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "modeltensorflow.alexnetModelT",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "modelpaddle.alexnetModelP",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "vgg":{
+    "config_file": "configvgg.txt",
+    "mxnet": {
+      "model": "modelmxnet.vggModelM",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "modeltensorflow.vggModelT",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "resnet":{
+    "config_file": "configresnet.txt",
+    "mxnet": {
+      "model": "modelmxnet.resnetModelM",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "modeltensorflow.resnetModelT",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "capsnet":{
+    "config_file": "configcapsnet.txt",
+    "mxnet": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "modeltensorflow.capsnetModelT",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "rnn":{
+    "config_file": "configrnn.txt",
+    "mxnet": {
+      "model": "modelmxnet.rnnModelM",
+      "cifar10": true,
+      "mnist": true,
+      "fashionmnist": true,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "lstm":{
+    "config_file": "configlstm.txt",
+    "mxnet": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "tensorflow": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "paddle": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    },
+    "pytorch": {
+      "model": "",
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
+      "houseprice": false,
+      "lyric": false
+    }
+  },
+
+  "datafetch": {
+    "cifar10": "datafetch.getCifar10",
+    "mnist": "datafetch.getMnist",
+    "fashionmnist": "datafetch.getFashionMnist",
+    "houseprice": "datafetch.getHouseprice",
+    "lyric": "datafetch.getLyric"
+  }
+
+}
+

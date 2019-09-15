@@ -5,7 +5,9 @@ from functools import partial
 import torch
 from torchvision import models
 from tensorboardX import SummaryWriter
-from torchsummary import summary
+from torchsummary import summary # 该1.8版本在pytorch 1.2.0版本下使用, add_graph函数存在异常
+import visdom
+import re
 
 #深度学习模型的基类
 class modelBaseH(modelBase):
@@ -19,17 +21,15 @@ class modelBaseH(modelBase):
         self.viewIsOn = self.gConfig['viewIsOn'.lower()]
         self.max_to_keep = self.gConfig['max_to_keep']
         self.ctx =self.get_ctx(self.gConfig['ctx'])
-        #self.optimizer = self.gConfig['optimizer']
         self.init_sigma = self.gConfig['init_sigma']
         self.init_bias = self.gConfig['init_bias']
         self.momentum = self.gConfig['momentum']
         self.initializer = self.gConfig['initializer']
         self.max_queue = self.gConfig['max_queue']
-        #self.init_op = self.get_initializer(self.initializer)
         self.weight_initializer = self.get_initializer(self.initializer)
         self.bias_initializer = self.get_initializer('constant')
         self.global_step = torch.tensor(0,dtype=torch.int64,device=self.ctx)
-        self.set_default_tensor_type()  #设置默认的tensor在ｇｐｕ还是在ｃｐｕ上运算
+        #self.set_default_tensor_type()  #设置默认的tensor在ｇｐｕ还是在ｃｐｕ上运算
         self.net = nn.Module()
 
     def get_net(self):
@@ -132,6 +132,7 @@ class modelBaseH(modelBase):
     def train(self,model_eval,getdataClass,gConfig,num_epochs):
         for epoch in range(num_epochs):
             self.run_epoch(getdataClass,epoch)
+        self.writer.close()
 
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
@@ -192,13 +193,12 @@ class modelBaseH(modelBase):
             acc_sum += acc
             loss_sum += loss
             n += y.size()[0]
-            self.writer.add_scalar('test/loss',loss,self.global_step.item())
-            self.writer.add_scalar('test/accuracy',acc,self.global_step.item())
         return loss_sum / n, acc_sum / n
 
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
         num = 0
+        self.net.train()
         for step, (X, y) in enumerate(train_iter):
             try:
                 X = X.asnumpy()
@@ -221,8 +221,10 @@ class modelBaseH(modelBase):
             # print(features.shape,labels.shape)
             loss_train = loss_train / num
             acc_train = acc_train / num
+            self.net.eval()
             loss_test,acc_test = self.evaluate_accuracy(test_iter)
-            #self.debug_info()
+            self.writer.add_scalar('test/loss',loss_test,self.global_step.item())
+            self.writer.add_scalar('test/accuracy',acc_test,self.global_step.item())
 
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
@@ -239,20 +241,25 @@ class modelBaseH(modelBase):
         self.clear_logging_directory(self.logging_directory)
 
         self.writer = SummaryWriter(logdir=self.logging_directory,max_queue=self.max_queue)
-        if 'pretrained_model' in self.gConfig:
-            self.net.load_parameters(self.gConfig['pretrained_model'])
+        #self.writer = SummaryWriter()
+        #self.vis = visdom.Visdom(env='test')
+        if 'pretrained' in self.gConfig:
+            pass
 
         ckpt = self.getSaveFile()
         if ckpt and ckpt_used:
             print("Reading model parameters from %s" % ckpt)
             #self.net = torch.load(ckpt,map_location=self.ctx)
             self.net.load_state_dict(torch.load(ckpt))
+            self.net.to(device=self.ctx)
             self.global_step = torch.load(self.symbol_savefile,map_location=self.ctx)
         else:
             print("Created model with fresh parameters.")
+            self.net.to(device=self.ctx)
             self.net.apply(self.params_initialize)
             self.global_step = torch.tensor(0,dtype=torch.int64,device=self.ctx)
-            self.debug_info(self.net)
-            dummy_input = torch.zeros(*self.get_input_shape())
-            summary(self.net,input_size=self.get_input_shape()[1:],batch_size=self.get_input_shape()[0])
-            #self.writer.add_graph(self.net,dummy_input)
+        self.debug_info(self.net)
+        summary(self.net,input_size=self.get_input_shape()[1:],batch_size=self.get_input_shape()[0],
+                device=re.findall(r'(\w*)',self.ctx.__str__())[0])
+        dummy_input = torch.zeros(*self.get_input_shape(),device=self.ctx)
+        self.writer.add_graph(self.net,dummy_input)
