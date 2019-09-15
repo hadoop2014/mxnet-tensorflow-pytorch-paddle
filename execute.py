@@ -5,14 +5,8 @@ import matplotlib.pyplot as plt
 from time import sleep
 from threading import Thread
 from datafetch import getConfig
-from datafetch import getConfig,getMnist,getCifar10,getFashionMnist,getBaseClass,getHouseprice,getLyric
-from modeltensorflow import capsnetModelT,alexnetModelT,lenetModelT,resnetModelT,vggModelT
-from modelmxnet import alexnetModelM,regressionModelM,lenetModelM,resnetModelM,vggModelM,rnnModelM
-from modelpaddle import alexnetModelP
-from modelpytorch import lenetModelH
 import json
 import os
-
 
 check_book = None
 
@@ -68,115 +62,12 @@ def closeplt(time):
     plt.close()
 
 def getDataset(taskName,framework,gConfig,dataset):
-    '''if taskName == 'regression':
-        dataset = 'houseprice'
-
-    if dataset == 'fashionmnist':
-        getdataClass = getFashionMnist.create_model(gConfig)
-    elif dataset == 'cifar10':
-        getdataClass = getCifar10.create_model(gConfig)
-    elif dataset == 'houseprice':
-        getdataClass = getHouseprice.create_model(gConfig)
-    elif dataset == 'mnist':
-        getdataClass = getMnist.create_model(gConfig)
-    elif dataset == 'lyric':
-        getdataClass = getLyric.create_model(gConfig)
-    else:
-        getdataClass = None'''
-    #getdataClass = None
     module = __import__(check_book['datafetch'][dataset],fromlist=(check_book['datafetch'][dataset].split('.')[-1]))
     getdataClass = getattr(module,'create_model')(gConfig)
     return getdataClass
 
 
 def modelManager(framework,gConfig,dataset,taskName,ckpt_used=False):
-    model=None
-    model_eval = None
-    getdataClass=None
-    '''
-    if taskName == 'regression':
-        getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        if framework == 'mxnet':
-            model = regressionModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                                  getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'lenet':
-        getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        if framework == 'mxnet':
-            model = lenetModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                             getdataClass=getdataClass)
-        elif framework == 'tensorflow':
-            model = lenetModelT.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                             getdataClass=getdataClass)
-        elif framework == 'pytorch':
-            model = lenetModelH.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                             getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'alexnet':
-        getdataClass = getDataset(taskName, framework, gConfig, dataset)
-        if framework == 'mxnet':
-            model = alexnetModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                               getdataClass=getdataClass)
-            #getdataClass = getFashionMnist.create_model(gConfig=gConfig)
-            getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        elif framework == 'tensorflow':
-            model = alexnetModelT.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                               getdataClass=getdataClass)
-            #getdataClass = getFashionMnist.create_model(gConfig=gConfig)
-            getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        elif framework == 'paddle':
-            model = alexnetModelP.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                               getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'vgg':
-        getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        if framework == 'mxnet':
-            model = vggModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                           getdataClass=getdataClass)
-        elif framework == 'tensorflow':
-            model = vggModelT.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                           getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'resnet':
-        getdataClass = getDataset(taskName,framework,gConfig,dataset)
-        if framework == 'mxnet':
-            model = resnetModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                              getdataClass=getdataClass)
-        elif framework == 'tensorflow':
-            model =resnetModelT.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                             getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'capsnet':
-        getdataClass = getDataset(taskName, framework, gConfig, dataset)
-        if framework == 'mxnet':
-            #model = capsnetModelM.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-            #                                  getdataClass=getdataClass)
-            raise ValueError('cpasnetModelM is not implemented!')
-        elif framework == 'tensorflow':
-            model = capsnetModelT.create_model(gConfig=gConfig, ckpt_used=ckpt_used,
-                                              getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-    elif taskName == 'rnn':
-        getdataClass = getDataset(taskName, framework, gConfig, dataset)
-        if framework == 'mxnet':
-            model = rnnModelM.create_model(gConfig=gConfig,ckpt_used=ckpt_used,
-                                           getdataClass=getdataClass)
-        else:
-            raise ValueError('task(%s) is not implement in %s'%(taskName,framework))
-        model_eval = model
-        '''
     getdataClass = getDataset(taskName, framework, gConfig, dataset)
     module = __import__(check_book[taskName][framework]["model"],
                         fromlist=(check_book[taskName][framework]["model"].split('.')[-1]))
@@ -202,18 +93,6 @@ def get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn):
 
 def trainStart(gConfig,taskName,framework,dataset,unittestIsOn):
     if gConfig['mode'] == 'train':
-        if framework == 'mxnet':
-            from modelmxnet import lenetModelM, regressionModelM, alexnetModelM, vggModelM, resnetModelM,rnnModelM
-            from datafetch import getHouseprice, getFashionMnist, getCifar10, getMnist,getLyric
-        elif framework == 'tensorflow':
-            from modeltensorflow import lenetModelT, vggModelT, alexnetModelT, resnetModelT, capsnetModelT
-            from datafetch import getHouseprice, getFashionMnist, getCifar10, getMnist,getLyric
-        elif framework == 'paddle':
-            from modelpaddle import alexnetModelP
-            from datafetch import getHouseprice, getFashionMnist, getCifar10, getMnist,getLyric
-        elif framework == 'pytorch':
-            from modelpytorch import lenetModelH
-            from datafetch import getHouseprice,getFashionMnist,getCifar10,getMnist,getLyric
         gConfig = get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn)
         model, model_eval, getdataClass = modelManager(framework, gConfig, dataset, taskName=taskName,
                                                        ckpt_used=gConfig['ckpt_used'])
