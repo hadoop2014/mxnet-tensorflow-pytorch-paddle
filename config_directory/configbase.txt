@@ -5,8 +5,8 @@
 #ctxlist = cpu,gpu
 mode = train
 taskname = lenet
-framework =　pytorch
-dataset = mnist
+framework =　mxnet
+dataset =mnist
 ctx =gpu
 
 working_directory = working_directory/

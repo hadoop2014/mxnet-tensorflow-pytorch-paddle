@@ -4,9 +4,9 @@ from mxnet import nd
 from mxnet.gluon import data as gdata
 import numpy as np
 
-class getHousepriceData(getdataBase):
+class getHousepriceDataM(getdataBase):
     def __init__(self,gConfig):
-        super(getHousepriceData, self).__init__(gConfig)
+        super(getHousepriceDataM, self).__init__(gConfig)
         self.data_path = self.gConfig['data_directory']
         self.train_file = self.gConfig['train_file']
         self.test_file = self.gConfig['test_file']
@@ -99,7 +99,14 @@ class getHousepriceData(getdataBase):
                                       batch_size=self.valid_features.shape[0])
         return valid_iter
 
-def create_model(gConfig):
-    getdataClass=getHousepriceData(gConfig=gConfig)
+class_selector = {
+    "mxnet":getHousepriceDataM,
+    "tensorflow":getHousepriceDataM,
+    "pytorch":getHousepriceDataM,
+    "paddle":getHousepriceDataM
+}
 
+def create_model(gConfig):
+
+    getdataClass = class_selector[gConfig['framework']](gConfig)
     return getdataClass

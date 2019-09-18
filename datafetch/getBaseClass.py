@@ -15,6 +15,8 @@ class getdataBase():
         self.train_iter=None
         self.test_iter=None
         self.unitestIsOn = self.gConfig['unittestIsOn'.lower()]
+        self.ctx = self.gConfig['ctx']
+
     def load_data(self,*args):
         pass
 

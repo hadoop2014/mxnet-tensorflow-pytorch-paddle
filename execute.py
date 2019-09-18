@@ -127,12 +127,13 @@ def main():
         if len(sys.argv) == 5:
             #该模式为从unittest.main调用
             unittestIsOn = bool(sys.argv[4])
+            assert unittestIsOn == True , \
+                'Now in unittest mode, the num of argvs must be 5 whitch is taskName, framework,dataset and unittestIsOn'
         else:
             #该模式为从python -m 方式调用
             unittestIsOn = gConfig['unittestIsOn'.lower()]
         # print(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],len(sys.argv))
-        assert unittestIsOn == True and len(sys.argv) == 5 and unittestIsOn == bool(sys.argv[4]), \
-            'Now in unittest mode, the num of argvs must be 5 whitch is taskName, framework,dataset and unittestIsOn'
+
         taskName = sys.argv[1]
         framework = sys.argv[2]
         dataset = sys.argv[3]

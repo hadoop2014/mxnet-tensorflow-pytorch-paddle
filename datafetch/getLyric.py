@@ -1,14 +1,14 @@
 from  datafetch.getBaseClass import *
-from mxnet import  nd
 import numpy as np
+from mxnet import  nd
 import mxnet as mx
 import zipfile
 import random
 
 
-class getLyricData(getdataBase):
+class getLyricDataM(getdataBase):
     def __init__(self,gConfig):
-        super(getLyricData,self).__init__(gConfig)
+        super(getLyricDataM,self).__init__(gConfig)
         self.data_path = self.gConfig['data_directory']
         self.filename = self.gConfig['lybric_filename']
         self.resize = self.gConfig['resize']
@@ -139,7 +139,14 @@ class getLyricData(getdataBase):
                              %(dataset_name,gConfig['datasetlist']))
         return [gConfig[dataset_name+'.dim']]
 
-def create_model(gConfig):
-    getdataClass=getLyricData(gConfig=gConfig)
+class_selector = {
+    "mxnet":getLyricDataM,
+    "tensorflow":getLyricDataM,
+    "pytorch":getLyricDataM,
+    "paddle":getLyricDataM
+}
 
+def create_model(gConfig):
+    #getdataClass=getMnistData(gConfig=gConfig)
+    getdataClass = class_selector[gConfig['framework']](gConfig)
     return getdataClass

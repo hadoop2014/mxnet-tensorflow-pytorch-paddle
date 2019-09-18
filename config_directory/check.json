@@ -74,7 +74,7 @@
   "alexnet":{
     "config_file": "configalexnet.txt",
     "mxnet": {
-      "model": "modelmxnet.alexModelM",
+      "model": "modelmxnet.alexnetModelM",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
