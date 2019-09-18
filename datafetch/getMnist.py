@@ -44,7 +44,8 @@ class getMnistDataM(getdataBase):
         if resize is not None and resize != 0:
             transformer += [gdata.vision.transforms.Resize(resize)]
             self.resizedshape = [self.rawshape[0],resize,resize]
-        #transformer += [gdata.vision.transforms.ToTensor()]
+        transformer += [gdata.vision.transforms.ToTensor()]
+
         transformer = gdata.vision.transforms.Compose(transformer)
         train_data = gdata.vision.MNIST(root=root,train=True)
         test_data = gdata.vision.MNIST(root=root, train=False)

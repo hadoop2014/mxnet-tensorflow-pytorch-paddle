@@ -5,7 +5,7 @@
 #ctxlist = cpu,gpu
 mode = train
 taskname = lenet
-framework =　mxnet
+framework =　tensorflow
 dataset =mnist
 ctx =gpu
 
