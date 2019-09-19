@@ -5,8 +5,8 @@
 #ctxlist = cpu,gpu
 mode = train
 taskname = lenet
-framework =　tensorflow
-dataset =mnist
+framework =　pytorch
+dataset =cifar10
 ctx =gpu
 
 working_directory = working_directory/
@@ -17,7 +17,7 @@ model_savefile = working_directory/defaultmodel
 symbol_savefile = working_directory/defaultsymbol
 lybric_filename = jaychou_lyrics.txt.zip
 unittest_logfile = unittest_log.txt
-check_file = check.json
+check_file = checkbook.json
 
 [ints]
 #resize=0 表示不对原始图像做缩放

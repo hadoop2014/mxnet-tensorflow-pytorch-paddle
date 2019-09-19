@@ -82,7 +82,7 @@ def get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn):
     if check_book is not None:
         config_file = os.path.join(gConfig['config_directory'],check_book[taskName]['config_file'])
     else:
-        raise ValueError('check_book is None ,it may be some error occured when open the check.json!')
+        raise ValueError('check_book is None ,it may be some error occured when open the checkbook.json!')
     gConfig = getConfig.get_config(config_file)
     #在unitest模式,这三个数据是从unittest.main中设置，而非从文件中读取．
     gConfig['taskName'] = taskName
