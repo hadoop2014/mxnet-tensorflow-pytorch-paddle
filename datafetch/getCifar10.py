@@ -1,8 +1,6 @@
 from  datafetch.getBaseClass import *
 import numpy as np
 import cv2
-import sys
-from PIL import Image
 
 classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 
@@ -30,8 +28,8 @@ class getCifar10DataP(getdataBase):
         if resize is not None and resize != 0:
             self.transformers = [self.fn_resize]
             self.resizedshape = [self.rawshape[0],self.resize,self.resize]
-        self.train_data = paddle.dataset.cifar.train10()#gdata.vision.FashionMNIST(root=root,train=True)
-        self.test_data = paddle.dataset.cifar.test10()#gdata.vision.FashionMNIST(root=root,train=False)
+        self.train_data = paddle.dataset.cifar.train10()
+        self.test_data = paddle.dataset.cifar.test10()
 
     def fn_reshape(self,x):
         return np.reshape(x,self.rawshape)
@@ -71,10 +69,9 @@ class getCifar10DataP(getdataBase):
                 for transformer in transformers:
                     X = np.apply_along_axis(transformer,axis=1,arr=X)
                 yield (X,y)
-
         return transform_reader
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getTrainData(self,batch_size):
         import paddle
         buf_size = self.batch_size * self.cpu_num
@@ -83,7 +80,7 @@ class getCifar10DataP(getdataBase):
         self.train_iter = self.transform(train_iter,self.transformers)
         return self.train_iter()
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getTestData(self,batch_size):
         import paddle
         buf_size = self.batch_size * self.cpu_num

@@ -14,14 +14,11 @@ class Residual(nn.HybridBlock):
         self.bn2 = nn.BatchNorm()
 
     def hybrid_forward(self, F, X,**kwargs):
-        #super(Residual,self).hybrid_forward(F,X,**kwargs)
         Y = F.relu(self.bn1(self.conv1(X)))
         Y = self.bn2(self.conv2(Y))
         if self.conv3:
             X = self.conv3(X)
         return F.relu(Y + X)
-
-
 
 class resnetModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
@@ -32,8 +29,6 @@ class resnetModel(modelBaseM):
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate})
-        #self.input_shape = (self.batch_size,self.gConfig['input_channels'],
-        #                                                 self.gConfig['input_dim_x'],self.gConfig['input_dim_y'])
         self.input_shape = (self.batch_size,*self.resizedshape)
 
     def resnet_block(self,num_channels, num_residuals, first_block=False):
@@ -44,7 +39,6 @@ class resnetModel(modelBaseM):
             else:
                 blk.add(Residual(num_channels))
         return blk
-
 
     def get_net(self):
         residual_arch = self.gConfig['residual_arch']
@@ -64,12 +58,10 @@ class resnetModel(modelBaseM):
                 nn.BatchNorm(),
                 nn.Activation(self.get_activation(activation)),
                 nn.MaxPool2D(pool_size=pool1_size, strides=pool1_strides, padding=pool1_padding))
-
         first_block = True
         for (num_residuls,num_channels) in small_residual_arch:
             self.net.add(self.resnet_block(num_channels,num_residuls,first_block))
             first_block = False
-
         # 全连接层部分
         self.net.add(nn.GlobalAvgPool2D(),
                      nn.Dense(dense1_hiddens))
@@ -87,7 +79,7 @@ class resnetModel(modelBaseM):
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
         return loss, acc
 
-    def run_loss_acc(self, X, y):
+    def run_eval_loss_acc(self, X, y):
         y_hat = self.net(X)
         acc = (y_hat.argmax(axis=1) == y).sum()
         loss = self.loss(y_hat, y).sum()
@@ -97,7 +89,6 @@ class resnetModel(modelBaseM):
         return self.input_shape
 
 def create_model(gConfig,ckpt_used,getdataClass):
-    #用cnnModel实例化一个对象model
     model=resnetModel(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
     return model

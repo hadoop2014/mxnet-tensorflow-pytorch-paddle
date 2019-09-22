@@ -76,7 +76,6 @@ def modelManager(framework,gConfig,dataset,taskName,ckpt_used=False):
     model_eval = model
     return model,model_eval,getdataClass
 
-
 def get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn):
     global check_book
     if check_book is not None:
@@ -133,7 +132,6 @@ def main():
             #该模式为从python -m 方式调用
             unittestIsOn = gConfig['unittestIsOn'.lower()]
         # print(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],len(sys.argv))
-
         taskName = sys.argv[1]
         framework = sys.argv[2]
         dataset = sys.argv[3]
@@ -150,7 +148,6 @@ def main():
         trainStart(gConfig, taskName, framework, dataset,unittestIsOn)
     else:
         raise ValueError("(%s %s %s) is not supported now!"%(taskName,framework,dataset))
-
 
 if __name__=='__main__':
     main()

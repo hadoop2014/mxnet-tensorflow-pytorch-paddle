@@ -1,6 +1,4 @@
 from datafetch.getBaseClass import  *
-import sys
-
 
 class getFashionMnistDataH(getdataBaseH):
     def __init__(self,gConfig):

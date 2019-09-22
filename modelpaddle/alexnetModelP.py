@@ -1,6 +1,4 @@
-import numpy as np
 from modelBaseClassP import *
-from torch import optim
 
 class alexnetModelP(modelBaseP):
     def __init__(self,gConfig,getdataClass):
@@ -53,9 +51,6 @@ class alexnetModelP(modelBaseP):
         bias_initializer = self.get_initializer('constant')
 
         with fluid.name_scope('input'):
-            #self.X_input = fluid.layers.data(shape=[-1,input_channels*input_dim_x*input_dim_y],dtype='float32',
-            #                                 stop_gradient=True,append_batch_size=False,
-            #                                 name='X_input')
             self.X_input = fluid.layers.data(shape=[-1, input_channels , input_dim_x , input_dim_y],
                                              dtype='float32',
                                              stop_gradient=True,append_batch_size=False,
@@ -72,7 +67,7 @@ class alexnetModelP(modelBaseP):
             self.t = fluid.layers.reshape(self.t_input,shape=[-1,1],
                                           name='t')
 
-        with fluid.name_scope('conv1'):#,tf.variable_scope('conv1'):
+        with fluid.name_scope('conv1'):
             conv1 = fluid.layers.conv2d(self.X,num_filters=conv1_channels,filter_size=conv1_kernel_size,
                                         stride=conv1_strides,padding=conv1_padding,
                                         act=self.get_activation(activation),
@@ -89,7 +84,7 @@ class alexnetModelP(modelBaseP):
                                         pool_padding=pool1_padding,name='pool1')
 
 
-        with fluid.name_scope('conv2'):#,tf.variable_scope('conv2'):
+        with fluid.name_scope('conv2'):
             conv2 = fluid.layers.conv2d(pool1, num_filters=conv2_channels, filter_size=conv2_kernel_size,
                                         stride=conv2_strides,padding=conv2_padding,
                                         act=self.get_activation(activation),
@@ -104,7 +99,7 @@ class alexnetModelP(modelBaseP):
                                         pool_padding=pool2_padding, name='pool2')
 
 
-        with fluid.name_scope('conv3'):#,tf.variable_scope('conv3'):
+        with fluid.name_scope('conv3'):
             conv3 = fluid.layers.conv2d(pool2, num_filters=conv3_channels, filter_size=conv3_kernel_size,
                                         stride=conv3_strides, padding=conv3_padding,
                                         act=self.get_activation(activation),
@@ -163,20 +158,11 @@ class alexnetModelP(modelBaseP):
                                                                           name='dense2/bias'),
                                      name='dense2')
 
-        #with fluid.layers.control_flow.Switch() as switch:
-        #    with switch.case(self.is_test ==
-        #                     fluid.layers.fill_constant(shape=[1],dtype='bool',value=True)):
-        #        drop2 = fluid.layers.dropout(dense2,dropout_prob=drop2_rate,
-        #                                     #dropout_implementation='upscale_in_train',
-        #                                     is_test=True,
-        #                                     name='drop2')
-        #    with switch.default():
             drop2 = fluid.layers.dropout(dense2, dropout_prob=drop2_rate,
-                                             # dropout_implementation='upscale_in_train',
                                              is_test=False,
                                              name='drop2')
 
-        with fluid.name_scope('dense3'):#,tf.variable_scope('dense3'):
+        with fluid.name_scope('dense3'):
             self.dense3 = fluid.layers.fc(drop2,size=class_num,
                                      act='softmax',
                                      param_attr=fluid.param_attr.ParamAttr(initializer=weight_initializer,
@@ -187,7 +173,6 @@ class alexnetModelP(modelBaseP):
 
 
         with fluid.name_scope('loss'):
-
             coss = fluid.layers.cross_entropy(self.dense3, self.t)
             self.loss = fluid.layers.mean(coss)
 
@@ -216,7 +201,7 @@ class alexnetModelP(modelBaseP):
 
         return loss,acc
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = self.executor.run(self.test_program,
                                      feed={self.X_input.name:X,self.t_input.name:y},
                                      fetch_list=[self.loss,self.accuracy])

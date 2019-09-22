@@ -21,11 +21,12 @@ class modelBaseM(modelBase):
         self.init_bias = self.gConfig['init_bias']
         self.initializer = self.gConfig['initializer']
         self.init_op = self.get_initializer(self.initializer)
-        #self.init_op = init.Mixed(['bias','weights'],[init.Constant(self.init_bias),self.get_init_op(self.initializer)])
         #self.weight_initial = init.Uniform(scale=self.init_sigma)
         #self.bias_initial = init.Constant(self.init_bias)
         self.global_step = nd.array([0],self.ctx)
-        self.net = nn.HybridSequential()
+        #self.net = nn.HybridSequential()
+        self.net = nn.Sequential()
+        self.state = None #用于rnn,lstm等
 
     def get_net(self):
         return
@@ -76,6 +77,9 @@ class modelBaseM(modelBase):
     def get_input_shape(self):
         pass
 
+    def init_state(self):
+        pass
+
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
             return
@@ -83,21 +87,7 @@ class modelBaseM(modelBase):
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         net = self.net(input_symbol)
-        if isinstance(net,tuple):
-            #针对rnn的特殊处理
-            for child in net:
-                if isinstance(child,list):
-                    #mx.viz.plot_network(child[0], title=title, save_format='png', hide_weights=False,
-                    #                    shape=input_shape)\
-                    #     .view(directory=self.logging_directory)
-                    pass
-                else:
-                    #mx.viz.plot_network(child, title=title, save_format='png', hide_weights=False,
-                    #                    shape=input_shape) \
-                    #    .view(directory=self.logging_directory)
-                    pass
-        else:
-            mx.viz.plot_network(net, title=title, save_format='png', hide_weights=False,
+        mx.viz.plot_network(net, title=title, save_format='png', hide_weights=False,
                                 shape=input_shape) \
                 .view(directory=self.logging_directory)
         return
@@ -105,7 +95,6 @@ class modelBaseM(modelBase):
     def saveCheckpoint(self):
         self.net.save_parameters(self.model_savefile)
         nd.save(self.symbol_savefile,self.global_step)
-
 
     def getSaveFile(self):
         if self.model_savefile == '':
@@ -127,7 +116,6 @@ class modelBaseM(modelBase):
             if os.path.exists(filename):
                 os.remove(filename)
 
-
     def train(self,model_eval,getdataClass,gConfig,num_epochs):
         for epoch in range(num_epochs):
             self.run_epoch(getdataClass,epoch)
@@ -135,20 +123,23 @@ class modelBaseM(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-
     def debug_info(self,info = None):
         if self.debugIsOn == False:
             return
         if info is not None:
             print('\tdebug:%s'%info)
             return
-        for layer in self.net:
-            self.debug(layer)
+        if isinstance(self.net,nn.HybridSequential):
+            for layer in self.net:
+                 self.debug(layer)
+        else:
+            self.debug(self.net)
         print('\n')
         return
 
     def debug(self,layer,name=''):
-        if str(layer.name).find('sequential') >= 0 or str(layer.name).find('residual')>=0:
+        if str(layer.name).find('sequential') >= 0 or str(layer.name).find('residual')>=0 \
+                or str(layer.name).find('rnn') >= 0:
             for i in layer._children:
                 self.debug(layer._children[i],layer.name)
         elif str(layer.name).find('pool') < 0 and \
@@ -173,7 +164,7 @@ class modelBaseM(modelBase):
         loss,acc = None,None
         return loss,acc
 
-    def run_loss_acc(self,X,y):
+    def run_eval_loss_acc(self, X, y):
         loss,acc = None,None
         return loss,acc
 
@@ -181,13 +172,14 @@ class modelBaseM(modelBase):
         acc_sum = nd.array([0], ctx=self.ctx)
         loss_sum = nd.array([0], ctx=self.ctx)
         n = 0
+        self.init_state()
         for X, y in data_iter:
             X = nd.array(X,ctx=self.ctx)
             y = nd.array(y,ctx=self.ctx)
             #X = X.as_in_context(self.ctx)
             #y = y.as_in_context(self.ctx)
             y = y.astype('float32')
-            loss,acc = self.run_loss_acc(X,y)
+            loss,acc = self.run_eval_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss
             n += y.size
@@ -196,6 +188,7 @@ class modelBaseM(modelBase):
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
         num = 0
+        self.init_state()
         for step, (X, y) in enumerate(train_iter):
             X = nd.array(X,ctx=self.ctx)
             y = nd.array(y,ctx=self.ctx)
@@ -208,14 +201,13 @@ class modelBaseM(modelBase):
             self.global_step += nd.array([1],ctx=self.ctx)
         #nd.waitall()
         if epoch % epoch_per_print == 0:
-            # print(features.shape,labels.shape)
             loss_train = loss_train / num
             acc_train = acc_train / num
             loss_test,acc_test = self.evaluate_accuracy(test_iter)
-            #self.debug_info()
-
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
+    def summary(self):
+        self.net.summary(nd.zeros(shape=self.get_input_shape(),ctx=self.ctx))
 
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
@@ -223,7 +215,6 @@ class modelBaseM(modelBase):
         self.show_net(input_shape={'input_data':self.get_input_shape()})
         if 'pretrained_model' in self.gConfig:
             self.net.load_parameters(self.gConfig['pretrained_model'])
-
         ckpt = self.getSaveFile()
         if ckpt and ckpt_used:
             print("Reading model parameters from %s" % ckpt)
@@ -236,5 +227,5 @@ class modelBaseM(modelBase):
             self.debug_info(self.init_op.dumps())
             self.debug_info(self.net)
             # model.removeSaveFile()
-            self.net.summary(nd.zeros(shape=self.get_input_shape(), ctx=self.ctx))
+            self.summary()
         self.net.hybridize()

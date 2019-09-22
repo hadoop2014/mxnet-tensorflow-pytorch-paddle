@@ -6,7 +6,6 @@ import os
 import sys
 import time
 
-
 class ExecuteTestCase(unittest.TestCase):
     def setUp(self) -> None:
         pass
@@ -16,7 +15,6 @@ class ExecuteTestCase(unittest.TestCase):
         logging_directory = gConfig['logging_directory']
         unittest_logfile = gConfig['unittest_logfile']
         unittest_logfilename = os.path.join(logging_directory,unittest_logfile)
-        #unittestIsOn = gConfig['unittestIsOn'.lower()]
         test_starttime = time.time()
         result = []
         unittestIsOn = True #unittest模式下设置unittestIsOn = True
@@ -43,7 +41,6 @@ class ExecuteTestCase(unittest.TestCase):
 
         for line in result:
             print(line)
-
 
 if __name__ == '__main__':
     unittest.main()

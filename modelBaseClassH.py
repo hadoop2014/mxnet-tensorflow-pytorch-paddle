@@ -107,7 +107,6 @@ class modelBaseH(modelBase):
         torch.save(self.net.state_dict(),self.model_savefile)
         torch.save(self.global_step,self.symbol_savefile)
 
-
     def getSaveFile(self):
         if self.model_savefile == '':
             self.model_savefile = None
@@ -167,12 +166,11 @@ class modelBaseH(modelBase):
         if global_step < self.gConfig['num_samples']:
             self.writer.add_image(tag,input_image,global_step)
 
-
     def run_train_loss_acc(self,X,y):
         loss,acc = None,None
         return loss,acc
 
-    def run_loss_acc(self,X,y):
+    def run_eval_loss_acc(self, X, y):
         loss,acc = None,None
         return loss,acc
 
@@ -189,7 +187,7 @@ class modelBaseH(modelBase):
                 y = np.array(y)
             X = torch.tensor(X,device=self.ctx)
             y = torch.tensor(y,device=self.ctx,dtype=torch.long)
-            loss,acc = self.run_loss_acc(X,y)
+            loss,acc = self.run_eval_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss
             n += y.size()[0]
@@ -241,7 +239,6 @@ class modelBaseH(modelBase):
         self.clear_logging_directory(self.logging_directory)
 
         self.writer = SummaryWriter(logdir=self.logging_directory,max_queue=self.max_queue)
-        #self.writer = SummaryWriter()
         #self.vis = visdom.Visdom(env='test')
         if 'pretrained' in self.gConfig:
             pass
@@ -249,7 +246,6 @@ class modelBaseH(modelBase):
         ckpt = self.getSaveFile()
         if ckpt and ckpt_used:
             print("Reading model parameters from %s" % ckpt)
-            #self.net = torch.load(ckpt,map_location=self.ctx)
             self.net.load_state_dict(torch.load(ckpt))
             self.net.to(device=self.ctx)
             self.global_step = torch.load(self.symbol_savefile,map_location=self.ctx)

@@ -219,11 +219,11 @@
     "config_file": "configrnn.txt",
     "mxnet": {
       "model": "modelmxnet.rnnModelM",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
+      "cifar10": false,
+      "mnist": false,
+      "fashionmnist": false,
       "houseprice": false,
-      "lyric": false
+      "lyric": true
     },
     "tensorflow": {
       "model": "",

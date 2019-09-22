@@ -2,10 +2,9 @@ from modelBaseClassM import *
 from mxnet import gluon,init,nd,autograd
 from mxnet.gluon import loss as gloss,nn
 
-
-class houseModel(modelBaseM):
+class regressionModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
-        super(houseModel,self).__init__(gConfig)
+        super(regressionModel, self).__init__(gConfig)
         self.weight_decay = self.gConfig['weight_decay']
         self.loss = gloss.L2Loss()
         self.resizedshape = getdataClass.resizedshape
@@ -13,7 +12,6 @@ class houseModel(modelBaseM):
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate,'wd':self.weight_decay})
-        #self.input_shape = (self.batch_size, gConfig['input_dim'])
         self.input_shape = (self.batch_size,self.resizedshape[0])
 
     def get_net(self):
@@ -22,8 +20,6 @@ class houseModel(modelBaseM):
     def log_rmse(self, features, labels):
         # 将小于1的值设成1，使得取对数时数值更稳定
         clipped_preds = nd.clip(self.net(features), 1, float('inf'))
-        #clipped_preds = self.net(features)
-        #print(clipped_preds,labels)
         rmse = nd.sqrt(2 * self.loss(clipped_preds.log(), labels.log()).mean())
         return rmse.asscalar()
 
@@ -74,8 +70,6 @@ class houseModel(modelBaseM):
         return self.input_shape
 
 def create_model(gConfig,ckpt_used,getdataClass):
-    #用cnnModel实例化一个对象model
-    #gConfig = gConfig#getConfig.get_config(config_file=config_file)
-    model=houseModel(gConfig=gConfig,getdataClass=getdataClass)
+    model=regressionModel(gConfig=gConfig, getdataClass=getdataClass)
     model.initialize(ckpt_used)
     return model

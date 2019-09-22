@@ -1,7 +1,5 @@
-from mxnet import nd, gluon,autograd,init
 from mxnet.gluon import nn,loss as gloss
 from modelBaseClassM import *
-
 
 class alexnetModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
@@ -11,8 +9,6 @@ class alexnetModel(modelBaseM):
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate})
-        #self.input_shape = (self.batch_size,self.gConfig['input_channels'],
-        #                                                 self.gConfig['input_dim_x'],self.gConfig['input_dim_y'])
         self.input_shape = (self.batch_size,*getdataClass.resizedshape)
 
     def get_net(self):
@@ -75,24 +71,6 @@ class alexnetModel(modelBaseM):
                      # 输出层。由于这里使用Fashion-MNIST，所以用类别数为10，而非论文中的1000
                      nn.Dense(dense3_hiddens))
 
-        '''self.net.add(nn.Conv2D(96, kernel_size=11, strides=4, activation='relu'),
-                nn.MaxPool2D(pool_size=3, strides=2),
-                # 减小卷积窗口，使用填充为2来使得输入与输出的高和宽一致，且增大输出通道数
-                nn.Conv2D(256, kernel_size=5, padding=2, activation='relu'),
-                nn.MaxPool2D(pool_size=3, strides=2),
-                # 连续3个卷积层，且使用更小的卷积窗口。除了最后的卷积层外，进一步增大了输出通道数。
-                # 前两个卷积层后不使用池化层来减小输入的高和宽
-                nn.Conv2D(384, kernel_size=3, padding=1, activation='relu'),
-                nn.Conv2D(384, kernel_size=3, padding=1, activation='relu'),
-                nn.Conv2D(256, kernel_size=3, padding=1, activation='relu'),
-                nn.MaxPool2D(pool_size=3, strides=2),
-                # 这里全连接层的输出个数比LeNet中的大数倍。使用丢弃层来缓解过拟合
-                nn.Dense(4096, activation="relu"), nn.Dropout(0.5),
-                nn.Dense(4096, activation="relu"), nn.Dropout(0.5),
-                # 输出层。由于这里使用Fashion-MNIST，所以用类别数为10，而非论文中的1000
-                nn.Dense(10))
-        '''
-
     def run_train_loss_acc(self, X, y):
         with autograd.record():
             y_hat = self.net(X)
@@ -106,7 +84,7 @@ class alexnetModel(modelBaseM):
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
         return loss, acc
 
-    def run_loss_acc(self, X, y):
+    def run_eval_loss_acc(self, X, y):
         y_hat = self.net(X)
         acc = (y_hat.argmax(axis=1) == y).sum()
         loss = self.loss(y_hat, y).sum()
@@ -116,7 +94,6 @@ class alexnetModel(modelBaseM):
         return self.input_shape
 
 def create_model(gConfig,ckpt_used,getdataClass):
-    #用cnnModel实例化一个对象model
     model=alexnetModel(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
     return model

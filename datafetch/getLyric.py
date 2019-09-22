@@ -1,10 +1,8 @@
 from  datafetch.getBaseClass import *
-import numpy as np
 from mxnet import  nd
 import mxnet as mx
 import zipfile
 import random
-
 
 class getLyricDataM(getdataBase):
     def __init__(self,gConfig):
@@ -14,7 +12,7 @@ class getLyricDataM(getdataBase):
         self.resize = self.gConfig['resize']
         self.test_percent = self.gConfig['test_percent']
         self.batch_size = self.gConfig['batch_size']
-        self.num_steps = self.gConfig['num_steps']
+        self.time_steps = self.gConfig['time_steps']
         self.ctx = self.get_ctx(gConfig['ctx'])
         self.load_data(self.filename,root=self.data_path)
 
@@ -40,14 +38,14 @@ class getLyricDataM(getdataBase):
         self.corpus_indices = [self.char_to_idx[char] for char in corpus_chars]
 
         self.transformers = [self.fn_onehot]
-        self.resizedshape = [self.vocab_size]
-        train_nums = int(self.test_percent * self.vocab_size)
+        self.resizedshape = [self.time_steps,self.vocab_size]
+        train_nums = int((1-self.test_percent) * len(self.corpus_indices))
         self.train_data = self.corpus_indices[:train_nums] #paddle.dataset.cifar.train10()#gdata.vision.FashionMNIST(root=root,train=True)
         self.test_data = self.corpus_indices[train_nums:]#paddle.dataset.cifar.test10()#gdata.vision.FashionMNIST(root=root,train=False)
 
     def fn_onehot(self,x):
+        x = nd.transpose(x)
         return nd.one_hot(x,self.vocab_size)
-        #return self.embedding(x)
 
     def transform(self,reader,transformers):
         """
@@ -65,61 +63,49 @@ class getLyricDataM(getdataBase):
                 for transformer in transformers:
                     X = transformer(X)
                 yield (X,y)
-
         return transform_reader
 
-    def data_iter_random(self,corpus_indices, batch_size, num_steps, ctx=None):
+    def data_iter_random(self, corpus_indices, batch_size, time_steps, ctx=None):
         # 减1是因为输出的索引是相应输入的索引加1
-        num_examples = (len(corpus_indices) - 1) // num_steps
+        num_examples = (len(corpus_indices) - 1) // time_steps
         epoch_size = num_examples // batch_size
         example_indices = list(range(num_examples))
         random.shuffle(example_indices)
 
-        # 返回从pos开始的长为num_steps的序列
+        # 返回从pos开始的长为time_steps的序列
         def _data(pos):
-            return corpus_indices[pos: pos + num_steps]
+            return corpus_indices[pos: pos + time_steps]
 
         for i in range(epoch_size):
             # 每次读取batch_size个随机样本
             i = i * batch_size
             batch_indices = example_indices[i: i + batch_size]
-            X = [_data(j * num_steps) for j in batch_indices]
-            Y = [_data(j * num_steps + 1) for j in batch_indices]
+            X = [_data(j * time_steps) for j in batch_indices]
+            Y = [_data(j * time_steps + 1) for j in batch_indices]
             yield nd.array(X, ctx), nd.array(Y, ctx)
 
-    def data_iter_consecutive(self,corpus_indices, batch_size, num_steps, ctx=None):
+    def data_iter_consecutive(self, corpus_indices, batch_size, time_steps, ctx=None):
         corpus_indices = nd.array(corpus_indices, ctx=ctx)
         data_len = len(corpus_indices)
         batch_len = data_len // batch_size
         indices = corpus_indices[0: batch_size * batch_len].reshape((
             batch_size, batch_len))
-        epoch_size = (batch_len - 1) // num_steps
+        epoch_size = (batch_len - 1) // time_steps
         for i in range(epoch_size):
-            i = i * num_steps
-            X = indices[:, i: i + num_steps]
-            Y = indices[:, i + 1: i + num_steps + 1]
+            i = i * time_steps
+            X = indices[:, i: i + time_steps]
+            Y = indices[:, i + 1: i + time_steps + 1]
             yield X, Y
-    '''
-    def getdataForUnitest(self,data_iter):
-        if self.unitestIsOn == True:
-            #仅用于unitest测试程序
-            def reader():
-                for X,y in data_iter:
-                    yield X,y
-                    break
-            return reader()
-        else:
-            return data_iter
-    '''
-    @getdataBase.getdataForUnitest
+
+    @getdataBase.getdataForUnittest
     def getTrainData(self,batch_size):
-        train_iter = self.data_iter_random(self.train_data,self.batch_size,self.num_steps,self.ctx)
+        train_iter = self.data_iter_consecutive(self.train_data, self.batch_size, self.time_steps, self.ctx)
         self.train_iter = self.transform(train_iter,self.transformers)
         return self.train_iter()
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getTestData(self,batch_size):
-        test_iter = self.data_iter_consecutive(self.test_data,self.batch_size,self.num_steps,self.ctx)
+        test_iter = self.data_iter_consecutive(self.test_data, self.batch_size, self.time_steps, self.ctx)
         self.test_iter = self.transform(test_iter,self.transformers)
         return self.test_iter()
 
@@ -147,6 +133,5 @@ class_selector = {
 }
 
 def create_model(gConfig):
-    #getdataClass=getMnistData(gConfig=gConfig)
     getdataClass = class_selector[gConfig['framework']](gConfig)
     return getdataClass

@@ -12,11 +12,7 @@ class lenetModel(modelBaseM):
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate})
-
-        #self.input_shape = (self.batch_size,self.gConfig['input_channels'],
-        #                                                 self.gConfig['input_dim_x'],self.gConfig['input_dim_y'])
         self.input_shape = (self.batch_size,*self.resizedshape)
-
 
     def get_net(self):
         activation = self.gConfig['activation']#sigmoid
@@ -62,7 +58,7 @@ class lenetModel(modelBaseM):
         acc= (y_hat.argmax(axis=1) == y).sum().asscalar()
         return loss,acc
 
-    def run_loss_acc(self,X,y):
+    def run_eval_loss_acc(self, X, y):
         y_hat = self.net(X)
         acc  = (y_hat.argmax(axis=1) == y).sum()
         loss = self.loss(y_hat, y).sum()
@@ -72,8 +68,6 @@ class lenetModel(modelBaseM):
         return self.input_shape
 
 def create_model(gConfig,ckpt_used,getdataClass):
-    #用cnnModel实例化一个对象model
     model=lenetModel(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
-
     return model

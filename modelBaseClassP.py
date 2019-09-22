@@ -31,7 +31,6 @@ class modelBaseP(modelBase):
                                                           name='global_step')
         self.global_step_value = 0
 
-
         with fluid.name_scope('learning_rate'):
             self.learning_rate = fluid.layers.create_global_var(shape=[1],value=self.learning_rate_value,
                                                                 persistable=True,dtype='float32',
@@ -44,16 +43,6 @@ class modelBaseP(modelBase):
 
     def get_net(self):
         return
-
-    #def learning_rate_deay(self,learning_rate,decay_steps,decay_rate,staircase):
-    #    #global_step = _decay_step_counter()
-    #    decay_steps_var = fluid.layers.fill_constant(shape=[1],value=decay_steps,dtype='float32')
-    #    div_res = fluid.layers.elementwise_div(fluid.layers.cast(self.global_step,dtype='float32') ,decay_steps_var)
-    #    decay_rate_var = fluid.layers.fill_constant(shape=[1],dtype='float32',value=decay_rate)
-    #    if staircase:
-    #        div_res = fluid.layers.floor(div_res)
-    #    decay = fluid.layers.elementwise_pow(decay_rate_var , div_res)
-    #    return fluid.layers.elementwise_mul(learning_rate ,decay)
 
     def get_executor(self,places):
         return fluid.Executor(places)
@@ -90,9 +79,7 @@ class modelBaseP(modelBase):
         elif optimizer == 'adadelta':
             return  fluid.optimizer.AdagradOptimizer(self.learning_rate)
         elif optimizer == 'rmsprop':
-            #return  fluid.optimizer.RMSPropOptimizer(self.learning_rate)
             return fluid.optimizer.RMSPropOptimizer(self.learning_rate_value)
-                #float(fluid.default_main_program().block(0).var('learning_rate')))
         elif optimizer == 'adam':
             return fluid.optimizer.AdamOptimizer(self.learning_rate)
         elif optimizer == 'adagrad':
@@ -110,19 +97,14 @@ class modelBaseP(modelBase):
     def get_learningrate(self):
         return  np.array(fluid.global_scope().find_var('learning_rate').get_tensor())
 
-
     def get_globalstep(self):
         return self.global_step_value
-        #return np.array(fluid.global_scope().find_var('global_step').get_tensor())
-
 
     def train(self,model_eval,getdataClass,gConfig,num_epochs):
         for epoch in range(num_epochs):
             self.run_epoch(getdataClass, epoch)
-
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
-
 
     def debug_info(self,*kargs):
         if len(kargs) == 0:
@@ -167,7 +149,7 @@ class modelBaseP(modelBase):
         loss,acc = None,None
         return loss,acc
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = None,None
         return loss,acc
 
@@ -194,14 +176,12 @@ class modelBaseP(modelBase):
             self.global_step_value += 1
             fluid.layers.assign(np.array([self.global_step_value],dtype=np.int32),
                                 self.global_step)
-
         if epoch % epoch_per_print == 0:
             loss_train = loss_train / num
             acc_train = acc_train / num
             loss_test,acc_test = self.evaluate_accuracy(test_iter,self.executor)
             self.log_test_acc.add_record(int(epoch/epoch_per_print),acc_test)
             self.log_test_lost.add_record(int(epoch/epoch_per_print),loss_test)
-
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def evaluate_accuracy(self,data_iter,session):
@@ -216,7 +196,7 @@ class modelBaseP(modelBase):
             except:
                 X = np.array(X)
                 y = np.array(y, dtype='int64')
-            loss,acc = self.run_loss_acc(X,y)
+            loss,acc = self.run_eval_loss_acc(X, y)
             batch_size = y.size
             acc_sum += acc * batch_size
             loss_sum += loss * batch_size
@@ -295,8 +275,6 @@ class modelBaseP(modelBase):
             self.executor.run(fluid.default_startup_program())
             #self.global_step = nd.array([0], ctx=self.ctx)
             #self.debug_info(self.init_op.dumps())
-            #print(fluid.default_main_program().to_string(True))
-            #print(fluid.default_main_program().clone(for_test=True).to_string(True))
             #self.debug_info(self.net)
             # model.removeSaveFile()
 

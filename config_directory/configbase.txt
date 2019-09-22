@@ -4,9 +4,9 @@
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric
 #ctxlist = cpu,gpu
 mode = train
-taskname = lenet
-framework =　pytorch
-dataset =cifar10
+taskname = rnn
+framework =　mxnet
+dataset =lyric
 ctx =gpu
 
 working_directory = working_directory/

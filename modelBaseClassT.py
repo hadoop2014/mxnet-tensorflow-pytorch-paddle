@@ -24,7 +24,6 @@ class modelBaseT(modelBase):
         self.tfdbgIsOn = self.gConfig['tfdbgIsOn'.lower()]
         self.keeps =self.gConfig['keeps']
         self.global_step = tf.Variable(0, trainable=False, name='global_step')
-        #self.scopes = []
         with tf.name_scope('learning_rate'):
             self.learning_rate = tf.Variable(float(self.learning_rate_value), trainable=False, name='learning_rate')
             self.learning_rate_decay_op = self.learning_rate.assign(self.learning_rate *
@@ -124,7 +123,6 @@ class modelBaseT(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-
     def debug_info(self,*kargs):
         if len(kargs) == 0:
             trainabled_vars = tf.trainable_variables()
@@ -138,9 +136,7 @@ class modelBaseT(modelBase):
         self.debug(X,y)
         return
 
-
     def debug(self,X,y):
-        #for scope_name in self.scopes:
         trainable_vars = tf.trainable_variables()
         grads = self.run_gradient(trainable_vars,X,y,self.keeps)
         for trainable_var,grad in zip(trainable_vars,grads):
@@ -159,7 +155,7 @@ class modelBaseT(modelBase):
         loss,acc,merged = None,None,None
         return loss,acc,merged
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = None,None
         return loss,acc
 
@@ -182,7 +178,6 @@ class modelBaseT(modelBase):
                 self.debug_info(X, y)
             loss,acc ,result = self.run_train_loss_acc(X,y,self.keeps)
             batch_size = y.size
-            #print(batch_size)
             loss_train += loss * batch_size
             acc_train += acc * batch_size
             num += batch_size
@@ -209,7 +204,7 @@ class modelBaseT(modelBase):
                 #由其他框架读入的数据通过numpy转换
                 X = np.array(X)
                 y = np.array(y)
-            loss,acc = self.run_loss_acc(X,y)
+            loss,acc = self.run_eval_loss_acc(X, y)
             batch_size = y.size
             acc_sum += acc * batch_size
             loss_sum += loss * batch_size

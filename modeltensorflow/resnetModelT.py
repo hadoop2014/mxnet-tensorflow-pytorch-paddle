@@ -1,6 +1,4 @@
-import numpy as np
 from modelBaseClassT import *
-
 
 class resnetModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
@@ -14,7 +12,6 @@ class resnetModelT(modelBaseT):
         residual_name = 'block'+str(block_index) + '/residual'+str(residual_index)
         with tf.variable_scope(residual_name):
             with tf.variable_scope('conv1',reuse=tf.AUTO_REUSE):
-                #self.scopes.append(residual_name + '/conv1')
                 conv1_filter = [3, 3, input_channels, num_channels]
                 conv1_w = tf.get_variable(name='w', shape=conv1_filter,
                                           initializer=self.get_initializer(self.initializer))
@@ -22,12 +19,10 @@ class resnetModelT(modelBaseT):
                                          initializer=tf.constant_initializer(self.init_bias))
                 conv1 = tf.nn.conv2d(conv_in,conv1_w,strides=[1,strides,strides,1],padding='SAME',name='conv')
                 conv1_out = tf.add(conv1 , conv1_b, name='conv_out')
-            #with tf.variable_scope('batch_norm1',reuse=tf.AUTO_REUSE):
-                #self.scopes.append(residual_name + '/batch_norm1')
+
             bn1 = tf.layers.batch_normalization(conv1_out,training=isTraining,name='bn1')
             bn1_out = self.get_activation(activation)(bn1,name='bn1_out')
             with tf.variable_scope('conv2',reuse=tf.AUTO_REUSE):
-                #self.scopes.append(residual_name + '/conv2')
                 conv2_filter = [3, 3, num_channels, num_channels]
                 conv2_w = tf.get_variable(name='w', shape=conv2_filter,
                                           initializer=self.get_initializer(self.initializer))
@@ -35,12 +30,10 @@ class resnetModelT(modelBaseT):
                                           initializer=tf.constant_initializer(self.init_bias))
                 conv2 = tf.nn.conv2d(bn1_out, conv2_w, strides=[1, 1, 1, 1], padding='SAME', name='conv')
                 conv2_out = tf.add(conv2 ,conv2_b, name='conv_out')
-            #self.scopes.append(residual_name + '/batch_norm2')
             bn2 = tf.layers.batch_normalization(conv2_out,training=isTraining,name='bn2')
 
             if use_1x1conv == True:
                 with tf.variable_scope('conv3',reuse=tf.AUTO_REUSE):
-                    #self.scopes.append(residual_name + '/conv1')
                     conv3_filter = [1, 1, input_channels, num_channels]
                     conv3_w = tf.get_variable(name='w', shape=conv3_filter,
                                               initializer=self.get_initializer(self.initializer))
@@ -94,7 +87,6 @@ class resnetModelT(modelBaseT):
         with tf.name_scope('input'):
             self.keep_prop = tf.placeholder(tf.float32, name="keep_prop")
             self.X_input = tf.placeholder(tf.float32, [None, input_channels, input_dim_x, input_dim_y], name='X_input')
-            # self.X = tf.placeholder(tf.float32, [None, self.gConfig['xdim']*self.gConfig['ydim']], name="x")
             self.t_input = tf.placeholder(tf.int32, [None, ], name='t_input')
             self.isTraining = tf.placeholder(tf.bool,name='isTraining')
         with tf.name_scope('transpos'):
@@ -104,7 +96,6 @@ class resnetModelT(modelBaseT):
 
         # 卷积层部分
         with tf.variable_scope('conv1'):
-            ##self.scopes.append('conv1')
             conv1_filter = [conv1_kernel_size, conv1_kernel_size, input_channels, conv1_channels]
             conv1_w = tf.get_variable(name='conv1_w', shape=conv1_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -137,8 +128,6 @@ class resnetModelT(modelBaseT):
             global_pool = tf.reduce_mean(conv_in,axis=[1,2],keepdims=True,name='global_pool')
 
         with tf.variable_scope('dense1'):
-            #self.scopes.append('dense1')
-            #pool_flat = tf.reshape(conv_in, shape=[-1, pool_out_dim], name='pool_flattern')
             pool_squeeze = tf.squeeze(global_pool,name='pool_squeeze')
             dense1_w = tf.get_variable(name='dense1_w', shape=[input_channels, dense1_hiddens],
                                        initializer=self.get_initializer(self.initializer))
@@ -175,7 +164,7 @@ class resnetModelT(modelBaseT):
 
         return loss,acc,merged
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = self.session.run([self.loss,self.accuracy],
                                     feed_dict={self.X_input:X,
                                                self.t_input:y,
@@ -190,8 +179,6 @@ class resnetModelT(modelBaseT):
                                                         self.keep_prop: float(keeps),
                                                         self.isTraining:False})
         return grads_value
-
-
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=resnetModelT(gConfig=gConfig,getdataClass=getdataClass)

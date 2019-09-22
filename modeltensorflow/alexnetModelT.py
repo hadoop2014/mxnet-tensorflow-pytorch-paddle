@@ -1,6 +1,4 @@
-import numpy as np
 from modelBaseClassT import *
-
 
 class alexnetModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
@@ -63,7 +61,6 @@ class alexnetModelT(modelBaseT):
             tf.summary.image('image', self.X)
 
         with tf.name_scope('conv1'),tf.variable_scope('conv1'):
-            #self.scopes.append('conv1')
             conv1_filter=[conv1_kernel_size,conv1_kernel_size,input_channels,conv1_channels]
             conv1_w = tf.get_variable(name='conv1_w', shape=conv1_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -82,7 +79,6 @@ class alexnetModelT(modelBaseT):
                                    name='pool1')
 
         with tf.name_scope('conv2'),tf.variable_scope('conv2'):
-            #self.scopes.append('conv2')
             conv2_filter=[conv2_kernel_size,conv2_kernel_size,conv1_channels,conv2_channels]
             conv2_w = tf.get_variable(name='conv2_w', shape=conv2_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -98,7 +94,6 @@ class alexnetModelT(modelBaseT):
 
 
         with tf.name_scope('conv3'),tf.variable_scope('conv3'):
-            #self.scopes.append('conv3')
             conv3_filter=[conv3_kernel_size,conv3_kernel_size,conv2_channels,conv3_channels]
             conv3_w = tf.get_variable(name='conv3_w', shape=conv3_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -110,7 +105,6 @@ class alexnetModelT(modelBaseT):
 
 
         with tf.name_scope('conv4'),tf.variable_scope('conv4'):
-            #self.scopes.append('conv4')
             conv4_filter=[conv4_kernel_size,conv4_kernel_size,conv3_channels,conv4_channels]
             conv4_w = tf.get_variable(name='conv4_w', shape=conv4_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -122,7 +116,6 @@ class alexnetModelT(modelBaseT):
 
 
         with tf.name_scope('conv5'),tf.variable_scope('conv5'):
-            #self.scopes.append('conv5')
             conv5_filter=[conv5_kernel_size,conv5_kernel_size,conv4_channels,conv5_channels]
             conv5_w = tf.get_variable(name='conv5_w', shape=conv5_filter,
                                       initializer=self.get_initializer(self.initializer))
@@ -138,7 +131,6 @@ class alexnetModelT(modelBaseT):
                                    padding=self.get_padding(pool3_padding))
 
         with tf.name_scope('dense1'),tf.variable_scope('dense1'):
-            #self.scopes.append('dense1')
             pool_out_dim = int(np.prod(pool3.get_shape()[1:]))
             pool_flat = tf.reshape(pool3, shape=[-1, pool_out_dim], name='pool_flattern')
             dense1_w = tf.get_variable(name='dense1_w', shape=[pool_out_dim, dense1_hiddens],
@@ -150,7 +142,6 @@ class alexnetModelT(modelBaseT):
             drop1_out = tf.nn.dropout(dense1_out,(1-drop1_rate),name='drop1_out')
 
         with tf.name_scope('dense2'),tf.variable_scope('dense2'):
-            #self.scopes.append('dense2')
             dense2_w = tf.get_variable(name='dense2_w', shape=[dense1_hiddens, dense2_hiddens],
                                        initializer=self.get_initializer(self.initializer))
             dense2_b = tf.get_variable(name='dense2_b', shape=[dense2_hiddens],
@@ -160,7 +151,6 @@ class alexnetModelT(modelBaseT):
             drop2_out = tf.nn.dropout(dense2_out,(1-drop2_rate),name='drop2_out')
 
         with tf.name_scope('dense3'),tf.variable_scope('dense3'):
-            #self.scopes.append('dense3')
             dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens, dense3_hiddens],
                                        initializer=self.get_initializer(self.initializer))
             dense3_b = tf.get_variable(name='dense3_b', shape=[dense3_hiddens],
@@ -189,10 +179,9 @@ class alexnetModelT(modelBaseT):
         _, loss, acc, merged = self.session.run([self.train_step, self.loss, self.accuracy, self.merged],
                                                 feed_dict={self.X_input: X, self.t_input: y,
                                                            self.keep_prop: float(keeps)})
-
         return loss,acc,merged
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = self.session.run([self.loss,self.accuracy],
                                    feed_dict={self.X_input:X,self.t_input:y,self.keep_prop:float(keeps)})
         return loss,acc
@@ -202,8 +191,6 @@ class alexnetModelT(modelBaseT):
         grads_value = self.session.run(grads,feed_dict={self.X_input: X, self.t_input: y,
                                                    self.keep_prop: float(keeps)})
         return grads_value
-
-
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=alexnetModelT(gConfig=gConfig,getdataClass=getdataClass)

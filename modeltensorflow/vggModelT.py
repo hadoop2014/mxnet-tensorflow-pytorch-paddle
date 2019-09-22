@@ -1,6 +1,4 @@
-import numpy as np
 from modelBaseClassT import *
-
 
 class vggModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
@@ -14,7 +12,6 @@ class vggModelT(modelBaseT):
         with tf.variable_scope(vgg_name):
             for i in range(num_convs):
                 scop_name = 'conv'+str(i)
-                #self.scopes.append(vgg_name+'/'+scop_name)
                 with tf.name_scope(scop_name),tf.variable_scope(scop_name):
                     conv_filter = [3, 3, input_channels, num_channels]
                     conv_w = tf.get_variable(name='w', shape=conv_filter,
@@ -49,7 +46,6 @@ class vggModelT(modelBaseT):
         with tf.name_scope('input'):
             self.keep_prop = tf.placeholder(tf.float32, name="keep_prop")
             self.X_input = tf.placeholder(tf.float32, [None, input_channels, input_dim_x, input_dim_y], name='X_input')
-            # self.X = tf.placeholder(tf.float32, [None, self.gConfig['xdim']*self.gConfig['ydim']], name="x")
             self.t_input = tf.placeholder(tf.int32, [None, ], name='t_input')
         with tf.name_scope('transpos'):
             self.X = tf.transpose(self.X_input, perm=[0, 2, 3, 1], name='X')
@@ -63,7 +59,6 @@ class vggModelT(modelBaseT):
                 self.vgg_block(block_index,input_channels,num_convs,num_channels,conv_in,activation=activation)
 
         with tf.name_scope('dense1'),tf.variable_scope('dense1'):
-            #self.scopes.append('dense1')
             pool_out_dim = int(np.prod(conv_in.get_shape()[1:]))
             pool_flat = tf.reshape(conv_in, shape=[-1, pool_out_dim], name='pool_flattern')
             dense1_w = tf.get_variable(name='dense1_w', shape=[pool_out_dim, dense1_hiddens],
@@ -75,7 +70,6 @@ class vggModelT(modelBaseT):
             drop1_out = tf.nn.dropout(dense1_out,(1-drop1_rate),name='drop1_out')
 
         with tf.name_scope('dense2'),tf.variable_scope('dense2'):
-            #self.scopes.append('dense2')
             dense2_w = tf.get_variable(name='dense2_w', shape=[dense1_hiddens, dense2_hiddens],
                                        initializer=self.get_initializer(self.initializer))
             dense2_b = tf.get_variable(name='dense2_b', shape=[dense2_hiddens],
@@ -85,7 +79,6 @@ class vggModelT(modelBaseT):
             drop2_out = tf.nn.dropout(dense2_out,(1-drop2_rate),name='drop2_out')
 
         with tf.name_scope('dense3'),tf.variable_scope('dense3'):
-            #self.scopes.append('dense3')
             dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens, dense3_hiddens],
                                        initializer=self.get_initializer(self.initializer))
             dense3_b = tf.get_variable(name='dense3_b', shape=[dense3_hiddens],
@@ -117,7 +110,7 @@ class vggModelT(modelBaseT):
 
         return loss,acc,merged
 
-    def run_loss_acc(self,X,y,keeps=1.0):
+    def run_eval_loss_acc(self, X, y, keeps=1.0):
         loss,acc = self.session.run([self.loss,self.accuracy],
                                    feed_dict={self.X_input:X,self.t_input:y,self.keep_prop:float(keeps)})
         return loss,acc
@@ -127,8 +120,6 @@ class vggModelT(modelBaseT):
         grads_value = self.session.run(grads,feed_dict={self.X_input: X, self.t_input: y,
                                                    self.keep_prop: float(keeps)})
         return grads_value
-
-
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=vggModelT(gConfig=gConfig,getdataClass=getdataClass)

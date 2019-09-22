@@ -28,8 +28,6 @@ class getHousepriceDataM(getdataBase):
             raise ValueError('dataset(%s) has not be configed in datasetlist(%s)'
                              %(dataset_name,gConfig['datasetlist']))
         return [gConfig[dataset_name+'.dim']]
-        #,gConfig[dataset_name+'.dim_x'],gConfig[dataset_name+'.dim_y']]
-
 
     def load_data(self,root,train_file,test_file):
         self.train_data = pd.read_csv(self.data_path+self.train_file)
@@ -62,20 +60,8 @@ class getHousepriceDataM(getdataBase):
                 X_train = nd.concat(X_train,X_part,dim=0)
                 y_train = nd.concat(y_train,y_part,dim=0)
         return X_train,y_train,X_valid,y_valid
-    '''
-    def getdataForUnitest(self,data_iter):
-        if self.unitestIsOn == True:
-            #仅用于unitest测试程序
-            def reader():
-                for X,y in data_iter:
-                    yield X,y
-                    break
-            return reader()
-        else:
-            return data_iter
-     '''
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getTrainData(self,batch_size):
         self.num_train = self.train_data.shape[0]
         train_features = nd.array(self.all_features[:self.num_train].values)
@@ -85,7 +71,7 @@ class getHousepriceDataM(getdataBase):
         train_iter = gdata.DataLoader(gdata.ArrayDataset(self.train_features, self.train_labels), batch_size, shuffle=True)
         return train_iter
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getTestData(self,batch_size = None):
         self.test_features = nd.array(self.all_features[self.num_train:].values)
         self.test_labels = nd.array([None] * len(self.test_features))
@@ -93,7 +79,7 @@ class getHousepriceDataM(getdataBase):
                                      batch_size=self.test_features.shape[0])
         return test_iter
 
-    @getdataBase.getdataForUnitest
+    @getdataBase.getdataForUnittest
     def getValidData(self,batch_size = None):
         valid_iter = gdata.DataLoader(gdata.ArrayDataset(self.valid_features,self.valid_labels),
                                       batch_size=self.valid_features.shape[0])
@@ -107,6 +93,5 @@ class_selector = {
 }
 
 def create_model(gConfig):
-
     getdataClass = class_selector[gConfig['framework']](gConfig)
     return getdataClass

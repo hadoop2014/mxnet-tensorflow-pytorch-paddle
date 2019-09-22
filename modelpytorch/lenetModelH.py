@@ -42,7 +42,6 @@ class lenet(nn.Module):
         out_dim_x = np.floor((out_dim_x - pool2_size + 2*pool2_padding)/pool2_strides) + 1
         out_dim_y = np.floor((out_dim_y - pool2_size + 2*pool2_padding)/pool2_strides) + 1
         in_features = int(out_dim_x*out_dim_y*conv2_channels)
-        #print('dense1:',in_features,out_dim_x,out_dim_y,conv2_channels)
         self.dense1 = nn.Linear(in_features=in_features,out_features=dense1_hiddens)
         self.dense2 = nn.Linear(in_features=dense1_hiddens,out_features=dense2_hiddens)
         self.dense3 = nn.Linear(in_features=dense2_hiddens,out_features=dense3_hiddens)
@@ -56,8 +55,6 @@ class lenet(nn.Module):
         x = self.pool2(x)
         pool_out_dim = int(np.prod(x.size()[1:]))
         x = x.view(-1,pool_out_dim)
-        #x = self.dense1(in_features=pool_out_dim)(x)
-        #x = nn.Linear(in_features=pool_out_dim,out_features=self.dense1_hiddens)(x)
         x = self.dense1(x)
         x = self.activation(x)
         x = self.dense2(x)
@@ -73,7 +70,6 @@ class lenetModel(modelBaseH):
         self.get_net()
         self.optimizer = self.get_optimizer(self.gConfig['optimizer'],self.net.parameters())
         self.input_shape = (self.batch_size,*self.resizedshape)
-
 
     def get_net(self):
         activation = self.gConfig['activation']#sigmoid
@@ -93,7 +89,7 @@ class lenetModel(modelBaseH):
         acc= (y_hat.argmax(dim=1) == y).sum().item()
         return loss,acc
 
-    def run_loss_acc(self,X,y):
+    def run_eval_loss_acc(self, X, y):
         with torch.no_grad():
             #解决GPU　out memory问题
             y_hat = self.net(X)
@@ -108,5 +104,4 @@ def create_model(gConfig,ckpt_used,getdataClass):
     #用cnnModel实例化一个对象model
     model=lenetModel(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
-
     return model

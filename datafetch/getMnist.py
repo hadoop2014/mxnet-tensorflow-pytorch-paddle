@@ -1,5 +1,4 @@
 from datafetch.getBaseClass import  *
-import sys
 
 class getMnistDataH(getdataBaseH):
     def __init__(self,gConfig):
@@ -17,6 +16,5 @@ class_selector = {
 }
 
 def create_model(gConfig):
-    #getdataClass=getMnistData(gConfig=gConfig)
     getdataClass = class_selector[gConfig['framework']](gConfig)
     return getdataClass

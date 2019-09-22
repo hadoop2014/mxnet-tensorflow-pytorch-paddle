@@ -14,9 +14,9 @@ activation = tanh
 [ints]
 resize = 224
 #训练迭代次数
-train_num_epoch = 5
-batch_size = 16
-num_steps = 6
+train_num_epoch = 50
+batch_size = 32
+time_steps = 35
 #used for max to keep checkpoint
 max_to_keep = 2
 
