@@ -123,7 +123,7 @@ class modelBaseM(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-    def debug_info(self,info = None):
+    '''def debug_info(self,info = None):
         if self.debugIsOn == False:
             return
         if info is not None:
@@ -159,6 +159,35 @@ class modelBaseM(modelBase):
                   '\tgrad.mean=%.6f' % layer.bias.grad().mean().asscalar(),
                   '\tdata.std=%.6f' % layer.bias.data().asnumpy().std(),
                   '\tgrad.std=%.6f' % layer.bias.grad().asnumpy().std())
+     '''
+
+    def debug_info(self, info=None):
+        if self.debugIsOn == False:
+            return
+        if info is not None:
+            print('\tdebug:%s' % info)
+            return
+        self.debug(self.net)
+        print('\n')
+        return
+
+    def debug(self, layer, name=''):
+        if len(layer._children) != 0:
+            for block in layer._children:
+                self.debug(layer._children[block], layer.name)
+        elif str(layer.name).find('pool') < 0 and \
+                str(layer.name).find('dropout') < 0 and \
+                str(layer.name).find('batchnorm') and \
+                str(layer.name).find('relu') < 0 and \
+                str(layer.name).find('sigmoid') < 0:
+            for param in layer.params:
+                parameter = layer.params[param]
+                print('\tdebug:%s(%s)' % (name, param),
+                      '\tshape=', parameter.shape,
+                      '\tdata.mean=%.6f' % parameter.data().mean().asscalar(),
+                      '\tgrad.mean=%.6f' % parameter.grad().mean().asscalar(),
+                      '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
+                      '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
 
     def run_train_loss_acc(self,X,y):
         loss,acc = None,None

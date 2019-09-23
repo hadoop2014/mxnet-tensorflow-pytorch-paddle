@@ -153,20 +153,6 @@ class rnnModel(modelBaseM):
         input_symbol = mx.symbol.Variable('input_data')
         state_symbol = mx.symbol.Variable('state')
         net,state = self.net(input_symbol,state_symbol)
-        #if isinstance(net,tuple):
-        #    #针对rnn的特殊处理
-        #    for child in net:
-        #        if isinstance(child,list):
-        #            #mx.viz.plot_network(child[0], title=title, save_format='png', hide_weights=False,
-        #            #                    shape=input_shape)\
-        #            #     .view(directory=self.logging_directory)
-        #            pass
-        #        else:
-        #            #mx.viz.plot_network(child, title=title, save_format='png', hide_weights=False,
-        #            #                    shape=input_shape) \
-        #            #    .view(directory=self.logging_directory)
-        #            pass
-        #else:
         mx.viz.plot_network(net, title=title, save_format='png', hide_weights=False,
                                 shape=input_shape) \
                 .view(directory=self.logging_directory)
