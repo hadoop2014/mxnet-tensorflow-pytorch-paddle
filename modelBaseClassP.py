@@ -106,10 +106,10 @@ class modelBaseP(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-    def debug_info(self,*kargs):
-        if len(kargs) == 0:
+    def debug_info(self,*args):
+        if len(args) == 0:
             return
-        (X,y) = kargs
+        (X,y) = args
         if self.debugIsOn == False:
             return
         self.debug(X,y)

@@ -175,7 +175,7 @@ class modelBaseM(modelBase):
         if len(layer._children) != 0:
             for block in layer._children:
                 self.debug(layer._children[block], layer.name)
-        elif str(layer.name).find('pool') < 0 and \
+        if str(layer.name).find('pool') < 0 and \
                 str(layer.name).find('dropout') < 0 and \
                 str(layer.name).find('batchnorm') and \
                 str(layer.name).find('relu') < 0 and \
