@@ -24,8 +24,7 @@ class modelBaseM(modelBase):
         #self.weight_initial = init.Uniform(scale=self.init_sigma)
         #self.bias_initial = init.Constant(self.init_bias)
         self.global_step = nd.array([0],self.ctx)
-        #self.net = nn.HybridSequential()
-        self.net = nn.Sequential()
+        self.net = nn.HybridSequential()
         self.state = None #用于rnn,lstm等
 
     def get_net(self):
@@ -83,7 +82,7 @@ class modelBaseM(modelBase):
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
             return
-        print(self.net)
+        #print(self.net)
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         net = self.net(input_symbol)
@@ -173,8 +172,8 @@ class modelBaseM(modelBase):
 
     def debug(self, layer, name=''):
         if len(layer._children) != 0:
-            for block in layer._children:
-                self.debug(layer._children[block], layer.name)
+            for block in layer._children.values():
+                self.debug(block, layer.name)
         if str(layer.name).find('pool') < 0 and \
                 str(layer.name).find('dropout') < 0 and \
                 str(layer.name).find('batchnorm') and \
@@ -188,6 +187,10 @@ class modelBaseM(modelBase):
                       '\tgrad.mean=%.6f' % parameter.grad().mean().asscalar(),
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
+
+    def predict_rnn(self, model):
+        #仅用于rnn网络的句子预测
+        pass
 
     def run_train_loss_acc(self,X,y):
         loss,acc = None,None
@@ -233,6 +236,7 @@ class modelBaseM(modelBase):
             loss_train = loss_train / num
             acc_train = acc_train / num
             loss_test,acc_test = self.evaluate_accuracy(test_iter)
+            self.predict_rnn(self.net)
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def summary(self):

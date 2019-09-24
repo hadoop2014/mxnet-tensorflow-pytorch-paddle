@@ -1,6 +1,7 @@
 from mxnet.gluon import loss as gloss,nn,rnn
 from mxnet import gluon,init
 from modelBaseClassM import *
+import math
 
 '''class Rnn(nn.HybridBlock):
     def __init__(self,input_dim,rnn_hiddens,output_dim,batch_size,ctx,
@@ -47,18 +48,6 @@ class RNN(nn.HybridBlock):
         self.hidden_size = rnn_hiddens
         self.dense = nn.Dense(self.vocab_size)
 
-    '''def hybrid_forward(self, F, x, *args, **kwargs):
-        # 将输入转置成(time_steps, batch_size)后获取one-hot向量表示
-        inputs = x
-        state = args
-        X = F.one_hot(F.transpose(inputs), self.vocab_size)
-        Y, state = self.rnn(X, state)
-        # 全连接层会首先将Y的形状变成(time_steps * batch_size, num_hiddens)，它的输出
-        # 形状为(time_steps * batch_size, vocab_size)
-        #output = self.dense(F.reshape(Y,(-1, F.shape(Y)[-1])))
-        output = self.dense(F.reshape(Y,(-1,self.hidden_size)))
-        return output, state
-    '''
     def hybrid_forward(self, F, x, *args, **kwargs):
         X = x
         state = args[0]
@@ -68,18 +57,7 @@ class RNN(nn.HybridBlock):
         # output = self.dense(Y.reshape((-1, Y.shape[-1])))
         output = self.dense(F.reshape(Y, (-1, self.hidden_size)))
         return output, state
-    '''
-    def forward(self, inputs, state):
-        # 将输入转置成(time_steps, batch_size)后获取one-hot向量表示
-        #X = nd.one_hot(inputs.T, self.vocab_size) #输入向量已经转换为one-hot向量
-        X = inputs
-        Y, state = self.rnn(X, state)
-        # 全连接层会首先将Y的形状变成(time_steps * batch_size, num_hiddens)，它的输出
-        # 形状为(time_steps * batch_size, vocab_size)
-        #output = self.dense(Y.reshape((-1, Y.shape[-1])))
-        output = self.dense(nd.reshape(Y,(-1,nd.shape_array(Y)[-1])))
-        return output, state
-    '''
+
     def begin_state(self, *args, **kwargs):
         return self.rnn.begin_state(*args,**kwargs)
 
@@ -89,7 +67,11 @@ class rnnModel(modelBaseM):
         self.loss = gloss.SoftmaxCrossEntropyLoss()
         self.resizedshape = getdataClass.resizedshape
         self.vocab_size = getdataClass.vocab_size
+        self.idx_to_char = getdataClass.idx_to_char
+        self.char_to_idx = getdataClass.char_to_idx
         self.clip_gradient = self.gConfig['clip_gradient']
+        self.prefixes = self.gConfig['prefixes']
+        self.predict_length = self.gConfig['predict_length']
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
@@ -127,9 +109,11 @@ class rnnModel(modelBaseM):
         if self.global_step == 0:
             self.debug_info()
         self.trainer.step(self.batch_size)
+        #self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
         loss = loss.asscalar()
         y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        #acc = self.evaluate_perplexity(loss)   #必须使用loss.mean的值
         return loss, acc
 
     def run_eval_loss_acc(self, X, y):
@@ -140,15 +124,41 @@ class rnnModel(modelBaseM):
         loss = self.loss(y_hat, y).sum().asscalar()
         y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        #acc = self.evaluate_perplexity(loss)
         return loss, acc
+
+    def evaluate_perplexity(self,loss):
+        #rnn中用perplexity取代accuracy
+        return math.exp(loss)
 
     def get_input_shape(self):
         return self.input_shape
 
+    def predict_rnn(self,model):
+        for prefix in self.prefixes:
+            print(' -', self.predict_rnn_gluon(
+                prefix, self.predict_length, model, self.vocab_size, self.ctx, self.idx_to_char,
+                self.char_to_idx))
+
+    def predict_rnn_gluon(self,prefix, num_chars, model, vocab_size, ctx, idx_to_char,
+                          char_to_idx):
+        # 使用model的成员函数来初始化隐藏状态
+        state = model.begin_state(batch_size=1, ctx=ctx)
+        output = [char_to_idx[prefix[0]]]
+        for t in range(num_chars + len(prefix) - 1):
+            X = nd.array([output[-1]], ctx=ctx).reshape((1, 1))
+            X = nd.one_hot(X,vocab_size)
+            (Y, state) = model(X, state)  # 前向计算不需要传入模型参数
+            if t < len(prefix) - 1:
+                output.append(char_to_idx[prefix[t + 1]])
+            else:
+                output.append(int(Y.argmax(axis=1).asscalar()))
+        return ''.join([idx_to_char[i] for i in output])
+
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
             return
-        print(self.net)
+        #print(self.net)
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         state_symbol = mx.symbol.Variable('state')

@@ -14,13 +14,13 @@ activation = tanh
 [ints]
 resize = 224
 #训练迭代次数
-train_num_epoch = 50
+train_num_epoch = 250
 batch_size = 32
 time_steps = 35
 #used for max to keep checkpoint
 max_to_keep = 2
 
-epoch_per_print = 1
+epoch_per_print = 5
 epochs_per_checkpoint =5
 
 
@@ -28,6 +28,9 @@ epochs_per_checkpoint =5
 input_dim =  1
 rnn_hiddens = 256
 output_dim = 1
+
+#用于指定预测句子的长度
+predict_length = 50
 
 [floats]
 init_sigma = 0.005
@@ -49,3 +52,5 @@ tfdbgIsOn = False
 
 
 [sets]
+#用于预测歌词的开头词
+prefixes = 分开, 不分开
