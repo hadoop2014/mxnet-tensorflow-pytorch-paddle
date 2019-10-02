@@ -60,8 +60,8 @@ class lenetModel(modelBaseM):
 
     def run_eval_loss_acc(self, X, y):
         y_hat = self.net(X)
-        acc  = (y_hat.argmax(axis=1) == y).sum()
-        loss = self.loss(y_hat, y).sum()
+        acc  = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        loss = self.loss(y_hat, y).sum().asscalar()
         return loss,acc
 
     def get_input_shape(self):

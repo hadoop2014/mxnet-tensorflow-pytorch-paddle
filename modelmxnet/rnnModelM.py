@@ -38,20 +38,16 @@ import math
         return outputs, H
 '''
 class RNN(nn.HybridBlock):
-    def __init__(self,rnn_hiddens,activation,vocab_size,
-                 weight_initializer,bias_initializer,**kwargs):
+    def __init__(self,rnn_layer,rnn_hiddens,vocab_size,**kwargs):
         super(RNN,self).__init__(**kwargs)
-        self.rnn = rnn.RNN(hidden_size=rnn_hiddens,activation=activation,
-                                 i2h_weight_initializer=weight_initializer,h2h_weight_initializer=weight_initializer,
-                                 i2h_bias_initializer=bias_initializer,h2h_bias_initializer=bias_initializer)
+        self.rnn = rnn_layer
         self.vocab_size = vocab_size
         self.hidden_size = rnn_hiddens
         self.dense = nn.Dense(self.vocab_size)
 
     def hybrid_forward(self, F, x, *args, **kwargs):
-        X = x
         state = args[0]
-        Y, state = self.rnn(X,state)
+        Y, state = self.rnn(x,state)
         # 全连接层会首先将Y的形状变成(time_steps * batch_size, num_hiddens)，它的输出
         # 形状为(time_steps * batch_size, vocab_size)
         # output = self.dense(Y.reshape((-1, Y.shape[-1])))
@@ -72,28 +68,43 @@ class rnnModel(modelBaseM):
         self.clip_gradient = self.gConfig['clip_gradient']
         self.prefixes = self.gConfig['prefixes']
         self.predict_length = self.gConfig['predict_length']
+        self.time_steps = self.resizedshape[0]
+        #self.weight_initializer = self.get_initializer(self.initializer)
+        #self.bias_initializer = self.get_initializer('constant')
+        self.rnn_hiddens =self.gConfig['rnn_hiddens'] #256
+        self.activation = self.get_activation(self.gConfig['activation'])
+        self.cell = self.get_cell(self.gConfig['cell'])
+        self.cell_selector = {
+            'rnn':rnn.RNN(hidden_size=self.rnn_hiddens, activation=self.activation,
+                  i2h_weight_initializer=self.weight_initializer, h2h_weight_initializer=self.weight_initializer,
+                  i2h_bias_initializer=self.bias_initializer, h2h_bias_initializer=self.bias_initializer),
+            'gru':rnn.GRU(hidden_size=self.rnn_hiddens,
+                          i2h_weight_initializer=self.weight_initializer,h2h_weight_initializer=self.weight_initializer,
+                          i2h_bias_initializer=self.bias_initializer,h2h_bias_initializer=self.bias_initializer),
+            'lstm':rnn.LSTM(hidden_size=self.rnn_hiddens,
+                            i2h_weight_initializer=self.weight_initializer,h2h_weight_initializer=self.weight_initializer,
+                            i2h_bias_initializer=self.bias_initializer,h2h_bias_initializer=self.bias_initializer)
+        }
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate,'clip_gradient':self.clip_gradient})
         self.input_shape = (self.resizedshape[0],self.batch_size,self.resizedshape[1])
-        #self.input_shape = (self.batch_size,*self.resizedshape)
-
 
     def get_net(self):
         input_dim = self.gConfig['input_dim']#1
         input_dim = self.resizedshape[0]
-        self.rnn_hiddens =self.gConfig['rnn_hiddens'] #256
+        rnn_hiddens =self.gConfig['rnn_hiddens'] #256
         output_dim = self.gConfig['output_dim']#1
         output_dim = self.resizedshape[0]
-        activation = self.gConfig['activation']
-        weight_initializer = self.get_initializer(self.initializer)
-        bias_initializer = self.get_initializer('constant')
+        activation = self.get_activation(self.gConfig['activation'])
+        cell = self.get_cell(self.gConfig['cell'])
         #self.net.add(Rnn(input_dim,self.rnn_hiddens,output_dim,self.batch_size,self.ctx,
         #                 weight_initializer,bias_initializer))
         #self.net.add(RNN(self.rnn_hiddens, activation, self.vocab_size,
         #        weight_initializer, bias_initializer))
-        self.net = RNN(self.rnn_hiddens,activation,self.vocab_size,weight_initializer,bias_initializer)
+        rnn_layer = self.cell_selector[cell]
+        self.net = RNN(rnn_layer,rnn_hiddens,self.vocab_size)
 
     def init_state(self):
         self.state = self.net.begin_state(batch_size=self.batch_size, ctx=self.ctx)
@@ -103,36 +114,47 @@ class rnnModel(modelBaseM):
             s.detach()
         with autograd.record():
             y_hat,self.state = self.net(X,self.state) #self.state在父类中通过init_state来初始化
-            y = y.T.reshape((-1,))
-            loss = self.loss(y_hat, y).sum()
+            y = y.T.reshape((-1,)) #y.shape = (batch_size,time_steps),y.T.reshape((-1)).shape=(time_steps*batch_size,)
+            loss = self.loss(y_hat, y).mean()
         loss.backward()
         if self.global_step == 0:
             self.debug_info()
-        self.trainer.step(self.batch_size)
-        #self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
-        loss = loss.asscalar()
-        y = y.astype('float32')
+        #self.trainer.step(self.batch_size)
+        params = [p.data() for p in self.net.collect_params().values()]
+        self.grad_clipping(params, self.clip_gradient, self.ctx)
+        self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
+        loss = loss.asscalar() * y.size
+        #y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
         #acc = self.evaluate_perplexity(loss)   #必须使用loss.mean的值
         return loss, acc
 
     def run_eval_loss_acc(self, X, y):
-        for s in self.state:
-            s.detach()
+        #return self.run_train_loss_acc(X,y)
+        self.init_state() #对于测试来说，因为没有反向传播，每个time_step,batch_size的数据都要初始化状态
         y_hat,self.state = self.net(X,self.state)
         y = y.T.reshape((-1,))
-        loss = self.loss(y_hat, y).sum().asscalar()
-        y = y.astype('float32')
+        loss = self.loss(y_hat, y).mean()
+        loss = loss.asscalar() * y.size
+        #y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
         #acc = self.evaluate_perplexity(loss)
         return loss, acc
 
-    def evaluate_perplexity(self,loss):
+    def run_perplexity(self, loss_train, loss_test):
         #rnn中用perplexity取代accuracy
-        return math.exp(loss)
+        perplexity_train = math.exp(loss_train)
+        perplexity_test = math.exp(loss_test)
+        print('global_step %d, perplexity_train %.6f,perplexity_test %f.6'%
+              (self.global_step.asscalar(), perplexity_train,perplexity_test))
+        return perplexity_train,perplexity_test
 
     def get_input_shape(self):
         return self.input_shape
+    def get_cell(self,cell):
+        assert cell in self.gConfig['celllist'], 'cell(%s) is invalid,it must one of %s' % \
+                                                               (cell, self.gConfig['celllist'])
+        return cell
 
     def predict_rnn(self,model):
         for prefix in self.prefixes:
@@ -172,6 +194,17 @@ class rnnModel(modelBaseM):
         self.init_state()
         self.net.summary(nd.zeros(shape=self.get_input_shape(), ctx=self.ctx),
                          self.state)
+
+    def grad_clipping(self,params, theta, ctx):
+        """Clip the gradient."""
+        if theta is not None:
+            norm = nd.array([0], ctx)
+            for param in params:
+                norm += (param.grad ** 2).sum()
+            norm = norm.sqrt().asscalar()
+            if norm > theta:
+                for param in params:
+                    param.grad[:] *= theta / norm
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=rnnModel(gConfig=gConfig,getdataClass=getdataClass)

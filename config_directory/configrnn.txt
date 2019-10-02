@@ -5,24 +5,24 @@ symbol_savefile = working_directory/resnetsymbol
 checkpoint_filename = resnet.ckpt
 
 optimizer =　sgd
-initializer =kaiming
-#ctx = gpu
+initializer =normal
+#用于指明rnn网络所用的单元，包括[rnn,gru,lstm]　
+cell = rnn
 
-#lenet parameter　[sigmoid,relu,tanh]
-activation = tanh
+#lenet parameter　[sigmoid,relu,tanh]  defalult value is relu
+activation = relu
 
 [ints]
-resize = 224
+resize = 0
 #训练迭代次数
-train_num_epoch = 250
+train_num_epoch = 351
 batch_size = 32
 time_steps = 35
 #used for max to keep checkpoint
 max_to_keep = 2
 
-epoch_per_print = 5
-epochs_per_checkpoint =5
-
+epoch_per_print = 50
+epochs_per_checkpoint =50
 
 #resnet parameter
 input_dim =  1
@@ -33,14 +33,13 @@ output_dim = 1
 predict_length = 50
 
 [floats]
-init_sigma = 0.005
+init_sigma = 0.01
 init_bias = 0.0
-learning_rate = 0.1
+learning_rate = 1e2
 learning_rate_decay_factor = 0.9
 keeps = 0.6
 test_percent = 0.1
 clip_gradient = 1e-2
-
 
 [bools]
 ckpt_used =False

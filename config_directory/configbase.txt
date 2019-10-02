@@ -1,4 +1,5 @@
 [strings]
+#该节配置大部分为configbase.txt所特有
 #taskname = [regression,lenet,alexnet,vgg,capsnet,convolution,lstm,resnet]
 #frameworklist = mxnet,tensorflow,paddle,pytorch
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric
@@ -20,6 +21,7 @@ unittest_logfile = unittest_log.txt
 check_file = checkbook.json
 
 [ints]
+#该节配置大部分可以被模型参数配置文件（如configlenet.txt）所覆盖
 #resize=0 表示不对原始图像做缩放
 resize =0
 cpu_num = 4
@@ -39,6 +41,7 @@ num_samples = 10
 pltsleeptime =1
 
 [floats]
+#该节配置可以被模型参数配置文件（如configlenet.txt）所覆盖
 learning_rate = 0.005
 learning_rate_decay_factor = 0.9
 decay_steps = 2000
@@ -46,6 +49,7 @@ test_percent = 1.0
 momentum = 0.9
 
 [bools]
+#该节配置可以被模型参数配置文件（如configlenet.txt）所覆盖
 ckpt_used = True
 debugIsOn = True
 viewIsOn =True　
@@ -54,6 +58,7 @@ unittestIsOn = False
 [lists]
 
 [sets]
+#该节配置为configbase.txt所特有
 tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,rnn,lstm
 optimizerlist = sgd,adam,rmsprop,adagrad,adadelta,momentum
 datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric
@@ -61,9 +66,10 @@ frameworklist = mxnet,tensorflow,paddle,pytorch
 activationlist = sigmoid,relu,tanh
 initializerlist = normal,xavier,kaiming,constant
 ctxlist = gpu,cpu
+celllist = rnn,gru,lstm
 
 [attrs]
-#描述数据集的参数
+#描述数据集的参数，只有configbase.txt所特有
 mnist.channels = 1
 mnist.dim_x = 28
 mnist.dim_y = 28

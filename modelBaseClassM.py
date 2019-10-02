@@ -16,16 +16,15 @@ class modelBaseM(modelBase):
         self.viewIsOn = self.gConfig['viewIsOn'.lower()]
         self.max_to_keep = self.gConfig['max_to_keep']
         self.ctx =self.get_ctx(self.gConfig['ctx'])
-        self.optimizer = self.gConfig['optimizer']
+        self.optimizer = self.get_optimizer(self.gConfig['optimizer'])
         self.init_sigma = self.gConfig['init_sigma']
         self.init_bias = self.gConfig['init_bias']
-        self.initializer = self.gConfig['initializer']
-        self.init_op = self.get_initializer(self.initializer)
-        #self.weight_initial = init.Uniform(scale=self.init_sigma)
-        #self.bias_initial = init.Constant(self.init_bias)
+        #self.initializer = self.gConfig['initializer']
+        self.weight_initializer = self.get_initializer(self.gConfig['initializer'])
+        self.bias_initializer = self.get_initializer('constant')
         self.global_step = nd.array([0],self.ctx)
-        self.net = nn.HybridSequential()
         self.state = None #用于rnn,lstm等
+        self.net = nn.HybridSequential()
 
     def get_net(self):
         return
@@ -87,7 +86,7 @@ class modelBaseM(modelBase):
         input_symbol = mx.symbol.Variable('input_data')
         net = self.net(input_symbol)
         mx.viz.plot_network(net, title=title, save_format='png', hide_weights=False,
-                                shape=input_shape) \
+                            shape=input_shape) \
                 .view(directory=self.logging_directory)
         return
 
@@ -122,49 +121,11 @@ class modelBaseM(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-    '''def debug_info(self,info = None):
-        if self.debugIsOn == False:
-            return
-        if info is not None:
-            print('\tdebug:%s'%info)
-            return
-        if isinstance(self.net,nn.HybridSequential):
-            for layer in self.net:
-                 self.debug(layer)
-        else:
-            self.debug(self.net)
-        print('\n')
-        return
-
-    def debug(self,layer,name=''):
-        if str(layer.name).find('sequential') >= 0 or str(layer.name).find('residual')>=0 \
-                or str(layer.name).find('rnn') >= 0:
-            for i in layer._children:
-                self.debug(layer._children[i],layer.name)
-        elif str(layer.name).find('pool') < 0 and \
-                str(layer.name).find('dropout') < 0 and \
-                str(layer.name).find('batchnorm') and \
-                str(layer.name).find('relu')<0 and \
-                str(layer.name).find('sigmoid')<0:
-            print('\tdebug:%s(%s):weight' % (name,layer.name),
-                  '\tshape=',layer.weight.shape,
-                  '\tdata.mean=%.6f'%layer.weight.data().mean().asscalar(),
-                  '\tgrad.mean=%.6f' % layer.weight.grad().mean().asscalar(),
-                  '\tdata.std=%.6f'%layer.weight.data().asnumpy().std(),
-                  '\tgrad.std=%.6f' % layer.weight.grad().asnumpy().std())
-            print('\tdebug:%s(%s):bias' % (name, layer.name),
-                  '\tshape=', layer.bias.shape,
-                  '\t\tdata.mean=%.6f' % layer.bias.data().mean().asscalar(),
-                  '\tgrad.mean=%.6f' % layer.bias.grad().mean().asscalar(),
-                  '\tdata.std=%.6f' % layer.bias.data().asnumpy().std(),
-                  '\tgrad.std=%.6f' % layer.bias.grad().asnumpy().std())
-     '''
-
     def debug_info(self, info=None):
         if self.debugIsOn == False:
             return
         if info is not None:
-            print('\tdebug:%s' % info)
+            print('debug:%s' % info)
             return
         self.debug(self.net)
         print('\n')
@@ -183,8 +144,8 @@ class modelBaseM(modelBase):
                 parameter = layer.params[param]
                 print('\tdebug:%s(%s)' % (name, param),
                       '\tshape=', parameter.shape,
-                      '\tdata.mean=%.6f' % parameter.data().mean().asscalar(),
-                      '\tgrad.mean=%.6f' % parameter.grad().mean().asscalar(),
+                      '\tdata.mean=%f' % parameter.data().mean().asscalar(),
+                      '\tgrad.mean=%f' % parameter.grad().mean().asscalar(),
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
 
@@ -200,43 +161,49 @@ class modelBaseM(modelBase):
         loss,acc = None,None
         return loss,acc
 
-    def evaluate_accuracy(self, data_iter):
-        acc_sum = nd.array([0], ctx=self.ctx)
-        loss_sum = nd.array([0], ctx=self.ctx)
+    def run_perplexity(self, loss_train, loss_test):
+        pass
+
+    def train_loss_acc(self,data_iter):
+        acc_sum = 0
+        loss_sum = 0
         n = 0
-        self.init_state()
+        self.init_state()  # 仅用于RNN,LSTM等
+        for X, y in data_iter:
+            X = nd.array(X, ctx=self.ctx)
+            y = nd.array(y, ctx=self.ctx)
+            y = y.astype('float32')
+            loss, acc = self.run_train_loss_acc(X, y)
+            acc_sum += acc
+            loss_sum += loss
+            n += y.size
+            self.global_step += nd.array([1],ctx=self.ctx)
+        return loss_sum / n, acc_sum / n
+
+    def evaluate_loss_acc(self, data_iter):
+        acc_sum = 0
+        loss_sum = 0
+        n = 0
+        self.init_state()  #仅用于RNN,LSTM等
         for X, y in data_iter:
             X = nd.array(X,ctx=self.ctx)
             y = nd.array(y,ctx=self.ctx)
-            #X = X.as_in_context(self.ctx)
-            #y = y.as_in_context(self.ctx)
             y = y.astype('float32')
             loss,acc = self.run_eval_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss
             n += y.size
-        return loss_sum.asscalar() / n, acc_sum.asscalar() / n
+        return loss_sum / n, acc_sum / n
 
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
-        num = 0
-        self.init_state()
-        for step, (X, y) in enumerate(train_iter):
-            X = nd.array(X,ctx=self.ctx)
-            y = nd.array(y,ctx=self.ctx)
-            #X = X.as_in_context(self.ctx)
-            #y = y.as_in_context(self.ctx)
-            loss, acc = self.run_train_loss_acc(X, y)
-            loss_train += loss
-            acc_train += acc
-            num += y.size
-            self.global_step += nd.array([1],ctx=self.ctx)
         #nd.waitall()
+        loss_train,acc_train = self.train_loss_acc(train_iter)
+        loss_test, acc_test = self.evaluate_loss_acc(test_iter)
         if epoch % epoch_per_print == 0:
-            loss_train = loss_train / num
-            acc_train = acc_train / num
-            loss_test,acc_test = self.evaluate_accuracy(test_iter)
-            self.predict_rnn(self.net)
+            #loss_test,acc_test = self.evaluate_loss_acc(test_iter)
+            self.run_perplexity(loss_train, loss_test)   #仅用于rnn,lstm等
+            self.predict_rnn(self.net)    #仅用于rnn,lstm等
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def summary(self):
@@ -255,9 +222,9 @@ class modelBaseM(modelBase):
             self.global_step = nd.load(self.symbol_savefile)[0]
         else:
             print("Created model with fresh parameters.")
-            self.net.initialize(self.init_op, force_reinit=True, ctx=self.ctx)
+            self.net.initialize(self.weight_initializer, force_reinit=True, ctx=self.ctx)
             self.global_step = nd.array([0], ctx=self.ctx)
-            self.debug_info(self.init_op.dumps())
+            self.debug_info(self.weight_initializer.dumps())
             self.debug_info(self.net)
             # model.removeSaveFile()
             self.summary()

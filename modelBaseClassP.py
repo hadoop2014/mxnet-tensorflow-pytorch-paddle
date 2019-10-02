@@ -156,10 +156,11 @@ class modelBaseP(modelBase):
     def run_learning_rate_decay(self,acc_train):
         return
 
-    def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
-        loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
+    def train_loss_acc(self,data_iter):
+        acc_sum = 0
+        loss_sum = 0
         num = 0
-        for step, (X, y) in enumerate(train_iter):
+        for X, y in data_iter:
             try:
                 X = X.asnumpy()
                 y = y.asnumpy()
@@ -167,24 +168,18 @@ class modelBaseP(modelBase):
             except:
                 X = np.array(X)
                 y = np.array(y, dtype='int64')
-            loss,acc  = self.run_train_loss_acc(X,y,self.keeps)
+            loss, acc = self.run_train_loss_acc(X, y, self.keeps)
             batch_size = y.size
-            loss_train += loss * batch_size
-            acc_train += acc * batch_size
+            loss_sum += loss * batch_size
+            acc_sum += acc * batch_size
             num += batch_size
-            self.visualdl_record(self.global_step_value,acc,loss,X[0])
+            self.visualdl_record(self.global_step_value, acc, loss, X[0])
             self.global_step_value += 1
-            fluid.layers.assign(np.array([self.global_step_value],dtype=np.int32),
+            fluid.layers.assign(np.array([self.global_step_value], dtype=np.int32),
                                 self.global_step)
-        if epoch % epoch_per_print == 0:
-            loss_train = loss_train / num
-            acc_train = acc_train / num
-            loss_test,acc_test = self.evaluate_accuracy(test_iter,self.executor)
-            self.log_test_acc.add_record(int(epoch/epoch_per_print),acc_test)
-            self.log_test_lost.add_record(int(epoch/epoch_per_print),loss_test)
-        return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
+        return loss_sum / num, acc_sum / num
 
-    def evaluate_accuracy(self,data_iter,session):
+    def evaluate_loss_acc(self, data_iter):
         acc_sum = 0
         loss_sum =0
         num = 0
@@ -202,6 +197,16 @@ class modelBaseP(modelBase):
             loss_sum += loss * batch_size
             num += y.size
         return loss_sum / num, acc_sum / num
+
+    def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
+        loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
+        loss_train,acc_train = self.train_loss_acc(train_iter)
+        if epoch % epoch_per_print == 0:
+            loss_test,acc_test = self.evaluate_loss_acc(test_iter)
+            self.log_test_acc.add_record(int(epoch/epoch_per_print),acc_test)
+            self.log_test_lost.add_record(int(epoch/epoch_per_print),loss_test)
+        return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
+
 
     def saveCheckpoint(self):
         pathname,filename = os.path.split(self.model_savefile)
@@ -274,7 +279,7 @@ class modelBaseP(modelBase):
             #参数初始化
             self.executor.run(fluid.default_startup_program())
             #self.global_step = nd.array([0], ctx=self.ctx)
-            #self.debug_info(self.init_op.dumps())
+            #self.debug_info(self.weight_initializer.dumps())
             #self.debug_info(self.net)
             # model.removeSaveFile()
 

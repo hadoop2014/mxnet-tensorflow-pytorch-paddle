@@ -174,10 +174,35 @@ class modelBaseH(modelBase):
         loss,acc = None,None
         return loss,acc
 
-    def evaluate_accuracy(self, data_iter):
+    def train_loss_acc(self, data_iter):
         acc_sum = 0
         loss_sum = 0
         n = 0
+        self.net.train()
+        for X, y in data_iter:
+            try:
+                X = X.asnumpy()
+                y = y.asnumpy()
+            except:
+                X = np.array(X)
+                y = np.array(y)
+            self.image_record(self.global_step.item(), 'input/image', X[0])
+            X = torch.tensor(X, device=self.ctx)
+            y = torch.tensor(y, device=self.ctx, dtype=torch.long)
+            loss, acc = self.run_train_loss_acc(X, y)
+            loss_sum += loss
+            acc_sum += acc
+            n += y.size()[0]
+            self.writer.add_scalar('train/loss', loss, self.global_step.item())
+            self.writer.add_scalar('train/accuracy', acc, self.global_step.item())
+            self.global_step += 1
+        return loss_sum / n, acc_sum / n
+
+    def evaluate_loss_acc(self, data_iter):
+        acc_sum = 0
+        loss_sum = 0
+        n = 0
+        self.net.eval()
         for X, y in data_iter:
             try:
                 X = X.asnumpy()
@@ -195,32 +220,11 @@ class modelBaseH(modelBase):
 
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
-        num = 0
-        self.net.train()
-        for step, (X, y) in enumerate(train_iter):
-            try:
-                X = X.asnumpy()
-                y = y.asnumpy()
-            except:
-                X = np.array(X)
-                y = np.array(y)
-            self.image_record(self.global_step.item(),'input/image',X[0])
-            X = torch.tensor(X,device=self.ctx)
-            y = torch.tensor(y,device=self.ctx,dtype=torch.long)
-            loss, acc = self.run_train_loss_acc(X, y)
-            loss_train += loss
-            acc_train += acc
-            num += y.size()[0]
-            self.writer.add_scalar('train/loss',loss,self.global_step.item())
-            self.writer.add_scalar('train/accuracy',acc,self.global_step.item())
-            self.global_step += 1
+        loss_train,acc_train = self.train_loss_acc(train_iter)
         #nd.waitall()
         if epoch % epoch_per_print == 0:
             # print(features.shape,labels.shape)
-            loss_train = loss_train / num
-            acc_train = acc_train / num
-            self.net.eval()
-            loss_test,acc_test = self.evaluate_accuracy(test_iter)
+            loss_test,acc_test = self.evaluate_loss_acc(test_iter)
             self.writer.add_scalar('test/loss',loss_test,self.global_step.item())
             self.writer.add_scalar('test/accuracy',acc_test,self.global_step.item())
 

@@ -164,10 +164,11 @@ class modelBaseT(modelBase):
             self.session.run(self.learning_rate_decay_op)
             print("\n execute learning rate decay(learning_rate=%f)\n" % self.learning_rate.eval())
 
-    def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
-        loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
+    def train_loss_acc(self,data_iter):
+        acc_sum = 0
+        loss_sum =0
         num = 0
-        for step, (X, y) in enumerate(train_iter):
+        for X, y in data_iter:
             try:
                 X = X.asnumpy()
                 y = y.asnumpy()
@@ -176,22 +177,15 @@ class modelBaseT(modelBase):
                 y = np.array(y)
             if self.global_step.eval() % self.debug_per_steps == 0:
                 self.debug_info(X, y)
-            loss,acc ,result = self.run_train_loss_acc(X,y,self.keeps)
+            loss, acc, result = self.run_train_loss_acc(X, y, self.keeps)
             batch_size = y.size
-            loss_train += loss * batch_size
-            acc_train += acc * batch_size
+            loss_sum += loss * batch_size
+            acc_sum += acc * batch_size
             num += batch_size
             self.writer.add_summary(result, global_step=self.global_step.eval())
+        return loss_sum / num, acc_sum / num
 
-        if epoch % epoch_per_print == 0:
-            loss_train = loss_train / num
-            acc_train = acc_train / num
-            self.run_learning_rate_decay(acc_train)
-            loss_test,acc_test = self.evaluate_accuracy(test_iter,self.session)
-
-        return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
-
-    def evaluate_accuracy(self,data_iter,session):
+    def evaluate_loss_acc(self, data_iter):
         acc_sum = 0
         loss_sum =0
         num = 0
@@ -206,10 +200,19 @@ class modelBaseT(modelBase):
                 y = np.array(y)
             loss,acc = self.run_eval_loss_acc(X, y)
             batch_size = y.size
-            acc_sum += acc * batch_size
             loss_sum += loss * batch_size
+            acc_sum += acc * batch_size
             num += y.size
         return loss_sum / num, acc_sum / num
+
+    def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
+        loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
+        loss_train,acc_train = self.train_loss_acc(train_iter)
+        if epoch % epoch_per_print == 0:
+            self.run_learning_rate_decay(acc_train)
+            loss_test,acc_test = self.evaluate_loss_acc(test_iter)
+
+        return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def tile_tensor_firstdim(self,tensor_a, tensor_b):
         '''扩张tensor_a的第一维,使得其和tesnor_b的第一维相同'''
