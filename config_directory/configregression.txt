@@ -1,7 +1,7 @@
 [strings]
 #data_directory = data_directory/
-model_savefile = working_directory/housemodel
-symbol_savefile = working_directory/housesymbol
+#model_savefile = working_directory/regressionmodel
+#symbol_savefile = working_directory/regressionsymbol
 train_file = kaggle_house_pred_train.csv
 test_file = kaggle_house_pred_test.csv
 

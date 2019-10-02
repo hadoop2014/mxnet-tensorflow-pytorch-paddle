@@ -15,9 +15,6 @@ class modelBaseH(modelBase):
         super(modelBaseH,self).__init__(gConfig)
         self.learning_rate = self.gConfig['learning_rate']
         self.learning_rate_decay_factor = self.gConfig['learning_rate_decay_factor']
-        self.model_savefile = self.gConfig['model_savefile']+'.' + self.gConfig['framework']
-        self.symbol_savefile = self.gConfig['symbol_savefile']+'.' + self.gConfig['framework']
-        self.logging_directory = os.path.join(self.logging_directory,self.gConfig['framework'])
         self.viewIsOn = self.gConfig['viewIsOn'.lower()]
         self.max_to_keep = self.gConfig['max_to_keep']
         self.ctx =self.get_ctx(self.gConfig['ctx'])

@@ -1,8 +1,8 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/capsnetmodel
-symbol_savefile = working_directory/capsnetsymbol
-checkpoint_filename = capsnet.ckpt
+#model_savefile = working_directory/capsnetmodel
+#symbol_savefile = working_directory/capsnetsymbol
+#checkpoint_filename = capsnet.ckpt
 
 optimizer =   sgd　
 initializer = normal

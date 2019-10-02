@@ -1,8 +1,8 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/resnetmodel
-symbol_savefile = working_directory/resnetsymbol
-checkpoint_filename = resnet.ckpt
+#model_savefile = working_directory/resnetmodel
+#symbol_savefile = working_directory/resnetsymbol
+#checkpoint_filename = resnet.ckpt
 
 optimizer =　sgd
 initializer =kaiming

@@ -12,11 +12,7 @@ class modelBaseP(modelBase):
         self.learning_rate_value = self.gConfig['learning_rate']
         self.learning_rate_decay_factor = self.gConfig['learning_rate_decay_factor']
         self.decay_steps = self.gConfig['decay_steps']
-        self.checkpoint_filename = self.gConfig['checkpoint_filename']
-        self.model_savefile =  self.gConfig['model_savefile']+'.' + self.gConfig['framework']
-        self.symbol_savefile = self.gConfig['symbol_savefile']+'.' + self.gConfig['framework']
         self.model_pb = os.path.split(self.model_savefile)[-1]
-        self.logging_directory = os.path.join(self.gConfig['logging_directory'],self.gConfig['framework'])
         self.init_sigma = self.gConfig['init_sigma']
         self.init_bias = self.gConfig['init_bias']
         self.max_to_keep = self.gConfig['max_to_keep']

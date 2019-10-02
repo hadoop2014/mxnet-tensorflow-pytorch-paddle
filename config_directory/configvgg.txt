@@ -1,8 +1,8 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/vggmodel
-symbol_savefile = working_directory/vggsymbol
-checkpoint_filename = vgg.ckpt
+#model_savefile = working_directory/vggmodel
+#symbol_savefile = working_directory/vggsymbol
+#checkpoint_filename = vgg.ckpt
 
 optimizer =　sgd
 initializer =kaiming

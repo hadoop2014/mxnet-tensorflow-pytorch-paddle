@@ -1,8 +1,8 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/lenetmodel
-symbol_savefile = working_directory/lenetsymbol
-checkpoint_filename = lenet.ckpt
+#model_savefile = working_directory/lenetmodel
+#symbol_savefile = working_directory/lenetsymbol
+#checkpoint_filename = lenet.ckpt
 
 optimizer = rmsprop
 initializer =xavier

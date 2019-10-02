@@ -1,5 +1,6 @@
 import os
 import time
+import re
 import logging
 
 #深度学习模型的基类
@@ -9,6 +10,12 @@ class modelBase():
         self.start_time = time.time()
         self.working_directory = self.gConfig['working_directory']
         self.logging_directory = self.gConfig['logging_directory']
+        self.model_savefile = os.path.join(self.working_directory,
+                                           self.get_model_name(self.gConfig) + 'model.' + self.gConfig['framework'])
+        self.symbol_savefile = os.path.join(self.working_directory,
+                                            self.get_model_name(self.gConfig) + 'symbol.' + self.gConfig['framework'])
+        self.logging_directory = os.path.join(self.logging_directory, self.gConfig['framework'])
+        self.checkpoint_filename = self.get_model_name(self.gConfig)+'.ckpt'
         self.epoch_per_print = self.gConfig['epoch_per_print']
         self.debug_per_steps = self.gConfig['debug_per_steps']
         self.epochs_per_checkpoint = self.gConfig['epochs_per_checkpoint']
@@ -21,6 +28,13 @@ class modelBase():
         self.acces_valid = []
         self.losses_test = []
         self.acces_test = []
+
+    def get_model_name(self,gConfig):
+        model_name = re.findall('(.*)Model', self.__class__.__name__).pop().lower()
+        assert model_name in gConfig['tasknamelist'], \
+            'tasknamelist(%s) is invalid,one of it must be a substring (%s) of class name(%s)' % \
+            (gConfig['tasknamelist'], model_name, self.__class__.__name__)
+        return model_name
 
     def get_net(self):
         pass

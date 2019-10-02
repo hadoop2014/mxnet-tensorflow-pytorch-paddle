@@ -85,6 +85,7 @@ class rnnModel(modelBaseM):
                             i2h_weight_initializer=self.weight_initializer,h2h_weight_initializer=self.weight_initializer,
                             i2h_bias_initializer=self.bias_initializer,h2h_bias_initializer=self.bias_initializer)
         }
+        self.randomIterIsOn = self.gConfig['randomIterIsOn'.lower()]
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
@@ -110,8 +111,11 @@ class rnnModel(modelBaseM):
         self.state = self.net.begin_state(batch_size=self.batch_size, ctx=self.ctx)
 
     def run_train_loss_acc(self, X, y):
-        for s in self.state:
-            s.detach()
+        if self.randomIterIsOn == True:
+            self.init_state()
+        else:
+            for s in self.state:
+                s.detach()
         with autograd.record():
             y_hat,self.state = self.net(X,self.state) #self.state在父类中通过init_state来初始化
             y = y.T.reshape((-1,)) #y.shape = (batch_size,time_steps),y.T.reshape((-1)).shape=(time_steps*batch_size,)
@@ -124,21 +128,16 @@ class rnnModel(modelBaseM):
         self.grad_clipping(params, self.clip_gradient, self.ctx)
         self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
         loss = loss.asscalar() * y.size
-        #y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
-        #acc = self.evaluate_perplexity(loss)   #必须使用loss.mean的值
         return loss, acc
 
     def run_eval_loss_acc(self, X, y):
-        #return self.run_train_loss_acc(X,y)
         self.init_state() #对于测试来说，因为没有反向传播，每个time_step,batch_size的数据都要初始化状态
         y_hat,self.state = self.net(X,self.state)
         y = y.T.reshape((-1,))
         loss = self.loss(y_hat, y).mean()
         loss = loss.asscalar() * y.size
-        #y = y.astype('float32')
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
-        #acc = self.evaluate_perplexity(loss)
         return loss, acc
 
     def run_perplexity(self, loss_train, loss_test):

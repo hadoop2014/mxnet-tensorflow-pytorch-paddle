@@ -1,8 +1,8 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/alexnetmodel
-symbol_savefile = working_directory/alexnetsymbol
-checkpoint_filename = alexnet.ckpt
+#model_savefile = working_directory/alexnetmodel
+#symbol_savefile = working_directory/alexnetsymbol
+#checkpoint_filename = alexnet.ckpt
 
 optimizer = sgd
 initializer = kaiming

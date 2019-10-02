@@ -1,13 +1,13 @@
 [strings]
 #data_directory = data_directory
-model_savefile = working_directory/resnetmodel
-symbol_savefile = working_directory/resnetsymbol
-checkpoint_filename = resnet.ckpt
+#model_savefile = working_directory/rnnmodel
+#symbol_savefile = working_directory/rnnsymbol
+#checkpoint_filename = resnet.ckpt
 
 optimizer =　sgd
 initializer =normal
 #用于指明rnn网络所用的单元，包括[rnn,gru,lstm]　
-cell = rnn
+cell = gru
 
 #lenet parameter　[sigmoid,relu,tanh]  defalult value is relu
 activation = relu
@@ -15,7 +15,7 @@ activation = relu
 [ints]
 resize = 0
 #训练迭代次数
-train_num_epoch = 351
+train_num_epoch = 251
 batch_size = 32
 time_steps = 35
 #used for max to keep checkpoint
@@ -30,7 +30,10 @@ rnn_hiddens = 256
 output_dim = 1
 
 #用于指定预测句子的长度
-predict_length = 50
+predict_length = 80
+
+#用于歌词数据Ｋ折交叉验证,k=5意味着留20%数据用于验证集
+k = 5
 
 [floats]
 init_sigma = 0.01
@@ -46,6 +49,8 @@ ckpt_used =False
 debugIsOn =　True
 viewIsOn = True
 tfdbgIsOn = False
+#当randomIterIsOn=True时读取数据时采用shuffle方式
+randomIterIsOn = True
 
 [lists]
 

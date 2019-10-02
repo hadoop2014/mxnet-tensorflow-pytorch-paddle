@@ -11,8 +11,6 @@ class modelBaseT(modelBase):
         self.learning_rate_value = self.gConfig['learning_rate']
         self.learning_rate_decay_factor = self.gConfig['learning_rate_decay_factor']
         self.decay_steps = self.gConfig['decay_steps']
-        self.checkpoint_filename = self.gConfig['checkpoint_filename']
-        self.logging_directory = os.path.join(self.logging_directory, self.gConfig['framework'])
         self.init_sigma = self.gConfig['init_sigma']
         self.init_bias = self.gConfig['init_bias']
         self.momentum = self.gConfig['momentum']

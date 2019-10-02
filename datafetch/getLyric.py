@@ -3,6 +3,7 @@ from mxnet import  nd
 import mxnet as mx
 import zipfile
 import random
+import numpy as np
 
 class getLyricDataM(getdataBase):
     def __init__(self,gConfig):
@@ -14,6 +15,8 @@ class getLyricDataM(getdataBase):
         self.batch_size = self.gConfig['batch_size']
         self.time_steps = self.gConfig['time_steps']
         self.ctx = self.get_ctx(gConfig['ctx'])
+        self.randomIterIsOn = self.gConfig['randomIterIsOn'.lower()]
+        self.k = self.gConfig['k']
         self.load_data(self.filename,root=self.data_path)
 
     def get_ctx(self,ctx):
@@ -40,9 +43,9 @@ class getLyricDataM(getdataBase):
 
         self.transformers = [self.fn_onehot]
         self.resizedshape = [self.time_steps,self.vocab_size]
-        train_nums = int((1-self.test_percent) * len(self.corpus_indices))
-        self.train_data = self.corpus_indices[:train_nums] #paddle.dataset.cifar.train10()#gdata.vision.FashionMNIST(root=root,train=True)
-        self.test_data = self.corpus_indices[train_nums:]#paddle.dataset.cifar.test10()#gdata.vision.FashionMNIST(root=root,train=False)
+        #train_nums = int((1-self.test_percent) * len(self.corpus_indices))
+        #self.train_data = self.corpus_indices[:train_nums] #paddle.dataset.cifar.train10()#gdata.vision.FashionMNIST(root=root,train=True)
+        #self.test_data = self.corpus_indices[train_nums:]#paddle.dataset.cifar.test10()#gdata.vision.FashionMNIST(root=root,train=False)
 
     def fn_onehot(self,x):
         x = nd.transpose(x)
@@ -65,6 +68,26 @@ class getLyricDataM(getdataBase):
                     X = transformer(X)
                 yield (X,y)
         return transform_reader
+
+    # Ｋ折交叉验证
+    def get_k_fold_data(self, k, features):
+        assert k > 1, 'k折交叉验证算法中，必须满足条件ｋ>1'
+        fold_size = len(features)// k
+        X_train, y_train = None, None
+        X_valid, y_valid = None, None
+        i = np.random.randint(k)
+        for j in range(k):
+            idx = slice(j * fold_size, (j + 1) * fold_size)
+            X_part = features[idx.start:idx.stop]
+            if j == i:
+                X_valid = X_part
+            elif X_train is None:
+                X_train = X_part
+            else:
+                #X_train = nd.concat(X_train, X_part, dim=0)
+                X_train.extend(X_part)
+                #y_train = nd.concat(y_train, y_part, dim=0)
+        return X_train,  X_valid
 
     def data_iter_random(self, corpus_indices, batch_size, time_steps, ctx=None):
         # 减1是因为输出的索引是相应输入的索引加1
@@ -100,13 +123,20 @@ class getLyricDataM(getdataBase):
 
     @getdataBase.getdataForUnittest
     def getTrainData(self,batch_size):
-        train_iter = self.data_iter_consecutive(self.train_data, self.batch_size, self.time_steps, self.ctx)
+        self.train_data,self.test_data = self.get_k_fold_data(self.k,self.corpus_indices)
+        if self.randomIterIsOn == True:
+            train_iter = self.data_iter_random(self.train_data,self.batch_size,self.time_steps,self.ctx)
+        else:
+            train_iter = self.data_iter_consecutive(self.train_data, self.batch_size, self.time_steps, self.ctx)
         self.train_iter = self.transform(train_iter,self.transformers)
         return self.train_iter()
 
     @getdataBase.getdataForUnittest
     def getTestData(self,batch_size):
-        test_iter = self.data_iter_consecutive(self.test_data, self.batch_size, self.time_steps, self.ctx)
+        if self.randomIterIsOn == True:
+            test_iter = self.data_iter_random(self.test_data,self.batch_size,self.time_steps,self.ctx)
+        else:
+            test_iter = self.data_iter_consecutive(self.test_data, self.batch_size, self.time_steps, self.ctx)
         self.test_iter = self.transform(test_iter,self.transformers)
         return self.test_iter()
 
