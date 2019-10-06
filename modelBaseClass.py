@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# @Time    : 9/25/2019 5:03 PM
+# @Author  : wuhao
+# @File    : modelBaseClass.py
 import os
 import time
 import re
@@ -21,7 +25,6 @@ class modelBase():
         self.epochs_per_checkpoint = self.gConfig['epochs_per_checkpoint']
         self.batch_size = self.gConfig['batch_size']
         self.debugIsOn = self.gConfig['debugIsOn'.lower()]
-
         self.losses_train = []
         self.acces_train = []
         self.losses_valid = []
@@ -105,28 +108,18 @@ class modelBase():
             self.debug_info()
         if epoch % self.epochs_per_checkpoint == 0:
             self.saveCheckpoint()
-
         return
 
     def train(self,model_eval,getdataClass,gConfig,num_epochs):
-
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-    def run_trainloss(self,getdataBase,epoch,output_log=False):
-        return self.acces_train,self.losses_train
-
-    def run_validloss(self,getdataBase,epoch,output_log=False):
-        return self.acces_valid, self.losses_valid
-
-    def run_testloss(self,getdataBase,epoch,output_log=False):
-        return self.acces_test, self.losses_test
-
-    def debug_info(self,*kargs):
+    def debug_info(self,*args):
         pass
 
     def clear_logging_directory(self,logging_directory):
-        assert logging_directory == self.logging_directory ,'It is only clear logging directory, but %s is not'%logging_directory
+        assert logging_directory == self.logging_directory ,\
+            'It is only clear logging directory, but %s is not'%logging_directory
         files = os.listdir(logging_directory)
         for file in files:
             full_file = os.path.join(logging_directory,file)

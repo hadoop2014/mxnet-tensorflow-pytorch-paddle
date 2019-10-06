@@ -205,6 +205,9 @@ class modelBaseM(modelBase):
     def summary(self):
         self.net.summary(nd.zeros(shape=self.get_input_shape(),ctx=self.ctx))
 
+    def hybridize(self):
+        self.net.hybridize()
+
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
@@ -224,4 +227,4 @@ class modelBaseM(modelBase):
             self.debug_info(self.net)
             # model.removeSaveFile()
             self.summary()
-        self.net.hybridize()
+        self.hybridize()
