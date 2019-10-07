@@ -7,6 +7,7 @@ class vggModel(modelBaseM):
         super(vggModel,self).__init__(gConfig)
         self.loss = gloss.SoftmaxCrossEntropyLoss()
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
@@ -27,7 +28,8 @@ class vggModel(modelBaseM):
         small_conv_arch = [(pair[0], pair[1] // ratio) for pair in conv_arch]
         dense1_hiddens = self.gConfig['dense1_hiddens'] #// ratio#4096
         dense2_hiddens = self.gConfig['dense2_hiddens'] #// ratio#4096
-        dense3_hiddens = self.gConfig['dense3_hiddens'] #4096
+        dense3_hiddens = self.gConfig['dense3_hiddens'] #10
+        dense3_hiddens = self.classnum
         drop1_rate = self.gConfig['drop1_rate'] #0.5
         drop2_rate = self.gConfig['drop2_rate'] #0.5
         activation = self.gConfig['activation'] #relu

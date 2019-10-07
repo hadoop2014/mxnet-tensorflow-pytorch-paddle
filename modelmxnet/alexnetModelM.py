@@ -5,11 +5,13 @@ class alexnetModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
         super(alexnetModel,self).__init__(gConfig)
         self.loss = gloss.SoftmaxCrossEntropyLoss()
+        self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate})
-        self.input_shape = (self.batch_size,*getdataClass.resizedshape)
+        self.input_shape = (self.batch_size,*self.resizedshape)
 
     def get_net(self):
         conv1_channels = self.gConfig['conv1_channels'] #96
@@ -46,6 +48,7 @@ class alexnetModel(modelBaseM):
         dense2_hiddens = self.gConfig['dense2_hiddens'] #4096
         drop2_rate = self.gConfig['drop2_rate'] #0.5
         dense3_hiddens = self.gConfig['dense3_hiddens'] #10
+        dense3_hiddens = self.classnum
         activation = self.gConfig['activation'] #relu
         self.net.add(nn.Conv2D(conv1_channels, kernel_size=conv1_kernel_size, strides=conv1_strides,
                                activation=self.get_activation(activation)),

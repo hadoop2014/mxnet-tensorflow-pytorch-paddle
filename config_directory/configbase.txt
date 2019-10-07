@@ -2,12 +2,12 @@
 #该节配置大部分为configbase.txt所特有
 #taskname = [regression,lenet,alexnet,vgg,capsnet,convolution,lstm,resnet]
 #frameworklist = mxnet,tensorflow,paddle,pytorch
-#datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric
+#datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog
 #ctxlist = cpu,gpu
 mode = train
-taskname = rnn
-framework =　mxnet
-dataset =lyric
+taskname = lenet
+framework =　pytorch
+dataset = mnist
 ctx =gpu
 
 working_directory = working_directory/
@@ -59,7 +59,7 @@ unittestIsOn = False
 #该节配置为configbase.txt所特有
 tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,rnn,lstm
 optimizerlist = sgd,adam,rmsprop,adagrad,adadelta,momentum
-datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric
+datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric,hotdog
 frameworklist = mxnet,tensorflow,paddle,pytorch
 activationlist = sigmoid,relu,tanh
 initializerlist = normal,xavier,kaiming,constant
@@ -71,11 +71,19 @@ celllist = rnn,gru,lstm
 mnist.channels = 1
 mnist.dim_x = 28
 mnist.dim_y = 28
+mnist.classnum=10
 cifar10.channels = 3
 cifar10.dim_x = 32
 cifar10.dim_y = 32
+cifar10.classnum=10
 fashionmnist.channels=1
 fashionmnist.dim_x = 28
 fashionmnist.dim_y = 28
+fashionmnist.classnum=10
+#hotdog图片为不规则的，其dim_x,dim_y仅为参考值
+hotdog.channels=3
+hotdog.dim_x=224
+hotdog.dim_y=224
+hotdog.classnum=2
 houseprice.dim = 331
 lyric.dim = 1

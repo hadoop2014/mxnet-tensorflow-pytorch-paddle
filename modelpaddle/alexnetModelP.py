@@ -4,6 +4,7 @@ class alexnetModelP(modelBaseP):
     def __init__(self,gConfig,getdataClass):
         super(alexnetModelP,self).__init__(gConfig)
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
 
     def get_net(self):
@@ -46,6 +47,7 @@ class alexnetModelP(modelBaseP):
         drop2_rate = self.gConfig['drop2_rate']  # 0.5
         dense3_hiddens = self.gConfig['dense3_hiddens']  # 10
         class_num = self.gConfig['class_num']#10
+        class_num = self.classnum #用数据集中实际的类别数来替换
         activation = self.gConfig['activation'] #relu
         weight_initializer = self.get_initializer(self.initializer)
         bias_initializer = self.get_initializer('constant')

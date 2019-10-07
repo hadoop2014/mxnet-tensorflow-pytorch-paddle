@@ -121,14 +121,14 @@ class modelBaseT(modelBase):
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
-    def debug_info(self,*kargs):
-        if len(kargs) == 0:
+    def debug_info(self,*args):
+        if len(args) == 0:
             trainabled_vars = tf.trainable_variables()
             for trainabled_var in trainabled_vars:
                 print('\tdebug:%s' % trainabled_var.name,
                       '\tshape=', trainabled_var.shape)
             return
-        (X,y) = kargs
+        (X,y) = args
         if self.debugIsOn == False:
             return
         self.debug(X,y)
@@ -173,7 +173,7 @@ class modelBaseT(modelBase):
             except:
                 X = np.array(X)
                 y = np.array(y)
-            if self.global_step.eval() % self.debug_per_steps == 0:
+            if self.global_step.eval()  == 0:
                 self.debug_info(X, y)
             loss, acc, result = self.run_train_loss_acc(X, y, self.keeps)
             batch_size = y.size

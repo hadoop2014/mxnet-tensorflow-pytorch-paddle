@@ -105,7 +105,7 @@ class modelBase():
                       '\t global_step = %d' % self.get_globalstep(),
                       "  context:%s" % self.get_context())
             self.start_time = check_time
-            self.debug_info()
+            self.debug_info()  #tensorflow框架下有无效打印，需要修改
         if epoch % self.epochs_per_checkpoint == 0:
             self.saveCheckpoint()
         return

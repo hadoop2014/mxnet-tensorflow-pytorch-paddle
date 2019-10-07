@@ -1,6 +1,8 @@
-from  datafetch.getBaseClass import *
+from datafetch.getBaseClassH import *
+from datafetch.getBaseClassM import *
 import numpy as np
 import cv2
+
 
 classes = ('plane', 'car', 'bird', 'cat','deer', 'dog', 'frog', 'horse', 'ship', 'truck')
 

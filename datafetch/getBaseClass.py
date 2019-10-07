@@ -1,8 +1,7 @@
-import os
 import re
 import sys
-
-numeric_types = (float, int)
+import os
+import matplotlib.pyplot as plt
 
 #数据读写处理的基类
 class getdataBase():
@@ -10,6 +9,7 @@ class getdataBase():
         self.gConfig = gConfig
         self.rawshape = self.get_rawshape(self.gConfig)
         self.resizedshape = self.rawshape
+        self.classnum = self.get_classnum(self.gConfig)  #每个数据集的类别数
         self.cpu_num = self.gConfig['cpu_num']
         self.train_iter=None
         self.test_iter=None
@@ -18,6 +18,19 @@ class getdataBase():
 
     def load_data(self,*args):
         pass
+
+    def get_classnum(self,gConfig):
+        is_find = False
+        dataset_name = self.get_dataset_name(gConfig)
+        for key in gConfig:
+            if key.find('.') >= 0:
+                dataset_key = re.findall('(.*)\.', key).pop().lower()
+                if dataset_key == dataset_name:
+                    is_find = True
+        if is_find == False:
+            raise ValueError('dataset(%s) has not be configed in datasetlist(%s)'
+                             % (dataset_name, gConfig['datasetlist']))
+        return gConfig[dataset_name+'.classnum']
 
     def get_rawshape(self,gConfig):
         is_find = False
@@ -69,71 +82,3 @@ class getdataBase():
     def endProcess(self):
         pass
 
-class getdataBaseM(getdataBase):
-    def __init__(self,gConfig):
-        super(getdataBaseM,self).__init__(gConfig)
-        self.dataset_name = self.get_dataset_name(self.gConfig)
-        self.data_path = os.path.join(self.gConfig['data_directory'],self.dataset_name)
-        self.resize = self.gConfig['resize']
-        self.test_percent = self.gConfig['test_percent']
-        self.batch_size = self.gConfig['batch_size']
-        from mxnet.gluon import data as gdata
-        self.dataset_selector = {
-            'mnist': gdata.vision.MNIST,
-            'fashionmnist': gdata.vision.FashionMNIST,
-            'cifar10': gdata.vision.CIFAR10
-        }
-        self.load_data(resize=self.resize,root=self.data_path)
-
-    def load_data(self,resize=None,root=""):
-        from mxnet.gluon import data as gdata
-        root = os.path.expanduser(root)
-        transformer = []
-        if resize is not None and resize != 0:
-            transformer += [gdata.vision.transforms.Resize(resize)]
-            self.resizedshape = [self.rawshape[0],resize,resize]
-        transformer += [gdata.vision.transforms.ToTensor()]
-        transformer = gdata.vision.transforms.Compose(transformer)
-        train_data = self.dataset_selector[self.dataset_name](root=root,train=True)
-        test_data = self.dataset_selector[self.dataset_name](root=root,train=False)
-        num_workers = 0 if sys.platform.startswith('win32') else self.cpu_num
-        self.train_iter = gdata.DataLoader(train_data.transform_first(transformer),
-                                           self.batch_size, shuffle=True,
-                                           num_workers=num_workers)
-        self.test_iter = gdata.DataLoader(test_data.transform_first(transformer),
-                                          self.batch_size, shuffle=False,
-                                          num_workers=num_workers)
-
-class getdataBaseH(getdataBase):
-    def __init__(self,gConfig):
-        super(getdataBaseH,self).__init__(gConfig)
-        self.dataset_name = self.get_dataset_name(self.gConfig)
-        self.data_path = os.path.join(self.gConfig['data_directory'], self.dataset_name)
-        self.resize = self.gConfig['resize']
-        self.test_percent = self.gConfig['test_percent']
-        self.batch_size = self.gConfig['batch_size']
-        from torchvision import datasets
-        self.dataset_selector={
-            'mnist':datasets.MNIST,
-            'fashionmnist':datasets.FashionMNIST,
-            'cifar10':datasets.CIFAR10
-        }
-        self.load_data(resize=self.resize, root=self.data_path)
-
-    def load_data(self,resize=None,root=""):
-        from torch import utils
-        from torchvision import transforms
-        root = os.path.expanduser(root)
-        transformer = []
-        if resize is not None and resize != 0:
-            transformer += [transforms.Resize(resize)]
-            self.resizedshape = [self.rawshape[0],resize,resize]
-        transformer += [transforms.ToTensor()]
-        transformer += [transforms.Normalize((0.1307,),(0.3081,))]
-        transformer = transforms.Compose(transformer)
-        train_data = self.dataset_selector[self.dataset_name](root=root,train=True,download=True,transform=transformer)
-        test_data = self.dataset_selector[self.dataset_name](root=root,train=True,download=True,transform=transformer)
-        num_workers = 0 if sys.platform.startswith('win32') else self.cpu_num
-        kwargs = {'num_workers': 1, 'pin_memory': True} if self.ctx == 'gpu' else {'num_workers':num_workers}
-        self.train_iter = utils.data.DataLoader(train_data,batch_size=self.batch_size,shuffle=True,**kwargs)
-        self.test_iter = utils.data.DataLoader(test_data,batch_size=self.batch_size,shuffle=True,**kwargs)

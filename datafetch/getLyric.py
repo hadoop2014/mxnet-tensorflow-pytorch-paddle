@@ -156,6 +156,10 @@ class getLyricDataM(getdataBase):
                              %(dataset_name,gConfig['datasetlist']))
         return [gConfig[dataset_name+'.dim']]
 
+    def get_classnum(self,gConfig):
+        #非分类用数据集，需要重写该函数，返回None
+        return None
+
 class_selector = {
     "mxnet":getLyricDataM,
     "tensorflow":getLyricDataM,

@@ -1,4 +1,5 @@
-from datafetch.getBaseClass import  *
+from datafetch.getBaseClassM import  *
+from datafetch.getBaseClassH import  *
 
 class getMnistDataH(getdataBaseH):
     def __init__(self,gConfig):

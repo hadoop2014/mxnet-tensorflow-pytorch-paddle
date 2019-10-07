@@ -29,6 +29,10 @@ class getHousepriceDataM(getdataBase):
                              %(dataset_name,gConfig['datasetlist']))
         return [gConfig[dataset_name+'.dim']]
 
+    def get_classnum(self,gConfig):
+        #非分类用数据集，需要重写该函数，返回None
+        return None
+
     def load_data(self,root,train_file,test_file):
         self.train_data = pd.read_csv(self.data_path+self.train_file)
         self.test_data = pd.read_csv(self.data_path + self.test_file)

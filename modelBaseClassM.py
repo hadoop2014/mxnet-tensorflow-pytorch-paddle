@@ -3,6 +3,9 @@ from mxnet import nd, gluon,autograd,init
 import mxnet as mx
 import numpy as np
 from modelBaseClass import  *
+import datafetch.commFunction as commFunc
+
+numeric_types = (int,float)
 
 #深度学习模型的基类
 class modelBaseM(modelBase):
@@ -149,6 +152,13 @@ class modelBaseM(modelBase):
         #仅用于rnn网络的句子预测
         pass
 
+    def image_record(self,global_step,tag,input_image):
+        input_image = nd.transpose(input_image,axes=[0,2,3,1])
+        if global_step < self.gConfig['num_samples']:
+            hotdogs = [input_image[i] for i in range(8)]
+            not_hotdogs = [input_image[-i - 1] for i in range(8)]
+            commFunc.show_images(hotdogs+not_hotdogs, 2, 8, scale=1.4)
+
     def run_train_loss_acc(self,X,y):
         loss,acc = None,None
         return loss,acc
@@ -169,6 +179,7 @@ class modelBaseM(modelBase):
             X = nd.array(X, ctx=self.ctx)
             y = nd.array(y, ctx=self.ctx)
             y = y.astype('float32')
+            #self.image_record(self.global_step.asscalar(), 'input/image', X) #仅调试时使用，正常运行时不要使用
             loss, acc = self.run_train_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss

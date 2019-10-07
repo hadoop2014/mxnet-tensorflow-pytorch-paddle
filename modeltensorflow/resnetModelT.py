@@ -4,6 +4,7 @@ class resnetModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
         super(resnetModelT,self).__init__(gConfig)
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.merged = tf.summary.merge_all()
 
@@ -82,6 +83,7 @@ class resnetModelT(modelBaseT):
         pool1_padding = self.gConfig['pool1_padding']
         dense1_hiddens = self.gConfig['dense1_hiddens']
         class_num = self.gConfig['class_num']
+        classnum = self.classnum
         activation = self.gConfig['activation']
 
         with tf.name_scope('input'):
@@ -91,7 +93,7 @@ class resnetModelT(modelBaseT):
             self.isTraining = tf.placeholder(tf.bool,name='isTraining')
         with tf.name_scope('transpos'):
             self.X = tf.transpose(self.X_input, perm=[0, 2, 3, 1], name='X')
-            self.t = tf.one_hot(self.t_input, class_num, axis=1, name='t')
+            self.t = tf.one_hot(self.t_input, classnum, axis=1, name='t')
             tf.summary.image('image', self.X)
 
         # 卷积层部分
@@ -129,9 +131,9 @@ class resnetModelT(modelBaseT):
 
         with tf.variable_scope('dense1'):
             pool_squeeze = tf.squeeze(global_pool,name='pool_squeeze')
-            dense1_w = tf.get_variable(name='dense1_w', shape=[input_channels, dense1_hiddens],
+            dense1_w = tf.get_variable(name='dense1_w', shape=[input_channels, classnum],
                                        initializer=self.get_initializer(self.initializer))
-            dense1_b = tf.get_variable(name='dense1_b', shape=[dense1_hiddens],
+            dense1_b = tf.get_variable(name='dense1_b', shape=[classnum],
                                        initializer=tf.constant_initializer(self.init_bias))
             dense1 = tf.nn.bias_add(tf.matmul(pool_squeeze, dense1_w), dense1_b, name='dense1')
 

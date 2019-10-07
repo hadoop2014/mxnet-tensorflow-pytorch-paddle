@@ -25,6 +25,7 @@ class resnetModel(modelBaseM):
         super(resnetModel,self).__init__(gConfig)
         self.loss = gloss.SoftmaxCrossEntropyLoss()
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
@@ -52,6 +53,7 @@ class resnetModel(modelBaseM):
         pool1_strides = self.gConfig['pool1_strides']
         pool1_padding = self.gConfig['pool1_padding']
         dense1_hiddens = self.gConfig['dense1_hiddens']
+        dense1_hiddens = self.classnum
         activation = self.gConfig['activation']
         # 卷积层部分
         self.net.add(nn.Conv2D(conv1_channels, kernel_size=conv1_kernel_size, strides=conv1_strides, padding=conv1_padding),

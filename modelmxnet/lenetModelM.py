@@ -8,6 +8,7 @@ class lenetModel(modelBaseM):
         self.optimizer = self.gConfig['optimizer']
         self.loss = gloss.SoftmaxCrossEntropyLoss()
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
@@ -31,6 +32,7 @@ class lenetModel(modelBaseM):
         dense1_hiddens = self.gConfig['dense1_hiddens']#120
         dense2_hiddens = self.gConfig['dense2_hiddens']#84
         dense3_hiddens = self.gConfig['dense3_hiddens']#10
+        dense3_hiddens = self.classnum
         self.net.add(nn.Conv2D(channels=conv1_channels,kernel_size=conv1_kernel_size,
                                strides=conv1_strides,activation=self.get_activation(activation),
                                bias_initializer=init.Constant(self.init_bias)),

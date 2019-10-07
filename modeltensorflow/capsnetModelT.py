@@ -5,6 +5,7 @@ class capsnetModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
         super(capsnetModelT,self).__init__(gConfig)
         self.resizedshape = getdataClass.resizedshape
+        self.classnum=getdataClass.classnum
         self.get_net()
         self.merged = tf.summary.merge_all()
 
@@ -38,6 +39,7 @@ class capsnetModelT(modelBaseT):
         dense3_hiddens = self.gConfig['dense3_hiddens']#784
         dense3_hiddens = input_dim_x * input_dim_y*input_channels
         class_num = self.gConfig['class_num']
+        classnum=self.classnum
         mask_with_labels = self.gConfig['mask_with_labels']
         epsilon = self.gConfig['epsilon']
         m_plus = self.gConfig['m_plus']#0.9
@@ -69,7 +71,7 @@ class capsnetModelT(modelBaseT):
             self.X = tf.transpose(self.X_input, perm=[0, 2, 3, 1], name='X')
             batch_size = tf.shape(self.X)[0]
             print('X=,batch_size=',self.X,batch_size)
-            self.t = tf.one_hot(self.t_input, class_num, axis=1, name='t')
+            self.t = tf.one_hot(self.t_input, classnum, axis=1, name='t')
             tf.summary.image('image', self.X)
 
         with tf.variable_scope('conv1'):
@@ -170,7 +172,7 @@ class capsnetModelT(modelBaseT):
                                       name='dense1') #维度[batch_size,512]
             dense2 = tf.layers.dense(dense1,dense2_hiddens,activation =self.get_activation(activation),
                                       name='dense2') #维度[batch_size,1024]
-            decoder_output = tf.layers.dense(dense2, dense3_hiddens, activation=self.get_activation('sigmoid'),
+            decoder_output = tf.layers.dense(dense2, classnum, activation=self.get_activation('sigmoid'),
                                              name="decoder_output") #维度[batch_size,784]
             print(decoder_output)
             x_out = tf.reshape(decoder_output, [-1, input_dim_x,input_dim_y, input_channels],

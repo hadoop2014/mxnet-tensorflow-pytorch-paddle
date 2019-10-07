@@ -13,7 +13,7 @@ activation =sigmoid
 [ints]
 resize = 0
 #训练迭代次数
-train_num_epoch =10
+train_num_epoch =3
 batch_size = 256
 #used for max to keep checkpoint
 max_to_keep = 2

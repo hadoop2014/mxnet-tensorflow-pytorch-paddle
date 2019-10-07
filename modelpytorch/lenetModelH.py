@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 class lenet(nn.Module):
-    def __init__(self,gConfig,input_channels,activation,input_dim_x,input_dim_y):
+    def __init__(self,gConfig,input_channels,activation,input_dim_x,input_dim_y,classnum):
         super(lenet,self).__init__()
         self.activation =activation # sigmoid
         conv1_channels = gConfig['conv1_channels']  # 6
@@ -23,6 +23,7 @@ class lenet(nn.Module):
         dense1_hiddens = gConfig['dense1_hiddens']  # 120
         dense2_hiddens = gConfig['dense2_hiddens']  # 84
         dense3_hiddens = gConfig['dense3_hiddens']  # 10
+        dense3_hiddens = classnum
         self.conv1 = nn.Conv2d(in_channels=input_channels,out_channels=conv1_channels,
                                kernel_size=conv1_kernel_size,stride=conv1_strides,
                                padding=conv1_padding)
@@ -67,6 +68,7 @@ class lenetModel(modelBaseH):
         super(lenetModel,self).__init__(gConfig)
         self.loss = nn.CrossEntropyLoss().to(self.ctx)
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.optimizer = self.get_optimizer(self.gConfig['optimizer'],self.net.parameters())
         self.input_shape = (self.batch_size,*self.resizedshape)
@@ -75,7 +77,7 @@ class lenetModel(modelBaseH):
         activation = self.gConfig['activation']#sigmoid
         activation = self.get_activation(activation)
         input_channels, input_dim_x, input_dim_y = self.resizedshape
-        self.net = lenet(self.gConfig,input_channels,activation,input_dim_x,input_dim_y)
+        self.net = lenet(self.gConfig,input_channels,activation,input_dim_x,input_dim_y,self.classnum)
 
     def run_train_loss_acc(self,X,y):
         self.optimizer.zero_grad()

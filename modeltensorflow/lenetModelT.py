@@ -4,6 +4,7 @@ class lenetModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
         super(lenetModelT,self).__init__(gConfig)
         self.resizedshape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.merged = tf.summary.merge_all()
 
@@ -32,6 +33,7 @@ class lenetModelT(modelBaseT):
         dense2_hiddens = self.gConfig['dense2_hiddens']  # 84
         dense3_hiddens = self.gConfig['dense3_hiddens']  # 10
         class_num = self.gConfig['class_num'] #10
+        classnum = self.classnum
 
         with tf.name_scope('input'):
             self.keep_prop = tf.placeholder(tf.float32, name="keep_prop")
@@ -39,7 +41,7 @@ class lenetModelT(modelBaseT):
             self.t_input = tf.placeholder(tf.int32, [None,],name = 't_input')
         with tf.name_scope('transpos'):
             self.X = tf.transpose(self.X_input,perm=[0,2,3,1],name='X')
-            self.t = tf.one_hot(self.t_input,class_num,axis=1,name='t')
+            self.t = tf.one_hot(self.t_input,classnum,axis=1,name='t')
             tf.summary.image('image', self.X)
         with tf.name_scope('conv1'),tf.variable_scope('conv1'):
             conv1_filter=[conv1_kernel_size,conv1_kernel_size,input_channels,conv1_channels]
@@ -87,9 +89,9 @@ class lenetModelT(modelBaseT):
             dense2 = tf.nn.bias_add(tf.matmul(dense1_out,dense2_w),dense2_b,name='dense2')
             dense2_out = self.get_activation(activation)(dense2, name='dense2_out')
         with tf.name_scope('dense3'),tf.variable_scope('dense3'):
-            dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens,dense3_hiddens],
+            dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens,classnum],
                                        initializer=self.get_initializer(self.initializer))
-            dense3_b = tf.get_variable(name='dense3_b',shape=[dense3_hiddens],
+            dense3_b = tf.get_variable(name='dense3_b',shape=[classnum],
                                        initializer=tf.constant_initializer(self.init_bias))
             dense3 = tf.nn.bias_add(tf.matmul(dense2_out,dense3_w),dense3_b,name='dense3')
         with tf.name_scope('softmax'):
@@ -110,8 +112,8 @@ class lenetModelT(modelBaseT):
 
 
     def run_train_loss_acc(self,X,y,keeps):
-        if self.global_step.eval() == 0:
-            self.debug_info(X,y)
+        #if self.global_step.eval() == 0:
+        #    self.debug_info(X,y)
         _, loss, acc, merged = self.session.run([self.train_step, self.loss, self.accuracy, self.merged],
                                                 feed_dict={self.X_input: X, self.t_input: y,
                                                            self.keep_prop: float(keeps)})

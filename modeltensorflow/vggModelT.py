@@ -4,6 +4,7 @@ class vggModelT(modelBaseT):
     def __init__(self,gConfig,getdataClass):
         super(vggModelT,self).__init__(gConfig)
         self.input_shape = getdataClass.resizedshape
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.merged = tf.summary.merge_all()
 
@@ -38,18 +39,19 @@ class vggModelT(modelBaseT):
         input_channels,input_dim_x,input_dim_y = self.input_shape
         dense1_hiddens = self.gConfig['dense1_hiddens']  # // ratio#4096
         dense2_hiddens = self.gConfig['dense2_hiddens']  # // ratio#4096
-        dense3_hiddens = self.gConfig['dense3_hiddens']  # 4096
+        dense3_hiddens = self.gConfig['dense3_hiddens']  # 10
         drop1_rate = self.gConfig['drop1_rate']  # 0.5
         drop2_rate = self.gConfig['drop2_rate']  # 0.5
         activation = self.gConfig['activation']
         class_num = self.gConfig['class_num']
+        classnum = self.classnum
         with tf.name_scope('input'):
             self.keep_prop = tf.placeholder(tf.float32, name="keep_prop")
             self.X_input = tf.placeholder(tf.float32, [None, input_channels, input_dim_x, input_dim_y], name='X_input')
             self.t_input = tf.placeholder(tf.int32, [None, ], name='t_input')
         with tf.name_scope('transpos'):
             self.X = tf.transpose(self.X_input, perm=[0, 2, 3, 1], name='X')
-            self.t = tf.one_hot(self.t_input, class_num, axis=1, name='t')
+            self.t = tf.one_hot(self.t_input, classnum, axis=1, name='t')
             tf.summary.image('image', self.X)
 
         # 卷积层部分
@@ -79,9 +81,9 @@ class vggModelT(modelBaseT):
             drop2_out = tf.nn.dropout(dense2_out,(1-drop2_rate),name='drop2_out')
 
         with tf.name_scope('dense3'),tf.variable_scope('dense3'):
-            dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens, dense3_hiddens],
+            dense3_w = tf.get_variable(name='dense3_w', shape=[dense2_hiddens, classnum],
                                        initializer=self.get_initializer(self.initializer))
-            dense3_b = tf.get_variable(name='dense3_b', shape=[dense3_hiddens],
+            dense3_b = tf.get_variable(name='dense3_b', shape=[classnum],
                                        initializer=tf.constant_initializer(self.init_bias))
             dense3 = tf.nn.bias_add(tf.matmul(drop2_out, dense3_w), dense3_b, name='dense3')
 
