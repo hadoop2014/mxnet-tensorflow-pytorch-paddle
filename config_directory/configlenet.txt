@@ -11,10 +11,11 @@ initializer =xavier
 activation =sigmoid
 
 [ints]
-resize = 0
+#mnist和fashionmnist都是28*28*1,cifar10为32*32*3,hotdog为224*224*3,其中hotdog很容易导致gpu溢出
+resize = 28　　
 #训练迭代次数
 train_num_epoch =3
-batch_size = 256
+batch_size = 56
 #used for max to keep checkpoint
 max_to_keep = 2
 
@@ -62,7 +63,5 @@ viewIsOn =False
 tfdbgIsOn = False
 
 [lists]
-resize = None
-
 
 [sets]

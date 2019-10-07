@@ -8,7 +8,6 @@ test_file = kaggle_house_pred_test.csv
 #optimizer = sgd,adam,rmsprop
 optimizer = rmsprop
 initializer = normal
-#ctx = gpu
 activation = 'relu'
 
 [ints]

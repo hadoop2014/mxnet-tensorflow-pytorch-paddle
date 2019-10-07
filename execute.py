@@ -96,6 +96,8 @@ def trainStart(gConfig,taskName,framework,dataset,unittestIsOn):
         model, model_eval, getdataClass = modelManager(framework, gConfig, dataset, taskName=taskName,
                                                        ckpt_used=gConfig['ckpt_used'])
         train(model, model_eval, getdataClass, gConfig, taskName, framework,dataset)
+    elif gConfig['mode'] == 'pretrain':
+        pass
     elif gConfig['mode'] == 'server':
         raise ValueError('Sever Usage:python3 app.py')
 

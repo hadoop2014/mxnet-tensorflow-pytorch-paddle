@@ -6,7 +6,6 @@
 
 optimizer =　sgd
 initializer =kaiming
-#ctx = gpu
 
 #lenet parameter　[sigmoid,relu]
 activation = relu

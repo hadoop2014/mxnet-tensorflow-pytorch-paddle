@@ -52,7 +52,7 @@ class lenetModel(modelBaseM):
             y_hat = self.net(X)
             loss = self.loss(y_hat, y).sum()
         loss.backward()
-        if self.global_step == 0:
+        if self.global_step.asscalar() == 0:
             self.debug_info()
         self.trainer.step(self.batch_size)
         loss = loss.asscalar()

@@ -3,6 +3,8 @@ import sys
 import os
 import matplotlib.pyplot as plt
 
+numeric_types = (int,float)
+
 #数据读写处理的基类
 class getdataBase():
     def __init__(self,gConfig):

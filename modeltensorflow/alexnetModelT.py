@@ -59,7 +59,7 @@ class alexnetModelT(modelBaseT):
             self.t_input = tf.placeholder(tf.int32, [None, ], name='t_input')
         with tf.name_scope('transpos'):
             self.X = tf.transpose(self.X_input, perm=[0, 2, 3, 1], name='X')
-            self.t = tf.one_hot(self.t_input, class_num, axis=1, name='t')
+            self.t = tf.one_hot(self.t_input, classnum, axis=1, name='t')
             tf.summary.image('image', self.X)
 
         with tf.name_scope('conv1'),tf.variable_scope('conv1'):

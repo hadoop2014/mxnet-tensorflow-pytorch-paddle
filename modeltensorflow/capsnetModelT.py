@@ -29,6 +29,7 @@ class capsnetModelT(modelBaseT):
         caps1_caps = int(conv2_dims * conv2_dims * conv2_channels / caps1_dims)
         print('caps1_caps=',caps1_caps)
         caps2_caps = self.gConfig['caps2_caps']#10
+        caps2_caps = self.classnum  #替换为数据的实际类别数
         caps2_dims = self.gConfig['caps2_dims']#16
         routing_num = self.gConfig['routing_num']#2
         dense1_hiddens = self.gConfig['dense1_hiddens']#512
@@ -38,8 +39,8 @@ class capsnetModelT(modelBaseT):
         dense2_hiddens = dense2_hiddens * input_channels
         dense3_hiddens = self.gConfig['dense3_hiddens']#784
         dense3_hiddens = input_dim_x * input_dim_y*input_channels
-        class_num = self.gConfig['class_num']
-        classnum=self.classnum
+        classnum = self.gConfig['class_num']
+        classnum = self.classnum    #替换为数据的实际类别数
         mask_with_labels = self.gConfig['mask_with_labels']
         epsilon = self.gConfig['epsilon']
         m_plus = self.gConfig['m_plus']#0.9
@@ -172,7 +173,7 @@ class capsnetModelT(modelBaseT):
                                       name='dense1') #维度[batch_size,512]
             dense2 = tf.layers.dense(dense1,dense2_hiddens,activation =self.get_activation(activation),
                                       name='dense2') #维度[batch_size,1024]
-            decoder_output = tf.layers.dense(dense2, classnum, activation=self.get_activation('sigmoid'),
+            decoder_output = tf.layers.dense(dense2, dense3_hiddens, activation=self.get_activation('sigmoid'),
                                              name="decoder_output") #维度[batch_size,784]
             print(decoder_output)
             x_out = tf.reshape(decoder_output, [-1, input_dim_x,input_dim_y, input_channels],

@@ -6,13 +6,13 @@
 
 optimizer =   sgd　
 initializer = normal
-#ctx = gpu
 
 #lenet parameter　[sigmoid,relu]
 activation = relu
 
 [ints]
-resize = 0
+#mnist和fashionmnist都是28*28*1,cifar10为32*32*3,hotdog为224*224*3,其中hotdog是二分类数据，capsnet效果很差
+resize = 28
 #训练迭代次数
 train_num_epoch = 5
 batch_size = 3

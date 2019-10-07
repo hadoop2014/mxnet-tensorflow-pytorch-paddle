@@ -5,8 +5,6 @@ import numpy as np
 from modelBaseClass import  *
 import datafetch.commFunction as commFunc
 
-numeric_types = (int,float)
-
 #深度学习模型的基类
 class modelBaseM(modelBase):
     def __init__(self,gConfig):

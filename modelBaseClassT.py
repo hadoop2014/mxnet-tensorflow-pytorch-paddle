@@ -95,7 +95,7 @@ class modelBaseT(modelBase):
 
     def get_context(self):
         devices = self.session.list_devices()
-        return devices[0].name
+        return devices
         #return [device.name for device in devices]
 
     def get_learningrate(self):
