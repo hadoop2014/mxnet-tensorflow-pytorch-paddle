@@ -2,7 +2,8 @@
   "regression":{
     "config_file": "configregression.txt",
     "mxnet": {
-      "model": "modelmxnet.regressionModelM",
+      "train":"modelmxnet.regressionModelM",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -11,7 +12,8 @@
       "hotdog": false
     },
     "tensorflow": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -20,7 +22,8 @@
       "hotdog": false
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -29,7 +32,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -42,7 +46,8 @@
   "lenet":{
     "config_file": "configlenet.txt",
     "mxnet": {
-      "model": "modelmxnet.lenetModelM",
+      "train": "modelmxnet.lenetModelM",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -51,7 +56,8 @@
       "hotdog": true
     },
     "tensorflow": {
-      "model": "modeltensorflow.lenetModelT",
+      "train": "modeltensorflow.lenetModelT",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -60,7 +66,8 @@
       "hotdog": true
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -69,7 +76,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "modelpytorch.lenetModelH",
+      "train": "modelpytorch.lenetModelH",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -82,7 +90,8 @@
   "alexnet":{
     "config_file": "configalexnet.txt",
     "mxnet": {
-      "model": "modelmxnet.alexnetModelM",
+      "train": "modelmxnet.alexnetModelM",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -91,7 +100,8 @@
       "hotdog": true
     },
     "tensorflow": {
-      "model": "modeltensorflow.alexnetModelT",
+      "train": "modeltensorflow.alexnetModelT",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -100,7 +110,8 @@
       "hotdog": true
     },
     "paddle": {
-      "model": "modelpaddle.alexnetModelP",
+      "train": "modelpaddle.alexnetModelP",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -109,7 +120,8 @@
       "hotdog": true
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -122,7 +134,8 @@
   "vgg":{
     "config_file": "configvgg.txt",
     "mxnet": {
-      "model": "modelmxnet.vggModelM",
+      "train": "modelmxnet.vggModelM",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -131,7 +144,8 @@
       "hotdog": true
     },
     "tensorflow": {
-      "model": "modeltensorflow.vggModelT",
+      "train": "modeltensorflow.vggModelT",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -140,7 +154,8 @@
       "hotdog": true
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -149,7 +164,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -162,7 +178,8 @@
   "resnet":{
     "config_file": "configresnet.txt",
     "mxnet": {
-      "model": "modelmxnet.resnetModelM",
+      "train": "modelmxnet.resnetModelM",
+      "pretrain": "mxnet.gluon.model_zoo.vision.resnet18_v2",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -171,7 +188,8 @@
       "hotdog": true
     },
     "tensorflow": {
-      "model": "modeltensorflow.resnetModelT",
+      "train": "modeltensorflow.resnetModelT",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -180,7 +198,8 @@
       "hotdog": true
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -189,7 +208,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -202,7 +222,8 @@
   "capsnet":{
     "config_file": "configcapsnet.txt",
     "mxnet": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -211,7 +232,8 @@
       "hotdog": false
     },
     "tensorflow": {
-      "model": "modeltensorflow.capsnetModelT",
+      "train": "modeltensorflow.capsnetModelT",
+      "pretrain": "",
       "cifar10": true,
       "mnist": true,
       "fashionmnist": true,
@@ -220,7 +242,8 @@
       "hotdog": true
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -229,7 +252,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -242,7 +266,8 @@
   "rnn":{
     "config_file": "configrnn.txt",
     "mxnet": {
-      "model": "modelmxnet.rnnModelM",
+      "train": "modelmxnet.rnnModelM",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -251,7 +276,8 @@
       "hotdog": false
     },
     "tensorflow": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -260,7 +286,8 @@
       "hotdog": false
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -269,7 +296,7 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -282,7 +309,8 @@
   "lstm":{
     "config_file": "configlstm.txt",
     "mxnet": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -291,7 +319,8 @@
       "hotdog": false
     },
     "tensorflow": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -300,7 +329,8 @@
       "hotdog": false
     },
     "paddle": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,
@@ -309,7 +339,8 @@
       "hotdog": false
     },
     "pytorch": {
-      "model": "",
+      "train": "",
+      "pretrain": "",
       "cifar10": false,
       "mnist": false,
       "fashionmnist": false,

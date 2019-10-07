@@ -24,20 +24,22 @@ class ExecuteTestCase(unittest.TestCase):
         for taskName in gConfig['tasknamelist']:
             for framework in gConfig['frameworklist']:
                 for dataset in gConfig['datasetlist']:
-                    if execute.validate_parameter(taskName,framework,dataset,gConfig) == False:
-                        continue
-                    print('taskName=%s,framework=%s,dataset=%s'%(taskName,framework,dataset))
-                    #execute.trainStart(gConfig,taskName,framework,dataset)
-                    command = 'python ' 'execute.py' + \
-                              ' ' + str(taskName) + ' ' + str(framework) + ' ' + str(dataset) +' ' + str(unittestIsOn)
-                    #with open(unittest_logfilename,'a',encoding='utf-8') as f:
-                        #CompletedProcessObject=subprocess.run(command,shell=True,stdout=f,timeout=100,check=False,
-                        #                                      universal_newlines=True)
-                    CompletedProcessObject = subprocess.run(command, shell=True, stdout=sys.stdout,stderr=sys.stderr)
-                    result.append(command+',testtimes = %.2f'%(time.time()-test_starttime))
-                    test_starttime =time.time()
-                    self.assertTrue(CompletedProcessObject,True)
-                    self.assertEqual(CompletedProcessObject.returncode,0)
+                    for mode in gConfig['modelist']:
+                        if execute.validate_parameter(taskName,framework,dataset,mode,gConfig) == False:
+                            continue
+                        print('taskName=%s,framework=%s,dataset=%s'%(taskName,framework,dataset))
+                        #execute.trainStart(gConfig,taskName,framework,dataset)
+                        command = 'python ' 'execute.py' + \
+                                  ' ' + str(taskName) + ' ' + str(framework) + ' ' + str(dataset) + ' ' \
+                                  + str(mode) + ' ' + str(unittestIsOn)
+                        #with open(unittest_logfilename,'a',encoding='utf-8') as f:
+                            #CompletedProcessObject=subprocess.run(command,shell=True,stdout=f,timeout=100,check=False,
+                            #                                      universal_newlines=True)
+                        CompletedProcessObject = subprocess.run(command, shell=True, stdout=sys.stdout,stderr=sys.stderr)
+                        result.append(command+',testtimes = %.2f'%(time.time()-test_starttime))
+                        test_starttime =time.time()
+                        self.assertTrue(CompletedProcessObject,True)
+                        self.assertEqual(CompletedProcessObject.returncode,0)
 
         for line in result:
             print(line)

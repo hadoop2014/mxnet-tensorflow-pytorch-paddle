@@ -5,6 +5,7 @@
 import os
 import time
 import re
+import json
 import logging
 
 #深度学习模型的基类
@@ -25,12 +26,23 @@ class modelBase():
         self.epochs_per_checkpoint = self.gConfig['epochs_per_checkpoint']
         self.batch_size = self.gConfig['batch_size']
         self.debugIsOn = self.gConfig['debugIsOn'.lower()]
+        self.check_book = self.get_check_book()
         self.losses_train = []
         self.acces_train = []
         self.losses_valid = []
         self.acces_valid = []
         self.losses_test = []
         self.acces_test = []
+
+    def get_check_book(self):
+        check_file = os.path.join(self.gConfig['config_directory'], self.gConfig['check_file'])
+        check_book = None
+        if os.path.exists(check_file):
+            with open(check_file, encoding='utf-8') as check_f:
+                check_book = json.load(check_f)
+        else:
+            raise ValueError("%s is not exist,you must create first!" % check_file)
+        return check_book
 
     def get_model_name(self,gConfig):
         model_name = re.findall('(.*)Model', self.__class__.__name__).pop().lower()

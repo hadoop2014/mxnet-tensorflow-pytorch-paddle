@@ -10,7 +10,7 @@ import os
 
 check_book = None
 
-def train(model,model_eval,getdataClass,gConfig,taskName,framework,dataset):
+def train(model,model_eval,getdataClass,gConfig,taskName,framework,dataset,mode):
     gConfig = gConfig
     if gConfig['unittestIsOn'.lower()] == True:
         num_epochs = 1
@@ -18,9 +18,9 @@ def train(model,model_eval,getdataClass,gConfig,taskName,framework,dataset):
         num_epochs = gConfig['train_num_epoch']
     start_time = time.time()
 
-    print("\n\ntraining %s starting at plat %s use dataset %s, use optimizer %s,ctx=%s,initializer=%s,check_point=%s,"
+    print("\n\n( %s %s %s %s)starting, use optimizer %s,ctx=%s,initializer=%s,check_point=%s,"
           "activation=%s...............\n\n"
-          %(taskName,framework,dataset,gConfig['optimizer'],gConfig['ctx'],gConfig['initializer'],
+          %(taskName,framework,dataset,mode,gConfig['optimizer'],gConfig['ctx'],gConfig['initializer'],
             gConfig['ckpt_used'],gConfig['activation']))
     losses_train,acces_train,losses_valid,acces_valid,losses_test,acces_test=\
         model.train(model_eval,getdataClass,gConfig,num_epochs)
@@ -61,22 +61,21 @@ def closeplt(time):
     sleep(time)
     plt.close()
 
-def getDataset(taskName,framework,gConfig,dataset):
+def getDataset(gConfig,dataset):
     module = __import__(check_book['datafetch'][dataset],fromlist=(check_book['datafetch'][dataset].split('.')[-1]))
     getdataClass = getattr(module,'create_model')(gConfig)
     return getdataClass
 
-
-def modelManager(framework,gConfig,dataset,taskName,ckpt_used=False):
-    getdataClass = getDataset(taskName, framework, gConfig, dataset)
-    module = __import__(check_book[taskName][framework]["model"],
-                        fromlist=(check_book[taskName][framework]["model"].split('.')[-1]))
+def modelManager(framework,gConfig,dataset,taskName,mode,ckpt_used=False):
+    getdataClass = getDataset(gConfig, dataset)
+    module = __import__(check_book[taskName][framework]["train"],
+                        fromlist=(check_book[taskName][framework]["train"].split('.')[-1]))
     model = getattr(module,'create_model')(gConfig=gConfig,ckpt_used=ckpt_used,
                                            getdataClass=getdataClass)
     model_eval = model
     return model,model_eval,getdataClass
 
-def get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn):
+def get_gConfig(gConfig,taskName,framework,dataset,mode,unittestIsOn):
     global check_book
     if check_book is not None:
         config_file = os.path.join(gConfig['config_directory'],check_book[taskName]['config_file'])
@@ -88,18 +87,15 @@ def get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn):
     gConfig['framework'] = framework
     gConfig['dataset'] = dataset
     gConfig['unittestIsOn'.lower()] = unittestIsOn
+    gConfig['mode']=mode
     return gConfig
 
-def trainStart(gConfig,taskName,framework,dataset,unittestIsOn):
-    if gConfig['mode'] == 'train':
-        gConfig = get_gConfig(gConfig,taskName,framework,dataset,unittestIsOn)
-        model, model_eval, getdataClass = modelManager(framework, gConfig, dataset, taskName=taskName,
-                                                       ckpt_used=gConfig['ckpt_used'])
-        train(model, model_eval, getdataClass, gConfig, taskName, framework,dataset)
-    elif gConfig['mode'] == 'pretrain':
-        pass
-    elif gConfig['mode'] == 'server':
-        raise ValueError('Sever Usage:python3 app.py')
+def trainStart(gConfig,taskName,framework,dataset,mode,unittestIsOn):
+    gConfig = get_gConfig(gConfig,taskName,framework,dataset,mode,unittestIsOn)
+    model, model_eval, getdataClass = modelManager(framework, gConfig, dataset, taskName=taskName,
+                                                   mode=mode,ckpt_used=gConfig['ckpt_used'])
+    train(model, model_eval, getdataClass, gConfig, taskName, framework,dataset,mode)
+
 
 def set_check_book(gConfig):
     check_file = os.path.join(gConfig['config_directory'], gConfig['check_file'])
@@ -111,23 +107,25 @@ def set_check_book(gConfig):
         raise ValueError("%s is not exist,you must create first!" % check_file)
 
 
-def validate_parameter(taskName,framework,dataset,gConfig):
+def validate_parameter(taskName,framework,dataset,mode,gConfig):
     assert taskName in gConfig['tasknamelist'], 'taskName(%s) is invalid,it must one of %s' % \
                                                 (taskName, gConfig['tasknamelist'])
     assert framework in gConfig['frameworklist'], 'framework(%s) is invalid,it must one of %s' % \
                                                   (framework, gConfig['frameworklist'])
     assert dataset in gConfig['datasetlist'], 'dataset(%s) is invalid,it must one of %s' % \
                                               (dataset, gConfig['datasetlist'])
+    assert mode in gConfig['modelist'], 'mode(%s) is invalid,it must one of %s' % \
+                                              (dataset, gConfig['modelist'])
     global check_book
     set_check_book(gConfig)
-    return check_book[taskName][framework][dataset]
+    return check_book[taskName][framework][dataset] and check_book[taskName][framework][mode] != ''
 
 def main():
     gConfig = getConfig.get_config()
     if len(sys.argv) > 1 :
-        if len(sys.argv) == 5:
+        if len(sys.argv) == 6:
             #该模式为从unittest.main调用
-            unittestIsOn = bool(sys.argv[4])
+            unittestIsOn = bool(sys.argv[5])
             assert unittestIsOn == True , \
                 'Now in unittest mode, the num of argvs must be 5 whitch is taskName, framework,dataset and unittestIsOn'
         else:
@@ -137,6 +135,7 @@ def main():
         taskName = sys.argv[1]
         framework = sys.argv[2]
         dataset = sys.argv[3]
+        mode = sys.argv[4]
     else:
         #该模式为从pycharm调用
         unittestIsOn = gConfig['unittestIsOn'.lower()]
@@ -145,11 +144,11 @@ def main():
         taskName = gConfig['taskname']
         framework = gConfig['framework']
         dataset = gConfig['dataset']
-
-    if validate_parameter(taskName,framework,dataset,gConfig) == True:
-        trainStart(gConfig, taskName, framework, dataset,unittestIsOn)
+        mode = gConfig['mode']
+    if validate_parameter(taskName,framework,dataset,mode,gConfig) == True:
+        trainStart(gConfig, taskName, framework, dataset,mode,unittestIsOn)
     else:
-        raise ValueError("(%s %s %s) is not supported now!"%(taskName,framework,dataset))
+        raise ValueError("(%s %s %s %s) is not supported now!"%(taskName,framework,dataset,mode))
 
 if __name__=='__main__':
     main()

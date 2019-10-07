@@ -2,6 +2,7 @@ from mxnet.gluon import nn
 from mxnet import nd, gluon,autograd,init
 import mxnet as mx
 import numpy as np
+from mxnet.gluon import model_zoo
 from modelBaseClass import  *
 import datafetch.commFunction as commFunc
 
@@ -217,14 +218,30 @@ class modelBaseM(modelBase):
     def hybridize(self):
         self.net.hybridize()
 
+    def get_pretrain_model(self,**kwargs):
+        moduleName = self.check_book[self.gConfig['taskName']][self.gConfig['framework']]['pretrain']
+        className = moduleName.split('.')[-1]
+        moduleName = '.'.join(moduleName.split('.')[:-1])
+        module = __import__(moduleName,fromlist=(moduleName.split('.')[-1]))
+        model = getattr(module,className)(**kwargs)
+        return model
+
+    def get_classnum(self):
+        pass
+
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
-        self.show_net(input_shape={'input_data':self.get_input_shape()})
-        if 'pretrained_model' in self.gConfig:
-            self.net.load_parameters(self.gConfig['pretrained_model'])
+        #self.show_net(input_shape={'input_data':self.get_input_shape()})
         ckpt = self.getSaveFile()
-        if ckpt and ckpt_used:
+        if self.gConfig['mode'] == 'pretrain' :
+            #self.net.load_parameters(self.gConfig['pretrained_model'])
+            pretrained_net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,root=self.working_directory)
+            self.net = self.get_pretrain_model(classes=self.get_classnum())
+            self.net.features = pretrained_net.features
+            self.net.output.initialize(self.weight_initializer,ctx=self.ctx)
+            self.net.output.collect_params().setattr('lr_mult', 10)
+        elif ckpt and ckpt_used:
             print("Reading model parameters from %s" % ckpt)
             self.net.load_parameters(ckpt, ctx=self.ctx)
             self.global_step = nd.load(self.symbol_savefile)[0]
@@ -236,4 +253,5 @@ class modelBaseM(modelBase):
             self.debug_info(self.net)
             # model.removeSaveFile()
             self.summary()
+        self.show_net(input_shape={'input_data': self.get_input_shape()})
         self.hybridize()

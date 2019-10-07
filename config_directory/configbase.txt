@@ -5,9 +5,9 @@
 #frameworklist = mxnet,tensorflow,paddle,pytorch
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog
 #ctxlist = cpu,gpu
-mode = train
-taskname = lenet
-framework =　pytorch
+mode = pretrain
+taskname = resnet
+framework =　mxnet
 dataset = cifar10
 ctx =gpu
 
@@ -58,7 +58,7 @@ unittestIsOn = False
 
 [sets]
 #该节配置为configbase.txt所特有
-modellist = train,pretrain
+modelist = train,pretrain
 tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,rnn,lstm
 optimizerlist = sgd,adam,rmsprop,adagrad,adadelta,momentum
 datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric,hotdog

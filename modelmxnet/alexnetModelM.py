@@ -96,6 +96,9 @@ class alexnetModel(modelBaseM):
     def get_input_shape(self):
         return self.input_shape
 
+    def get_classnum(self):
+        return self.classnum
+
 def create_model(gConfig,ckpt_used,getdataClass):
     model=alexnetModel(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
