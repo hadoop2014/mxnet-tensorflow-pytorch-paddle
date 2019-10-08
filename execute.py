@@ -68,8 +68,8 @@ def getDataset(gConfig,dataset):
 
 def modelManager(framework,gConfig,dataset,taskName,mode,ckpt_used=False):
     getdataClass = getDataset(gConfig, dataset)
-    module = __import__(check_book[taskName][framework]["train"],
-                        fromlist=(check_book[taskName][framework]["train"].split('.')[-1]))
+    module = __import__(check_book[taskName][framework]["train"]['model'],
+                        fromlist=(check_book[taskName][framework]["train"]['model'].split('.')[-1]))
     model = getattr(module,'create_model')(gConfig=gConfig,ckpt_used=ckpt_used,
                                            getdataClass=getdataClass)
     model_eval = model
@@ -88,6 +88,7 @@ def get_gConfig(gConfig,taskName,framework,dataset,mode,unittestIsOn):
     gConfig['dataset'] = dataset
     gConfig['unittestIsOn'.lower()] = unittestIsOn
     gConfig['mode']=mode
+    gConfig['viewIsOn'.lower()] = False  #必要时关闭mxnet的graph打印功能，节省测试时间
     return gConfig
 
 def trainStart(gConfig,taskName,framework,dataset,mode,unittestIsOn):
@@ -118,7 +119,7 @@ def validate_parameter(taskName,framework,dataset,mode,gConfig):
                                               (dataset, gConfig['modelist'])
     global check_book
     set_check_book(gConfig)
-    return check_book[taskName][framework][dataset] and check_book[taskName][framework][mode] != ''
+    return check_book[taskName][framework][mode][dataset] and check_book[taskName][framework][mode]['model'] != ''
 
 def main():
     gConfig = getConfig.get_config()

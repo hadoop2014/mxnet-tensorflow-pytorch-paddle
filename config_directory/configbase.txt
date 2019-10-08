@@ -23,7 +23,7 @@ check_file = checkbook.json
 #该节配置大部分可以被模型参数配置文件（如configlenet.txt）所覆盖
 #resize=0 表示不对原始图像做缩放
 resize =0
-cpu_num = 4
+cpu_num = 0
 #训练迭代次数
 train_num_epoch = 200
 #used for max to keep checkpoint

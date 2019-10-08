@@ -230,7 +230,7 @@ class modelBaseM(modelBase):
         self.net.hybridize()
 
     def get_pretrain_model(self,**kwargs):
-        moduleName = self.check_book[self.gConfig['taskName']][self.gConfig['framework']]['pretrain']
+        moduleName = self.check_book[self.gConfig['taskName']][self.gConfig['framework']]['pretrain']['model']
         className = moduleName.split('.')[-1]
         moduleName = '.'.join(moduleName.split('.')[:-1])
         module = __import__(moduleName,fromlist=(moduleName.split('.')[-1]))

@@ -2,351 +2,673 @@
   "regression":{
     "config_file": "configregression.txt",
     "mxnet": {
-      "train":"modelmxnet.regressionModelM",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": true,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "modelmxnet.regressionModelM",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": true,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain": {
+        "model":"",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": true,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "tensorflow": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "lenet":{
     "config_file": "configlenet.txt",
     "mxnet": {
-      "train": "modelmxnet.lenetModelM",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modelmxnet.lenetModelM",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "tensorflow": {
-      "train": "modeltensorflow.lenetModelT",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modeltensorflow.lenetModelT",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "modelpytorch.lenetModelH",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train":{
+        "model":"modelpytorch.lenetModelH",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "alexnet":{
     "config_file": "configalexnet.txt",
     "mxnet": {
-      "train": "modelmxnet.alexnetModelM",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modelmxnet.alexnetModelM",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain": {
+        "model":"",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "tensorflow": {
-      "train": "modeltensorflow.alexnetModelT",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modeltensorflow.alexnetModelT",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "paddle": {
-      "train": "modelpaddle.alexnetModelP",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modelpaddle.alexnetModelP",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain": {
+        "model":"",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "vgg":{
     "config_file": "configvgg.txt",
     "mxnet": {
-      "train": "modelmxnet.vggModelM",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modelmxnet.vggModelM",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain": {
+        "model":"",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
+
     "tensorflow": {
-      "train": "modeltensorflow.vggModelT",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model": "modeltensorflow.vggModelT",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain": {
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "resnet":{
     "config_file": "configresnet.txt",
     "mxnet": {
-      "train": "modelmxnet.resnetModelM",
-      "pretrain": "mxnet.gluon.model_zoo.vision.resnet18_v2",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train": {
+        "model":"modelmxnet.resnetModelM",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model":"mxnet.gluon.model_zoo.vision.resnet18_v2",
+        "cifar10": true,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "tensorflow": {
-      "train": "modeltensorflow.resnetModelT",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train":{
+        "model": "modeltensorflow.resnetModelT",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model":"",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "capsnet":{
     "config_file": "configcapsnet.txt",
     "mxnet": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "tensorflow": {
-      "train": "modeltensorflow.capsnetModelT",
-      "pretrain": "",
-      "cifar10": true,
-      "mnist": true,
-      "fashionmnist": true,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": true
+      "train":{
+        "model":"modeltensorflow.capsnetModelT",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "rnn":{
     "config_file": "configrnn.txt",
     "mxnet": {
-      "train": "modelmxnet.rnnModelM",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": true,
-      "hotdog": false
+      "train": {
+        "model":"modelmxnet.rnnModelM",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": true,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model":"",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "tensorflow": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
   "lstm":{
     "config_file": "configlstm.txt",
     "mxnet": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "tensorflow": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "paddle": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     },
     "pytorch": {
-      "train": "",
-      "pretrain": "",
-      "cifar10": false,
-      "mnist": false,
-      "fashionmnist": false,
-      "houseprice": false,
-      "lyric": false,
-      "hotdog": false
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false
+      }
     }
   },
 
