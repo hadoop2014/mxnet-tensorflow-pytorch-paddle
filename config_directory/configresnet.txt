@@ -5,7 +5,7 @@
 #checkpoint_filename = resnet.ckpt
 
 optimizer =　sgd
-initializer =kaiming
+initializer =xavier
 
 #lenet parameter　[sigmoid,relu]
 activation = relu
@@ -14,7 +14,7 @@ activation = relu
 resize = 224
 #训练迭代次数
 train_num_epoch = 5
-batch_size = 16
+batch_size = 32
 #used for max to keep checkpoint
 max_to_keep = 2
 
@@ -42,7 +42,7 @@ ratio = 4
 [floats]
 init_sigma = 0.005
 init_bias = 0.1
-learning_rate = 0.1
+learning_rate = 0.01
 learning_rate_decay_factor = 0.9
 keeps = 0.6
 test_percent = 0.16

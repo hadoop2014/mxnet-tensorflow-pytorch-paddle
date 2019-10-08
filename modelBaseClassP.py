@@ -246,6 +246,8 @@ class modelBaseP(modelBase):
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
+        if os.path.exists(self.working_directory) == False:
+            os.makedirs(self.working_directory)
         self.writer = LogWriter(self.logging_directory,sync_cycle=self.max_queue)
         with self.writer.mode('train') as logger:
             self.log_train_acc = logger.scalar('acc')

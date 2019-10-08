@@ -182,7 +182,7 @@ class resnetModelT(modelBaseT):
                                                         self.isTraining:False})
         return grads_value
 
-def create_model(gConfig,ckpt_used,getdataClass,mode):
+def create_model(gConfig,ckpt_used,getdataClass):
     model=resnetModelT(gConfig=gConfig,getdataClass=getdataClass)
     model.initialize(ckpt_used)
     return model

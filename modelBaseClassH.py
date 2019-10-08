@@ -237,6 +237,8 @@ class modelBaseH(modelBase):
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
+        if os.path.exists(self.working_directory) == False:
+            os.makedirs(self.working_directory)
         self.clear_logging_directory(self.logging_directory)
 
         self.writer = SummaryWriter(logdir=self.logging_directory,max_queue=self.max_queue)

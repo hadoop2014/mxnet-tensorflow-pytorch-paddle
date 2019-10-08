@@ -12,6 +12,7 @@ class modelBaseM(modelBase):
         super(modelBaseM,self).__init__(gConfig)
         self.learning_rate = self.gConfig['learning_rate']
         self.learning_rate_decay_factor = self.gConfig['learning_rate_decay_factor']
+        self.lr_mult = self.gConfig['lr_mult'] #learning_rate的乘数，加速学习，用于预训练模型
         self.viewIsOn = self.gConfig['viewIsOn'.lower()]
         self.max_to_keep = self.gConfig['max_to_keep']
         self.ctx =self.get_ctx(self.gConfig['ctx'])
@@ -133,9 +134,19 @@ class modelBaseM(modelBase):
         if len(layer._children) != 0:
             for block in layer._children.values():
                 self.debug(block, layer.name)
+        for param in layer.params:
+            parameter = layer.params[param]
+            if parameter.grad_req != 'null':
+                print('\tdebug:%s(%s)' % (name, param),
+                      '\tshape=', parameter.shape,
+                      '\tdata.mean=%f' % parameter.data().mean().asscalar(),
+                      '\tgrad.mean=%f' % parameter.grad().mean().asscalar(),
+                      '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
+                      '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
+        '''
         if str(layer.name).find('pool') < 0 and \
                 str(layer.name).find('dropout') < 0 and \
-                str(layer.name).find('batchnorm') and \
+                str(layer.name).find('batchnorm') < 0 and \
                 str(layer.name).find('relu') < 0 and \
                 str(layer.name).find('sigmoid') < 0:
             for param in layer.params:
@@ -146,7 +157,7 @@ class modelBaseM(modelBase):
                       '\tgrad.mean=%f' % parameter.grad().mean().asscalar(),
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
-
+        '''
     def predict_rnn(self, model):
         #仅用于rnn网络的句子预测
         pass
@@ -232,15 +243,25 @@ class modelBaseM(modelBase):
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
-        #self.show_net(input_shape={'input_data':self.get_input_shape()})
+        if os.path.exists(self.working_directory) == False:
+            os.makedirs(self.working_directory)
         ckpt = self.getSaveFile()
         if self.gConfig['mode'] == 'pretrain' :
-            #self.net.load_parameters(self.gConfig['pretrained_model'])
-            pretrained_net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,root=self.working_directory)
+            pretrained_net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,
+                                                     root=self.working_directory)
             self.net = self.get_pretrain_model(classes=self.get_classnum())
             self.net.features = pretrained_net.features
             self.net.output.initialize(self.weight_initializer,ctx=self.ctx)
-            self.net.output.collect_params().setattr('lr_mult', 10)
+            self.net.output.collect_params().setattr('lr_mult', self.lr_mult)
+            #self.net.features.collect_params().setattr('grad_req', 'null') #所有的features的梯度不再更新
+            #weight = pretrained_net.output.weight
+            #hotdog_w = nd.split(weight.data(), 1000, axis=0)[713]  ＃713即为imagenet中hotdog的分类
+            #self.net.output.weight.data()[1]= hotdog_w
+            self.trainer = gluon.Trainer(self.net.collect_params(), self.optimizer,
+                                         {'learning_rate': self.learning_rate})
+            self.global_step = nd.array([0], ctx=self.ctx)
+            self.debug_info(self.net)
+            self.summary()
         elif ckpt and ckpt_used:
             print("Reading model parameters from %s" % ckpt)
             self.net.load_parameters(ckpt, ctx=self.ctx)

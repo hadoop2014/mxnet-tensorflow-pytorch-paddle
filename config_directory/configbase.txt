@@ -8,7 +8,7 @@
 mode = pretrain
 taskname = resnet
 framework =　mxnet
-dataset = cifar10
+dataset = mnist
 ctx =gpu
 
 working_directory = working_directory/
@@ -46,6 +46,7 @@ learning_rate_decay_factor = 0.9
 decay_steps = 2000
 test_percent = 1.0
 momentum = 0.9
+lr_mult = 10
 
 [bools]
 #该节配置可以被模型参数配置文件（如configlenet.txt）所覆盖

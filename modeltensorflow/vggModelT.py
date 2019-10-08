@@ -123,9 +123,9 @@ class vggModelT(modelBaseT):
                                                    self.keep_prop: float(keeps)})
         return grads_value
 
-def create_model(gConfig,ckpt_used,getdataClass,mode):
+def create_model(gConfig,ckpt_used,getdataClass):
     model=vggModelT(gConfig=gConfig,getdataClass=getdataClass)
-    model.initialize(ckpt_used,mode)
+    model.initialize(ckpt_used)
     return model
 
 

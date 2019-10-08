@@ -235,6 +235,8 @@ class modelBaseT(modelBase):
         tf.gfile.DeleteRecursively(self.logging_directory)
         if os.path.exists(self.logging_directory) == False:
             os.makedirs(self.logging_directory)
+        if os.path.exists(self.working_directory) == False:
+            os.makedirs(self.working_directory)
         #used after create_model
         self.saver = tf.train.Saver(tf.all_variables(),max_to_keep=self.max_to_keep)
         self.writer = tf.summary.FileWriter(self.logging_directory, tf.get_default_graph(),

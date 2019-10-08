@@ -52,7 +52,7 @@ tfdbgIsOn = False
 #当randomIterIsOn=True时读取数据时采用shuffle方式
 randomIterIsOn = True
 #scratchIsOn=True时采用自定义模型,次数self.net.hybrize不可用（没有调试成功）
-scratchIsOn = False
+scratchIsOn = True
 
 [lists]
 

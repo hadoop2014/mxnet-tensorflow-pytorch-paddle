@@ -18,7 +18,7 @@ def train(model,model_eval,getdataClass,gConfig,taskName,framework,dataset,mode)
         num_epochs = gConfig['train_num_epoch']
     start_time = time.time()
 
-    print("\n\n( %s %s %s %s)starting, use optimizer %s,ctx=%s,initializer=%s,check_point=%s,"
+    print("\n\n(%s %s %s %s) is starting, use optimizer %s,ctx=%s,initializer=%s,check_point=%s,"
           "activation=%s...............\n\n"
           %(taskName,framework,dataset,mode,gConfig['optimizer'],gConfig['ctx'],gConfig['initializer'],
             gConfig['ckpt_used'],gConfig['activation']))
