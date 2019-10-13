@@ -22,15 +22,15 @@ class ExecuteTestCase(unittest.TestCase):
             'Now in unittest mode,the unittestIsOn must be True which is in configbase.txt'
 
         for taskName in gConfig['tasknamelist']:
-            for framework in gConfig['frameworklist']:
-                for dataset in gConfig['datasetlist']:
+            for dataset in gConfig['datasetlist']:
+                for framework in gConfig['frameworklist']:
                     for mode in gConfig['modelist']:
                         if execute.validate_parameter(taskName,framework,dataset,mode,gConfig) == False:
                             continue
                         print('taskName=%s,framework=%s,dataset=%s'%(taskName,framework,dataset))
                         #execute.trainStart(gConfig,taskName,framework,dataset)
                         command = 'python ' 'execute.py' + \
-                                  ' ' + str(taskName) + ' ' + str(framework) + ' ' + str(dataset) + ' ' \
+                                  ' ' + str(taskName) + ' ' + str(dataset) + ' ' + str(framework) + ' ' \
                                   + str(mode) + ' ' + str(unittestIsOn)
                         #with open(unittest_logfilename,'a',encoding='utf-8') as f:
                             #CompletedProcessObject=subprocess.run(command,shell=True,stdout=f,timeout=100,check=False,

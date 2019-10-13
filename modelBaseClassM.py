@@ -216,9 +216,10 @@ class modelBaseM(modelBase):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
         #nd.waitall()
         loss_train,acc_train = self.train_loss_acc(train_iter)
-        loss_test, acc_test = self.evaluate_loss_acc(test_iter)
+        #loss_test, acc_test = self.evaluate_loss_acc(test_iter) #对于rnn的情况，该函数放在if外面较合适
         if epoch % epoch_per_print == 0:
             #loss_test,acc_test = self.evaluate_loss_acc(test_iter)
+            loss_test, acc_test = self.evaluate_loss_acc(test_iter)
             self.run_perplexity(loss_train, loss_test)   #仅用于rnn,lstm等
             self.predict_rnn(self.net)    #仅用于rnn,lstm等
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test

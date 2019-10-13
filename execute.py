@@ -89,6 +89,7 @@ def get_gConfig(gConfig,taskName,framework,dataset,mode,unittestIsOn):
     gConfig['unittestIsOn'.lower()] = unittestIsOn
     gConfig['mode']=mode
     gConfig['viewIsOn'.lower()] = False  #必要时关闭mxnet的graph打印功能，节省测试时间
+    #gConfig['debugIsOn'.lower()] = False  #必要时关闭mxnet的debug打印功能，节省测试时间(节省约18%时间)
     return gConfig
 
 def trainStart(gConfig,taskName,framework,dataset,mode,unittestIsOn):
@@ -134,8 +135,8 @@ def main():
             unittestIsOn = gConfig['unittestIsOn'.lower()]
         # print(sys.argv[0],sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],len(sys.argv))
         taskName = sys.argv[1]
-        framework = sys.argv[2]
-        dataset = sys.argv[3]
+        dataset = sys.argv[2]
+        framework = sys.argv[3]
         mode = sys.argv[4]
     else:
         #该模式为从pycharm调用
