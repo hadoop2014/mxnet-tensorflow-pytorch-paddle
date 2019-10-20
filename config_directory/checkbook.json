@@ -9,7 +9,8 @@
         "fashionmnist": false,
         "houseprice": true,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain": {
         "model":"",
@@ -18,7 +19,8 @@
         "fashionmnist": false,
         "houseprice": true,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -29,7 +31,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -38,7 +41,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -49,7 +53,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -58,7 +63,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -69,7 +75,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -78,7 +85,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -93,7 +101,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -102,7 +111,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -113,7 +123,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -122,7 +133,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -133,7 +145,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -142,7 +155,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -153,7 +167,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -162,7 +177,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -177,7 +193,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain": {
         "model":"",
@@ -186,7 +203,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -197,7 +215,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -206,7 +225,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -217,7 +237,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain": {
         "model":"",
@@ -226,7 +247,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -237,7 +259,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -246,7 +269,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -261,7 +285,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain": {
         "model":"",
@@ -270,7 +295,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
 
@@ -282,7 +308,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain": {
         "model": "",
@@ -291,7 +318,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -302,7 +330,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -311,7 +340,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -322,7 +352,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -331,7 +362,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -346,7 +378,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model":"mxnet.gluon.model_zoo.vision.resnet18_v2",
@@ -355,7 +388,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -366,7 +400,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model":"",
@@ -375,7 +410,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -386,7 +422,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -395,7 +432,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -406,7 +444,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -415,7 +454,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -430,7 +470,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -439,7 +480,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -450,7 +492,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -459,7 +502,8 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true
+        "hotdog": true,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -470,7 +514,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -479,7 +524,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -490,7 +536,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -499,7 +546,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -514,7 +562,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": true,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model":"",
@@ -523,7 +572,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -534,7 +584,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -543,7 +594,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -554,7 +606,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -563,7 +616,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -574,7 +628,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -583,7 +638,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },
@@ -598,7 +654,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -607,7 +664,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "tensorflow": {
@@ -618,7 +676,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -627,7 +686,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "paddle": {
@@ -638,7 +698,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -647,7 +708,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     },
     "pytorch": {
@@ -658,7 +720,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       },
       "pretrain":{
         "model": "",
@@ -667,7 +730,8 @@
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false
+        "hotdog": false,
+        "pikachu":false
       }
     }
   },

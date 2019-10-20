@@ -21,8 +21,9 @@ class HOTDOG(gdata.vision.ImageFolderDataset):
     from mxnet import base
     def __init__(self, root=os.path.join(base.data_dir(), 'datasets', 'hotdog'),
                  train=True, transform=None):
-        self._hotdog_data = ('hotdog.zip',
+        self._data_set = ('hotdog.zip',
                              'fba480ffa8aa7e0febbb511d181409f899b9baa5')
+        self._name_space=""
         self._download_data(root)
         if train:
             self._root = os.path.join(root, 'hotdog/train')
@@ -34,8 +35,8 @@ class HOTDOG(gdata.vision.ImageFolderDataset):
     def _download_data(self, root):
         from mxnet.gluon.utils import download, check_sha1, _get_repo_file_url
         import zipfile
-        data = self._hotdog_data
-        namespace = 'gluon/dataset'
+        data = self._data_set
+        namespace = 'gluon/dataset' + self._name_space
         data_file = download(_get_repo_file_url(namespace, data[0]),
                              path=root,
                              sha1_hash=data[1])

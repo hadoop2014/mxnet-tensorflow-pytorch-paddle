@@ -9,6 +9,8 @@ numeric_types = (int,float)
 class getdataBase():
     def __init__(self,gConfig):
         self.gConfig = gConfig
+        self.dataset_name = self.get_dataset_name(self.gConfig)
+        self.data_path = os.path.join(self.gConfig['data_directory'],self.dataset_name)
         self.rawshape = self.get_rawshape(self.gConfig)
         self.resizedshape = self.rawshape
         self.classnum = self.get_classnum(self.gConfig)  #每个数据集的类别数
@@ -17,6 +19,8 @@ class getdataBase():
         self.test_iter=None
         self.unitestIsOn = self.gConfig['unittestIsOn'.lower()]
         self.ctx = self.gConfig['ctx']
+        if os.path.exists(self.data_path) == False:
+            os.makedirs(self.data_path)
 
     def load_data(self,*args):
         pass
@@ -29,6 +33,7 @@ class getdataBase():
                 dataset_key = re.findall('(.*)\.', key).pop().lower()
                 if dataset_key == dataset_name:
                     is_find = True
+                    break
         if is_find == False:
             raise ValueError('dataset(%s) has not be configed in datasetlist(%s)'
                              % (dataset_name, gConfig['datasetlist']))
