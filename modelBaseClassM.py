@@ -143,21 +143,7 @@ class modelBaseM(modelBase):
                       '\tgrad.mean=%f' % parameter.grad().mean().asscalar(),
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
-        '''
-        if str(layer.name).find('pool') < 0 and \
-                str(layer.name).find('dropout') < 0 and \
-                str(layer.name).find('batchnorm') < 0 and \
-                str(layer.name).find('relu') < 0 and \
-                str(layer.name).find('sigmoid') < 0:
-            for param in layer.params:
-                parameter = layer.params[param]
-                print('\tdebug:%s(%s)' % (name, param),
-                      '\tshape=', parameter.shape,
-                      '\tdata.mean=%f' % parameter.data().mean().asscalar(),
-                      '\tgrad.mean=%f' % parameter.grad().mean().asscalar(),
-                      '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
-                      '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
-        '''
+
     def predict_rnn(self, model):
         #仅用于rnn网络的句子预测
         pass

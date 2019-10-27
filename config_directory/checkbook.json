@@ -460,6 +460,98 @@
     }
   },
 
+  "nin":{
+    "config_file": "confignin.txt",
+    "mxnet": {
+      "train": {
+        "model":"modelmxnet.ninModelM",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model":"",
+        "cifar10": true,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      }
+    },
+    "tensorflow": {
+      "train":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model":"",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      }
+    },
+    "paddle": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
+    },
+    "pytorch": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
+    }
+  },
+
   "capsnet":{
     "config_file": "configcapsnet.txt",
     "mxnet": {
@@ -643,19 +735,18 @@
       }
     }
   },
-
-  "lstm":{
-    "config_file": "configlstm.txt",
+  "ssd":{
+    "config_file": "configssd.txt",
     "mxnet": {
       "train": {
-        "model": "",
+        "model": "modelmxnet.ssdModelM",
         "cifar10": false,
         "mnist": false,
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
         "hotdog": false,
-        "pikachu":false
+        "pikachu":true
       },
       "pretrain":{
         "model": "",

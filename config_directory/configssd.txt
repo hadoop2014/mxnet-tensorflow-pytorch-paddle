@@ -1,0 +1,62 @@
+[strings]
+#data_directory = data_directory
+#model_savefile = working_directory/rnnmodel
+#symbol_savefile = working_directory/rnnsymbol
+#checkpoint_filename = resnet.ckpt
+
+optimizer =　sgd
+initializer =normal
+#用于指明rnn网络所用的单元，包括[rnn,gru,lstm]　
+cell = lstm
+
+#lenet parameter　[sigmoid,relu,tanh]  defalult value is relu
+activation = relu
+
+[ints]
+resize = 0
+#训练迭代次数
+train_num_epoch = 251
+batch_size = 32
+time_steps = 35
+#used for max to keep checkpoint
+max_to_keep = 2
+
+epoch_per_print = 50
+epochs_per_checkpoint =50
+
+#resnet parameter
+input_dim =  1
+rnn_hiddens = 256
+output_dim = 1
+
+#用于指定预测句子的长度
+predict_length = 80
+
+#用于歌词数据Ｋ折交叉验证,k=5意味着留20%数据用于验证集
+k = 5
+
+[floats]
+init_sigma = 0.01
+init_bias = 0.0
+learning_rate = 1e2
+learning_rate_decay_factor = 0.9
+keeps = 0.6
+test_percent = 0.1
+clip_gradient = 1e-2
+
+[bools]
+ckpt_used =False
+debugIsOn =　True
+viewIsOn = True
+tfdbgIsOn = False
+#当randomIterIsOn=True时读取数据时采用shuffle方式
+randomIterIsOn = True
+#scratchIsOn=True时采用自定义模型,次数self.net.hybrize不可用（没有调试成功）
+scratchIsOn = True
+
+[lists]
+
+
+[sets]
+#用于预测歌词的开头词
+prefixes = 分开, 不分开

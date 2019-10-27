@@ -16,7 +16,7 @@ class alexnetModelT(modelBaseT):
         input_channels,input_dim_x,input_dim_y = self.resizedshape
         conv1_channels = self.gConfig['conv1_channels']  # 96
         conv1_kernel_size = self.gConfig['conv1_kernel_size']  # 11
-        conv1_strides = self.gConfig['conv1_striders']  # 4
+        conv1_strides = self.gConfig['conv1_strides']  # 4
         conv1_padding = self.gConfig['conv1_padding']  # 1
         pool1_size = self.gConfig['pool1_size']  # 3
         pool1_strides = self.gConfig['pool1_strides']  # 2
