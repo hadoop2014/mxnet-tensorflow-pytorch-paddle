@@ -1,196 +1,164 @@
 #single shot multibox detection,用于目标检测
 #author by wu.wenhua at 2019/10/20
-
 from mxnet.gluon import loss as gloss,nn,rnn
+from mxnet.ndarray import NDArray
+from mxnet import contrib
 from modelBaseClassM import *
-import math
 
-class Rnn(nn.HybridBlock):
-    # 该类在net.hybridize()时存在问题
-    def __init__(self,input_dim,rnn_hiddens,output_dim,batch_size,ctx,
-                 weight_initializer,bias_initializer,**kwargs):
-        super(Rnn,self).__init__(**kwargs)
-        self.rnn_hiddens = rnn_hiddens
-        self.ctx = ctx
-        with self.name_scope():
-            # 隐藏层参数
-            self.W_xh = self.params.get("W_xh",shape=(input_dim,rnn_hiddens),init=weight_initializer)#_one((num_inputs, num_hiddens))
-            self.W_hh = self.params.get('W_hh',shape=(rnn_hiddens,rnn_hiddens),init=weight_initializer)#_one((num_hiddens, num_hiddens))
-            self.b_h = self.params.get('b_h',shape=(rnn_hiddens),init=bias_initializer)#nd.zeros(num_hiddens, ctx=ctx)
-            # 输出层参数
-            self.W_hq =self.params.get('W_hq',shape=(rnn_hiddens,output_dim),init=weight_initializer) #_one((num_hiddens, num_outputs))
-            self.b_q = self.params.get('b_q',shape=(output_dim),init=bias_initializer)#nd.zeros(num_outputs, ctx=ctx)
+class TinySSD(nn.HybridBlock):
+    def __init__(self,num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,
+                 basenet_filters,**kwargs):
+        super(TinySSD,self).__init__(**kwargs)
+        self.num_blocks = num_blocks
+        self.num_classes = num_classes
+        self.num_channels = num_channels
+        self.anchor_sizes = anchor_sizes
+        self.anchor_ratios = anchor_ratios
+        self.activation = activation
+        self.basenet_filters = basenet_filters
+        def class_predictor(num_anchors, num_classes):
+            return nn.Conv2D(channels=num_anchors * (num_classes + 1),kernel_size=3,padding=1)
+        def bbox_predictor(num_anchors):
+            return nn.Conv2D(channels=num_anchors * 4, kernel_size=3, padding=1)
+        for i in range(self.num_blocks):
+            # 即赋值语句self.blk_i = get_blk(i)
+            sizes = self.anchor_sizes[i]
+            ratios = self.anchor_ratios[i]
+            num_anchors = len(sizes) + len(ratios) - 1
+            setattr(self, 'block_%d'%i, self.get_block(i))
+            setattr(self,'class_predictor_%d'%i, class_predictor(num_anchors,num_classes))
+            setattr(self,'bbox_predictor_%d'%i, bbox_predictor(num_anchors))
+
 
     def hybrid_forward(self, F, X, *args, **kwargs):
-        W_xh = kwargs['W_xh']
-        W_hh = kwargs['W_hh']
-        b_h = kwargs['b_h']
-        W_hq = kwargs['W_hq']
-        b_q = kwargs['b_q']
-
-        H = args[0]
-        outputs = 0
-        for x in X:
-            H = F.tanh(F.dot(x, W_xh) + F.dot(H, W_hh) + b_h)
-            Y = F.dot(H, W_hq) + b_q
-            if type(outputs) == int:
-                outputs = Y
+        anchors = [None] * 5
+        class_predictors = [None] * 5
+        bbox_predictors = [None] * 5
+        for i in range(self.num_blocks):
+            sizes = self.anchor_sizes[i]
+            ratios = self.anchor_ratios[i]
+            if isinstance(X, NDArray):
+                F_module = __import__('mxnet.contrib.ndarray',fromlist=['ndarray'])
             else:
-                outputs = F.concat(outputs,Y,dim=0)
-        return outputs, H
+                F_module = __import__('mxnet.contrib.symbol',fromlist=['symbol'])
+            X, anchors[i], class_predictors[i],bbox_predictors[i] = \
+                self.block_forward(X,
+                                   getattr(self, 'block_%d'%i),
+                                   sizes,ratios,
+                                   getattr(self,'class_predictor_%d'%i),
+                                   getattr(self,'bbox_predictor_%d'%i),F_module)
 
-    def begin_state(self, *args, **kwargs):
-        batch_size = kwargs['batch_size']
-        ctx = kwargs['ctx']
-        return nd.zeros(shape=(batch_size, self.rnn_hiddens), ctx=ctx)
+        return (F.concat(*anchors,dim=1),
+                self.concat_predictors(class_predictors,F).reshape(shape=(0,-1,self.num_classes + 1)),
+                self.concat_predictors(bbox_predictors,F))
 
-    def get_symbol_state(self):
-        return mx.symbol.Variable('state')
+    def concat_predictors(self,preds,F):
+        return F.concat(*[self.flatten_pred(p) for p in preds], dim=1)
 
-class RNN(nn.HybridBlock):
-    def __init__(self,rnn_layer,rnn_hiddens,vocab_size,**kwargs):
-        super(RNN,self).__init__(**kwargs)
-        self.rnn = rnn_layer
-        self.vocab_size = vocab_size
-        self.hidden_size = rnn_hiddens
-        self.dense = nn.Dense(self.vocab_size)
+    def flatten_pred(self,pred):
+        return pred.transpose((0, 2, 3, 1)).flatten()
 
-    def hybrid_forward(self, F, x, *args, **kwargs):
-        state = args[0]
-        Y, state = self.rnn(x,state)
-        # 全连接层会首先将Y的形状变成(time_steps * batch_size, num_hiddens)，它的输出
-        # 形状为(time_steps * batch_size, vocab_size)
-        # output = self.dense(Y.reshape((-1, Y.shape[-1])))
-        output = self.dense(F.reshape(Y, (-1, self.hidden_size)))
-        return output, state
+    def block_forward(self,X,block,size,ratio,class_predictor,bbox_predictor,F):
+        Y = block(X)
+        #anchors = contrib.ndarray.MultiBoxPrior(Y, sizes=size, ratios=ratio)
+        anchors = F.MultiBoxPrior(Y, sizes = size, ratios = ratio)
+        class_predictors = class_predictor(Y)
+        bbox_predictors = bbox_predictor(Y)
+        return (Y, anchors, class_predictors, bbox_predictors)
 
-    def begin_state(self, *args, **kwargs):
-        return self.rnn.begin_state(*args,**kwargs)
+    def get_block(self,block_index):
+        if block_index == 0:
+            block = self.base_net()
+        elif block_index == self.num_blocks - 1:
+            block = nn.GlobalMaxPool2D()
+        else:
+            block = self.down_sample_block(self.num_channels)
+        return block
+
+    def base_net(self):
+        block = nn.HybridSequential()
+        for num_filters in self.basenet_filters:#[16, 32, 64]
+            block.add(self.down_sample_block(num_filters))
+        return block
+
+    def down_sample_block(self,num_channels):
+        block = nn.HybridSequential()
+        for _ in range(2):
+            block.add(nn.Conv2D(num_channels,kernel_size=3,padding=1),
+                      nn.BatchNorm(in_channels=num_channels),
+                      nn.Activation(self.activation))
+        block.add(nn.MaxPool2D(pool_size=2))
+        return block
 
 class ssdModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
         super(ssdModel,self).__init__(gConfig)
         self.loss = gloss.SoftmaxCrossEntropyLoss()
+        self.bbox_loss = gloss.L1Loss()
         self.resizedshape = getdataClass.resizedshape
-        self.vocab_size = getdataClass.vocab_size
-        self.idx_to_char = getdataClass.idx_to_char
-        self.char_to_idx = getdataClass.char_to_idx
-        self.clip_gradient = self.gConfig['clip_gradient']
-        self.prefixes = self.gConfig['prefixes']
-        self.predict_length = self.gConfig['predict_length']
-        self.time_steps = self.resizedshape[0]
-        self.rnn_hiddens =self.gConfig['rnn_hiddens'] #256
-        self.input_dim = self.vocab_size
-        self.output_dim = self.vocab_size
         self.activation = self.get_activation(self.gConfig['activation'])
-        self.cell = self.get_cell(self.gConfig['cell'])
-        self.scratchIsOn = self.gConfig['scratchIsOn'.lower()]
-        self.cell_selector = {
-            'rnn':rnn.RNN(hidden_size=self.rnn_hiddens, activation=self.activation,
-                  i2h_weight_initializer=self.weight_initializer, h2h_weight_initializer=self.weight_initializer,
-                  i2h_bias_initializer=self.bias_initializer, h2h_bias_initializer=self.bias_initializer),
-            'gru':rnn.GRU(hidden_size=self.rnn_hiddens,
-                          i2h_weight_initializer=self.weight_initializer,h2h_weight_initializer=self.weight_initializer,
-                          i2h_bias_initializer=self.bias_initializer,h2h_bias_initializer=self.bias_initializer),
-            'lstm':rnn.LSTM(hidden_size=self.rnn_hiddens,
-                            i2h_weight_initializer=self.weight_initializer,h2h_weight_initializer=self.weight_initializer,
-                            i2h_bias_initializer=self.bias_initializer,h2h_bias_initializer=self.bias_initializer)
-        }
-        self.scratch_selector = {
-            'rnn':Rnn(self.input_dim,self.rnn_hiddens,self.output_dim,self.batch_size,self.ctx,
-                      self.weight_initializer,self.bias_initializer),
-
-        }
-        self.randomIterIsOn = self.gConfig['randomIterIsOn'.lower()]
+        self.classnum = getdataClass.classnum
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
-                                     {'learning_rate':self.learning_rate,'clip_gradient':self.clip_gradient})
-        self.input_shape = (self.resizedshape[0],self.batch_size,self.resizedshape[1])
+                                     {'learning_rate':self.learning_rate})
+        self.input_shape = (self.batch_size,*self.resizedshape)
 
     def get_net(self):
-        input_dim = self.gConfig['input_dim']#1
-        input_dim = self.vocab_size
-        rnn_hiddens =self.gConfig['rnn_hiddens'] #256
-        output_dim = self.gConfig['output_dim']#1
-        output_dim = self.vocab_size
+        num_blocks = self.gConfig['num_blocks']
+        num_classes = self.classnum
+        num_channels = self.gConfig['num_channels']
+        anchor_sizes = self.gConfig['anchor_sizes']
+        anchor_ratios = self.gConfig['anchor_ratios']
         activation = self.get_activation(self.gConfig['activation'])
-        cell = self.get_cell(self.gConfig['cell'])
-
-        if self.scratchIsOn == True:
-            self.net = self.scratch_selector[cell]
-        else:
-             rnn_layer = self.cell_selector[cell]
-             self.net = RNN(rnn_layer,rnn_hiddens,self.vocab_size)
-
-    def init_state(self):
-        self.state = self.net.begin_state(batch_size=self.batch_size, ctx=self.ctx)
+        basenet_filters = self.gConfig['basenet_filters']
+        self.net = TinySSD(num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,basenet_filters)
 
     def run_train_loss_acc(self, X, y):
-        if self.randomIterIsOn == True:
-            self.init_state()
-        else:
-            for s in self.state:
-                s.detach()
         with autograd.record():
-            y_hat,self.state = self.net(X,self.state) #self.state在父类中通过init_state来初始化
-            y = y.T.reshape((-1,)) #y.shape = (batch_size,time_steps),y.T.reshape((-1)).shape=(time_steps*batch_size,)
-            loss = self.loss(y_hat, y).mean()
+            #y_hat = self.net(X)
+            anchors, cls_preds, bbox_preds = self.net(X)
+            bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
+                anchors, y, cls_preds.transpose((0, 2, 1)))
+            loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
+                          bbox_masks)
+            #loss = self.loss(y_hat, y).sum()
         loss.backward()
         if self.global_step == 0:
             self.debug_info()
-        #self.trainer.step(self.batch_size)
-        params = [p.data() for p in self.net.collect_params().values()]
-        self.grad_clipping(params, self.clip_gradient, self.ctx)
-        self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
-        loss = loss.asscalar() * y.size
-        acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        self.trainer.step(self.batch_size)
+        loss = loss.sum().asscalar()
+        y = y.astype('float32')
+        #acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).sum().asscalar()
         return loss, acc
+
+    def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
+        cls = self.loss(cls_preds, cls_labels)
+        bbox = self.bbox_loss(bbox_preds * bbox_masks, bbox_labels * bbox_masks)
+        return cls + bbox
+
+    def bbox_eval(self,bbox_preds,bbox_labels,bbox_masks):
+        return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
 
     def run_eval_loss_acc(self, X, y):
-        self.init_state() #对于测试来说，因为没有反向传播，每个time_step,batch_size的数据都要初始化状态
-        y_hat,self.state = self.net(X,self.state)
-        y = y.T.reshape((-1,))
-        loss = self.loss(y_hat, y).mean()
-        loss = loss.asscalar() * y.size
-        acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        #y_hat = self.net(X)
+        anchors, cls_preds, bbox_preds = self.net(X)
+        #acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
+        bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
+            anchors, y, cls_preds.transpose((0, 2, 1)))
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).sum().asscalar()
+        #loss = self.loss(y_hat, y).sum().asscalar()
+        loss=self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
+                       bbox_masks)
+        loss = loss.sum().asscalar()
         return loss, acc
-
-    def run_perplexity(self, loss_train, loss_test):
-        #rnn中用perplexity取代accuracy
-        perplexity_train = math.exp(loss_train)
-        perplexity_test = math.exp(loss_test)
-        print('global_step %d, perplexity_train %.6f,perplexity_test %f.6'%
-              (self.global_step.asscalar(), perplexity_train,perplexity_test))
-        return perplexity_train,perplexity_test
 
     def get_input_shape(self):
         return self.input_shape
-    def get_cell(self,cell):
-        assert cell in self.gConfig['celllist'], 'cell(%s) is invalid,it must one of %s' % \
-                                                               (cell, self.gConfig['celllist'])
-        return cell
 
-    def predict_rnn(self,model):
-        for prefix in self.prefixes:
-            print(' -', self.predict_rnn_gluon(
-                prefix, self.predict_length, model, self.vocab_size, self.ctx, self.idx_to_char,
-                self.char_to_idx))
-
-    def predict_rnn_gluon(self,prefix, num_chars, model, vocab_size, ctx, idx_to_char,
-                          char_to_idx):
-        # 使用model的成员函数来初始化隐藏状态
-        state = model.begin_state(batch_size=1, ctx=ctx)
-        output = [char_to_idx[prefix[0]]]
-        for t in range(num_chars + len(prefix) - 1):
-            X = nd.array([output[-1]], ctx=ctx).reshape((1, 1))
-            X = nd.one_hot(X,vocab_size)
-            (Y, state) = model(X, state)  # 前向计算不需要传入模型参数
-            if t < len(prefix) - 1:
-                output.append(char_to_idx[prefix[t + 1]])
-            else:
-                output.append(int(Y.argmax(axis=1).asscalar()))
-        return ''.join([idx_to_char[i] for i in output])
+    def get_classnum(self):
+        return self.classnum
 
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
@@ -198,40 +166,12 @@ class ssdModel(modelBaseM):
         #print(self.net)
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
-        if self.scratchIsOn:
-            print('采用自定义Rnn,Lstm,Gru模型时，mx.viz.plot_network当前不可用！')
-            state_symbol = self.net.get_symbol_state()
-            net,state = self.net(input_symbol,state_symbol)
-        else:
-            state_symbol = mx.symbol.Variable('state')
-            net,state = self.net(input_symbol,state_symbol)
-            mx.viz.plot_network(net, title=title, save_format='png', hide_weights=False,
-                                shape=input_shape) \
-                    .view(directory=self.logging_directory)
+        nets = self.net(input_symbol)
+        for net in nets:
+            mx.viz.plot_network(net, title=title + '.' + str(net), save_format='png', hide_weights=False,
+                            shape=input_shape) \
+                .view(directory=self.logging_directory)
         return
-
-    def summary(self):
-        self.init_state()
-        self.net.summary(nd.zeros(shape=self.get_input_shape(), ctx=self.ctx),
-                         self.state)
-
-    def hybridize(self):
-        if self.scratchIsOn:
-            print('当使用自定义模型时，hybridize()函数无法使用')
-            pass
-        else:
-            self.net.hybridize()
-
-    def grad_clipping(self,params, theta, ctx):
-        """Clip the gradient."""
-        if theta is not None:
-            norm = nd.array([0], ctx)
-            for param in params:
-                norm += (param.grad ** 2).sum()
-            norm = norm.sqrt().asscalar()
-            if norm > theta:
-                for param in params:
-                    param.grad[:] *= theta / norm
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=ssdModel(gConfig=gConfig,getdataClass=getdataClass)

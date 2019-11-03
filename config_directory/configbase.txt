@@ -3,12 +3,12 @@
 #modelist = train,pretrain
 #taskname = [regression,lenet,alexnet,vgg,capsnet,convolution,lstm,resnet]
 #frameworklist = mxnet,tensorflow,paddle,pytorch
-#datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog
+#datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog,pikachu
 #ctxlist = cpu,gpu
 mode = train
-taskname = nin
+taskname = ssd
 framework =　mxnet
-dataset = fashionmnist
+dataset = pikachu
 ctx =gpu
 
 working_directory = working_directory/
@@ -93,5 +93,5 @@ lyric.dim = 1
 pikachu.channels=3
 pikachu.dim_x=256
 pikachu.dim_y=256
-pikachu.classnum=2
+pikachu.classnum=1
 

@@ -833,7 +833,8 @@
     "fashionmnist": "datafetch.getFashionMnist",
     "houseprice": "datafetch.getHouseprice",
     "lyric": "datafetch.getLyric",
-    "hotdog": "datafetch.getHotdog"
+    "hotdog": "datafetch.getHotdog",
+    "pikachu": "datafetch.getPikachu"
   }
 
 }

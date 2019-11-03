@@ -242,6 +242,7 @@ class rnnModel(modelBaseM):
         self.randomIterIsOn = self.gConfig['randomIterIsOn'.lower()]
         self.get_net()
         self.net.initialize(ctx=self.ctx)
+        #该处的clip_gradient没有起到效果
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate,'clip_gradient':self.clip_gradient})
         self.input_shape = (self.resizedshape[0],self.batch_size,self.resizedshape[1])
