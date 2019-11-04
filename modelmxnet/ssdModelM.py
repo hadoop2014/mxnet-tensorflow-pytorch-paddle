@@ -116,22 +116,20 @@ class ssdModel(modelBaseM):
 
     def run_train_loss_acc(self, X, y):
         with autograd.record():
-            #y_hat = self.net(X)
             anchors, cls_preds, bbox_preds = self.net(X)
             bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
                 anchors, y, cls_preds.transpose((0, 2, 1)))
             loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
                           bbox_masks)
-            #loss = self.loss(y_hat, y).sum()
         loss.backward()
         if self.global_step == 0:
             self.debug_info()
         self.trainer.step(self.batch_size)
         loss = loss.sum().asscalar()
-        y = y.astype('float32')
-        #acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
-        acc = (cls_preds.argmax(axis=-1) == cls_labels).sum().asscalar()
-        return loss, acc
+        n = cls_labels.shape[0]
+        #m = bbox_labels.shape[0]
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
+        return loss, acc * n
 
     def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
         cls = self.loss(cls_preds, cls_labels)
@@ -142,17 +140,15 @@ class ssdModel(modelBaseM):
         return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
 
     def run_eval_loss_acc(self, X, y):
-        #y_hat = self.net(X)
         anchors, cls_preds, bbox_preds = self.net(X)
-        #acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
         bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
             anchors, y, cls_preds.transpose((0, 2, 1)))
-        acc = (cls_preds.argmax(axis=-1) == cls_labels).sum().asscalar()
-        #loss = self.loss(y_hat, y).sum().asscalar()
+        n = cls_labels.shape[0]
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         loss=self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
                        bbox_masks)
         loss = loss.sum().asscalar()
-        return loss, acc
+        return loss, acc * n
 
     def get_input_shape(self):
         return self.input_shape

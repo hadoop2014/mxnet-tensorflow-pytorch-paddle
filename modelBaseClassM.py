@@ -179,7 +179,7 @@ class modelBaseM(modelBase):
             loss, acc = self.run_train_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss
-            n += y.size
+            n += y.shape[0]
             self.global_step += nd.array([1],ctx=self.ctx)
         return loss_sum / n, acc_sum / n
 
@@ -195,7 +195,7 @@ class modelBaseM(modelBase):
             loss,acc = self.run_eval_loss_acc(X, y)
             acc_sum += acc
             loss_sum += loss
-            n += y.size
+            n += y.shape[0]
         return loss_sum / n, acc_sum / n
 
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
