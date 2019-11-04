@@ -16,9 +16,7 @@ resize = 28
 #训练迭代次数
 train_num_epoch = 5
 batch_size = 3
-#used for max to keep checkpoint
-max_to_keep = 2
-epoch_per_print = 1
+
 epochs_per_checkpoint = 2
 debug_per_steps = 500
 #used for capsnets model

@@ -30,7 +30,8 @@ train_num_epoch = 200
 max_to_keep = 2
 #used for max queue of tensorboard logging:default value = 10
 max_queue = 10
-epoch_per_print = 10
+#该值epoch_per_print默认为1合适，如果不为1,最终plotLossAcc函数中train_loss和test_loss对不齐
+epoch_per_print = 1
 epochs_per_checkpoint = 200
 debug_per_steps = 1000
 batch_size = 64

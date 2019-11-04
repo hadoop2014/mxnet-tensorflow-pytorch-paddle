@@ -9,11 +9,8 @@ resize = 0
 train_num_epoch = 5
 batch_size = 32
 time_steps = 35
-#used for max to keep checkpoint
-max_to_keep = 2
 
-epoch_per_print = 50
-epochs_per_checkpoint =50
+epochs_per_checkpoint =5
 
 #ssd parameters
 num_blocks = 5
