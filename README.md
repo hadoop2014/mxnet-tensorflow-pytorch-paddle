@@ -22,4 +22,7 @@ conda env create -f environment.yaml
 
 ２）working_directory 用于存放模型持久化文件，所有变量和模型的持久化文件，如tensorflow的ckeckpoint文件存放于此目录．
 
-３）data_directory用于存放所有的数据文件，从网络下载的数据文件也存放于此
+３）data_directory用于存放所有的数据文件，从网络下载的数据文件也存放于此．
+
+４）webapp用于存放c/s的应用，采用streamlit框架实现
+　　运行streamlit run streamlitApp.py
