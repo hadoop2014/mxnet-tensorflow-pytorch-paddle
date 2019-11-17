@@ -15,6 +15,7 @@ class modelBase():
         self.start_time = time.time()
         self.working_directory = os.path.join(self.gConfig['working_directory'],self.gConfig['framework'])
         self.logging_directory = self.gConfig['logging_directory']
+        self.data_directory = self.gConfig['data_directory']
         self.model_savefile = os.path.join(self.working_directory,
                                            self.get_model_name(self.gConfig) + 'model.' + self.gConfig['framework'])
         self.symbol_savefile = os.path.join(self.working_directory,

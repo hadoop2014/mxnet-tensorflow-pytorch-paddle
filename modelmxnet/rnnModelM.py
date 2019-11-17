@@ -273,6 +273,8 @@ class rnnModel(modelBaseM):
                 s.detach()
         with autograd.record():
             y_hat,self.state = self.net(X,self.state) #self.state在父类中通过init_state来初始化
+            batch_size = y.shape[0]
+            n = batch_size / y.size
             y = y.T.reshape((-1,)) #y.shape = (batch_size,time_steps),y.T.reshape((-1)).shape=(time_steps*batch_size,)
             loss = self.loss(y_hat, y).mean()
         loss.backward()
@@ -282,20 +284,22 @@ class rnnModel(modelBaseM):
         params = [p.data() for p in self.net.collect_params().values()]
         self.grad_clipping(params, self.clip_gradient, self.ctx)
         self.trainer.step(batch_size=1) #在loss采用mean后，batch_size相应的改成１
-        loss = loss.asscalar() * y.size
+        loss = loss.asscalar() * batch_size
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
-        return loss, acc
+        return loss, acc * n
 
     def run_eval_loss_acc(self, X, y):
         self.init_state() #对于测试来说，因为没有反向传播，每个time_step,batch_size的数据都要初始化状态
         y_hat,self.state = self.net(X,self.state)
+        batch_size = y.shape[0]
+        n = batch_size / y.size
         y = y.T.reshape((-1,))
         loss = self.loss(y_hat, y).mean()
-        loss = loss.asscalar() * y.size
+        loss = loss.asscalar() * batch_size
         acc = (y_hat.argmax(axis=1) == y).sum().asscalar()
-        return loss, acc
+        return loss, acc * n
 
-    def run_perplexity(self, loss_train, loss_test):
+    def run_matrix(self, loss_train, loss_test):
         #rnn中用perplexity取代accuracy
         perplexity_train = math.exp(loss_train)
         perplexity_test = math.exp(loss_test)
@@ -310,7 +314,7 @@ class rnnModel(modelBaseM):
                                                                (cell, self.gConfig['celllist'])
         return cell
 
-    def predict_rnn(self,model):
+    def predict(self, model):
         for prefix in self.prefixes:
             print(' -', self.predict_rnn_gluon(
                 prefix, self.predict_length, model, self.vocab_size, self.ctx, self.idx_to_char,

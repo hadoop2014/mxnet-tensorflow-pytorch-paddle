@@ -1,8 +1,9 @@
 #single shot multibox detection,用于目标检测
 #author by wu.wenhua at 2019/10/20
-from mxnet.gluon import loss as gloss,nn,rnn
+from mxnet.gluon import loss as gloss
 from mxnet.ndarray import NDArray
-from mxnet import contrib
+from mxnet import contrib,image
+from datafetch import commFunction
 from modelBaseClassM import *
 
 class TinySSD(nn.HybridBlock):
@@ -31,9 +32,9 @@ class TinySSD(nn.HybridBlock):
 
 
     def hybrid_forward(self, F, X, *args, **kwargs):
-        anchors = [None] * 5
-        class_predictors = [None] * 5
-        bbox_predictors = [None] * 5
+        anchors = [None] * self.num_blocks
+        class_predictors = [None] * self.num_blocks
+        bbox_predictors = [None] * self.num_blocks
         for i in range(self.num_blocks):
             sizes = self.anchor_sizes[i]
             ratios = self.anchor_ratios[i]
@@ -66,6 +67,7 @@ class TinySSD(nn.HybridBlock):
         bbox_predictors = bbox_predictor(Y)
         return (Y, anchors, class_predictors, bbox_predictors)
 
+
     def get_block(self,block_index):
         if block_index == 0:
             block = self.base_net()
@@ -90,6 +92,16 @@ class TinySSD(nn.HybridBlock):
         block.add(nn.MaxPool2D(pool_size=2))
         return block
 
+    def down_sample_blk(num_channels):
+        blk = nn.HybridSequential()
+        for _ in range(2):
+            blk.add(nn.Conv2D(num_channels, kernel_size=3, padding=1),
+                    nn.BatchNorm(in_channels=num_channels),
+                    nn.Activation('relu'))
+        blk.add(nn.MaxPool2D(2))
+        return blk
+
+
 class ssdModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
         super(ssdModel,self).__init__(gConfig)
@@ -98,10 +110,13 @@ class ssdModel(modelBaseM):
         self.resizedshape = getdataClass.resizedshape
         self.activation = self.get_activation(self.gConfig['activation'])
         self.classnum = getdataClass.classnum
+        self.predict_images = self.gConfig['predict_images']
+        self.weight_decay = self.gConfig['weight_decay']
+        self.predict_threshold = self.gConfig['predict_threshold']
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
-                                     {'learning_rate':self.learning_rate})
+                                     {'learning_rate':self.learning_rate,'wd':self.weight_decay})
         self.input_shape = (self.batch_size,*self.resizedshape)
 
     def get_net(self):
@@ -128,16 +143,24 @@ class ssdModel(modelBaseM):
         loss = loss.sum().asscalar()
         n = cls_labels.shape[0]
         #m = bbox_labels.shape[0]
+        self.mae_train = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         return loss, acc * n
+        #return self.mae_train*n,acc*n
 
     def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
         cls = self.loss(cls_preds, cls_labels)
         bbox = self.bbox_loss(bbox_preds * bbox_masks, bbox_labels * bbox_masks)
+        #print('calc_loss=%.6f,bbox_loss=%.6f ' % (cls.sum().asscalar(), bbox.sum().asscalar()))
         return cls + bbox
 
     def bbox_eval(self,bbox_preds,bbox_labels,bbox_masks):
         return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
+
+    def run_matrix(self, loss_train, loss_test):
+        print('global_step %d, mae_train %.6f, mae_test %.6f' %
+              (self.global_step.asscalar(), self.mae_train,self.mae_test))
+        return self.mae_train,self.mae_test
 
     def run_eval_loss_acc(self, X, y):
         anchors, cls_preds, bbox_preds = self.net(X)
@@ -148,7 +171,32 @@ class ssdModel(modelBaseM):
         loss=self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
                        bbox_masks)
         loss = loss.sum().asscalar()
+        self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         return loss, acc * n
+        #return self.mae_test * n,acc * n
+
+    def predict(self, model):
+        for image_file in self.predict_images:
+            img = image.imread(os.path.join(self.data_directory,image_file))
+            feature = image.imresize(img,*self.resizedshape[1:]).astype('float32')
+            X = feature.transpose((2, 0, 1)).expand_dims(axis=0)
+            anchors, cls_preds, bbox_preds = model(X.as_in_context(self.ctx))
+            cls_probs = cls_preds.softmax().transpose((0, 2, 1))
+            output = contrib.nd.MultiBoxDetection(cls_probs, bbox_preds, anchors)
+            idx = [i for i, row in enumerate(output[0]) if row[0].asscalar() != -1]
+            output = output[0, idx]
+            commFunction.set_figsize((5,5))
+            self.display(img,output,threshold=self.predict_threshold)
+
+    def display(self,img, output, threshold):
+        fig = commFunction.plt.imshow(img.asnumpy())
+        for row in output:
+            score = row[1].asscalar()
+            if score < threshold:
+                continue
+            h, w = img.shape[0:2]
+            bbox = [row[2:6] * nd.array((w, h, w, h), ctx=row.context)]
+            commFunction.show_bboxes(fig.axes, bbox, '%.2f' % score, 'w')
 
     def get_input_shape(self):
         return self.input_shape
@@ -159,7 +207,6 @@ class ssdModel(modelBaseM):
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
             return
-        #print(self.net)
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         nets = self.net(input_symbol)

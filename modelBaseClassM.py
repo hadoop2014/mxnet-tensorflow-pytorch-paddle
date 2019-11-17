@@ -49,6 +49,8 @@ class modelBaseM(modelBase):
             return init.Xavier(rnd_type='uniform',factor_type='in',magnitude=np.sqrt(2))
         elif initializer == 'constant':
             return init.Constant(self.init_bias)
+        elif initializer == 'uniform':
+            return init.Uniform()
         else:
             return None
 
@@ -144,7 +146,7 @@ class modelBaseM(modelBase):
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
 
-    def predict_rnn(self, model):
+    def predict(self, model):
         #仅用于rnn网络的句子预测
         pass
 
@@ -163,7 +165,7 @@ class modelBaseM(modelBase):
         loss,acc = None,None
         return loss,acc
 
-    def run_perplexity(self, loss_train, loss_test):
+    def run_matrix(self, loss_train, loss_test):
         pass
 
     def train_loss_acc(self,data_iter):
@@ -206,8 +208,8 @@ class modelBaseM(modelBase):
         if epoch % epoch_per_print == 0:
             #loss_test,acc_test = self.evaluate_loss_acc(test_iter)
             loss_test, acc_test = self.evaluate_loss_acc(test_iter)
-            self.run_perplexity(loss_train, loss_test)   #仅用于rnn,lstm等
-            self.predict_rnn(self.net)    #仅用于rnn,lstm等
+            self.run_matrix(loss_train, loss_test)   #仅用于rnn,lstm等
+            self.predict(self.net)    #仅用于rnn,lstm等
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def summary(self):
