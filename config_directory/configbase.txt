@@ -7,7 +7,7 @@
 #ctxlist = cpu,gpu
 mode = train
 taskname = ssd
-framework =　mxnet
+framework = mxnet
 dataset = pikachu
 ctx =gpu
 

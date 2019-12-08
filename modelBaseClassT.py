@@ -1,9 +1,10 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 from modelBaseClass import *
-from tensorflow.contrib.layers import xavier_initializer
+#from tensorflow.contrib.layers import xavier_initializer
 from tensorflow.python import debug as tfdbg
 import numpy as np
 
+tf.disable_v2_behavior()
 #深度学习模型的基类
 class modelBaseT(modelBase):
     def __init__(self,gConfig):
@@ -52,7 +53,7 @@ class modelBaseT(modelBase):
         if initializer == 'normal':
             return tf.truncated_normal_initializer(stddev=self.init_sigma)
         elif initializer == 'xavier':
-            return xavier_initializer()
+            return tf.glorot_normal_initializer()
         elif initializer == 'kaiming':
             #何凯明初始化法
             return tf.glorot_uniform_initializer()

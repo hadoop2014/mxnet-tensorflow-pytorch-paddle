@@ -749,14 +749,14 @@
         "pikachu":true
       },
       "pretrain":{
-        "model": "",
+        "model": "gluoncv.model_zoo.ssd_512_resnet50_v1_voc",
         "cifar10": false,
         "mnist": false,
         "fashionmnist": false,
         "houseprice": false,
         "lyric": false,
         "hotdog": false,
-        "pikachu":false
+        "pikachu":true
       }
     },
     "tensorflow": {

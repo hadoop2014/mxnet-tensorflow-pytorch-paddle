@@ -5,7 +5,9 @@ import numpy as np
 from mxnet.gluon import model_zoo
 from modelBaseClass import  *
 import datafetch.commFunction as commFunc
-
+import mxnet.gluon.model_zoo.vision
+from gluoncv import model_zoo,utils,data
+#model_zoo.get_model()
 #深度学习模型的基类
 class modelBaseM(modelBase):
     def __init__(self,gConfig):
@@ -208,8 +210,8 @@ class modelBaseM(modelBase):
         if epoch % epoch_per_print == 0:
             #loss_test,acc_test = self.evaluate_loss_acc(test_iter)
             loss_test, acc_test = self.evaluate_loss_acc(test_iter)
-            self.run_matrix(loss_train, loss_test)   #仅用于rnn,lstm等
-            self.predict(self.net)    #仅用于rnn,lstm等
+            self.run_matrix(loss_train, loss_test)   #仅用于rnn,lstm,ssd等
+            self.predict(self.net)    #仅用于rnn,lstm,ssd等
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def summary(self):
@@ -221,9 +223,13 @@ class modelBaseM(modelBase):
     def get_pretrain_model(self,**kwargs):
         moduleName = self.check_book[self.gConfig['taskName']][self.gConfig['framework']]['pretrain']['model']
         className = moduleName.split('.')[-1]
+        firstName = moduleName.split('.')[0]
         moduleName = '.'.join(moduleName.split('.')[:-1])
         module = __import__(moduleName,fromlist=(moduleName.split('.')[-1]))
-        model = getattr(module,className)(**kwargs)
+        if firstName == 'gluoncv':
+            model = getattr(module,'get_model')(name=className,**kwargs)
+        else:
+            model = getattr(module,className)(**kwargs)
         return model
 
     def get_classnum(self):
@@ -261,7 +267,6 @@ class modelBaseM(modelBase):
             self.global_step = nd.array([0], ctx=self.ctx)
             self.debug_info(self.weight_initializer.dumps())
             self.debug_info(self.net)
-            # model.removeSaveFile()
             self.summary()
         self.show_net(input_shape={'input_data': self.get_input_shape()})
         self.hybridize()

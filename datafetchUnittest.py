@@ -1,5 +1,6 @@
 import unittest
 from datafetch import getConfig
+#getConfig = __import__('datafetch.getConfig',fromlist=['getConfig'])
 
 class MyTestCase(unittest.TestCase):
 

@@ -6,7 +6,7 @@ activation = relu
 [ints]
 resize = 0
 #训练迭代次数
-train_num_epoch = 10
+train_num_epoch = 5
 batch_size = 32
 
 epochs_per_checkpoint =5

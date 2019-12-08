@@ -146,7 +146,6 @@ class ssdModel(modelBaseM):
         self.mae_train = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         return loss, acc * n
-        #return self.mae_train*n,acc*n
 
     def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
         cls = self.loss(cls_preds, cls_labels)
