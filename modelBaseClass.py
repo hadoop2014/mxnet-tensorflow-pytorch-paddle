@@ -8,6 +8,7 @@ import re
 import json
 import logging
 
+
 #深度学习模型的基类
 class modelBase():
     def __init__(self,gConfig):

@@ -38,4 +38,4 @@ anchor_ratios = [[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5]]
 basenet_filters = [16, 32, 64]
 
 [sets]
-predict_images = img/pikachu.jpg
+predict_images = pikachu.jpg
