@@ -1,10 +1,11 @@
-import tensorflow.compat.v1 as tf
+#import tensorflow.compat.v1 as tf
+import tensorflow as tf
 from modelBaseClass import *
 #from tensorflow.contrib.layers import xavier_initializer
 from tensorflow.python import debug as tfdbg
 import numpy as np
 
-tf.disable_v2_behavior()
+#tf.disable_v2_behavior()
 #深度学习模型的基类
 class modelBaseT(modelBase):
     def __init__(self,gConfig):

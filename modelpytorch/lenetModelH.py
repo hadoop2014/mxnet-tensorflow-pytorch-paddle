@@ -1,9 +1,10 @@
 from modelBaseClassH import *
+import modelBaseClassH
 from torch import nn
 import torch.nn.functional as F
 
 class lenet(nn.Module):
-    def __init__(self,gConfig,input_channels,activation,input_dim_x,input_dim_y,classnum):
+    def __init__(self,gConfig,input_channels,activation,input_dim_x,input_dim_y,classnum,compute_dim_xy):
         super(lenet,self).__init__()
         self.activation =activation # sigmoid
         conv1_channels = gConfig['conv1_channels']  # 6
@@ -27,21 +28,25 @@ class lenet(nn.Module):
         self.conv1 = nn.Conv2d(in_channels=input_channels,out_channels=conv1_channels,
                                kernel_size=conv1_kernel_size,stride=conv1_strides,
                                padding=conv1_padding)
-        out_dim_x = np.floor((input_dim_x - conv1_kernel_size + 2*conv1_padding)/conv1_strides) + 1
-        out_dim_y = np.floor((input_dim_y - conv1_kernel_size + 2*conv1_padding)/conv1_strides) + 1
+        out_dim_x,out_dim_y = compute_dim_xy(input_dim_x,input_dim_y,conv1_kernel_size,conv1_strides,conv1_padding)
+        #out_dim_x = np.floor((input_dim_x - conv1_kernel_size + 2*conv1_padding)/conv1_strides) + 1
+        #out_dim_y = np.floor((input_dim_y - conv1_kernel_size + 2*conv1_padding)/conv1_strides) + 1
         self.pool1 = partial(F.max_pool2d,kernel_size=pool1_size,stride=pool1_strides,
                          padding=pool1_padding)
-        out_dim_x = np.floor((out_dim_x - pool1_size + 2*pool1_padding)/pool1_strides) + 1
-        out_dim_y = np.floor((out_dim_y - pool1_size + 2*pool1_padding)/pool1_strides) + 1
+        out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,pool1_size,pool1_strides,pool1_padding)
+        #out_dim_x = np.floor((out_dim_x - pool1_size + 2*pool1_padding)/pool1_strides) + 1
+        #out_dim_y = np.floor((out_dim_y - pool1_size + 2*pool1_padding)/pool1_strides) + 1
         self.conv2 = nn.Conv2d(in_channels=conv1_channels,out_channels=conv2_channels,
                                kernel_size=conv2_kernel_size,stride=conv2_strides,
                                padding=conv2_padding)
-        out_dim_x = np.floor((out_dim_x - conv2_kernel_size + 2*conv2_padding)/conv2_strides) + 1
-        out_dim_y = np.floor((out_dim_y - conv2_kernel_size + 2*conv2_padding)/conv2_strides) + 1
+        out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,conv2_kernel_size,conv2_strides,conv2_padding)
+        #out_dim_x = np.floor((out_dim_x - conv2_kernel_size + 2*conv2_padding)/conv2_strides) + 1
+        #out_dim_y = np.floor((out_dim_y - conv2_kernel_size + 2*conv2_padding)/conv2_strides) + 1
         self.pool2 = partial(F.max_pool2d,kernel_size=pool2_size,stride=pool2_strides,
                          padding=pool2_padding)
-        out_dim_x = np.floor((out_dim_x - pool2_size + 2*pool2_padding)/pool2_strides) + 1
-        out_dim_y = np.floor((out_dim_y - pool2_size + 2*pool2_padding)/pool2_strides) + 1
+        out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,pool2_size,pool2_strides,pool2_padding)
+        #out_dim_x = np.floor((out_dim_x - pool2_size + 2*pool2_padding)/pool2_strides) + 1
+        #out_dim_y = np.floor((out_dim_y - pool2_size + 2*pool2_padding)/pool2_strides) + 1
         in_features = int(out_dim_x*out_dim_y*conv2_channels)
         self.dense1 = nn.Linear(in_features=in_features,out_features=dense1_hiddens)
         self.dense2 = nn.Linear(in_features=dense1_hiddens,out_features=dense2_hiddens)
@@ -77,7 +82,8 @@ class lenetModel(modelBaseH):
         activation = self.gConfig['activation']#sigmoid
         activation = self.get_activation(activation)
         input_channels, input_dim_x, input_dim_y = self.resizedshape
-        self.net = lenet(self.gConfig,input_channels,activation,input_dim_x,input_dim_y,self.classnum)
+        self.net = lenet(self.gConfig,input_channels,activation,input_dim_x,input_dim_y,self.classnum,
+                         modelBaseH.compute_dim_xy)
 
     def run_train_loss_acc(self,X,y):
         self.optimizer.zero_grad()
@@ -101,6 +107,7 @@ class lenetModel(modelBaseH):
 
     def get_input_shape(self):
         return self.input_shape
+
 
 def create_model(gConfig,ckpt_used,getdataClass):
     #用cnnModel实例化一个对象model

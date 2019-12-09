@@ -253,13 +253,13 @@
     },
     "pytorch": {
       "train": {
-        "model": "",
-        "cifar10": false,
-        "mnist": false,
-        "fashionmnist": false,
+        "model": "modelpytorch.alexnetModelH",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": false,
+        "hotdog": true,
         "pikachu":false
       },
       "pretrain":{

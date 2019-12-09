@@ -6,9 +6,9 @@
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog,pikachu
 #ctxlist = cpu,gpu
 mode = train
-taskname = ssd
-framework = mxnet
-dataset = pikachu
+taskname = alexnet
+framework = pytorch
+dataset = mnist
 ctx =gpu
 
 working_directory = working_directory/

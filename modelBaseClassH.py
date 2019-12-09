@@ -83,9 +83,9 @@ class modelBaseH(modelBase):
         assert activation in self.gConfig['activationlist'], 'activation(%s) is invalid,it must one of %s' % \
                                                     (activation, self.gConfig['activationlist'])
         if activation == 'sigmoid':
-            return torch.sigmoid
+            return torch.nn.Sigmoid()
         elif activation == 'relu':
-            return torch.relu
+            return torch.nn.ReLU()
 
     def get_context(self):
         return self.ctx
@@ -146,6 +146,10 @@ class modelBaseH(modelBase):
         return
 
     def debug(self,layer,name=''):
+        if len(layer.children()) != 0:
+            for block in layer.children():
+                self.debug(block, layer.name)
+        #for param in layer.params:
         print('\tdebug:%s(%s):weight' % (name,layer._get_name()),
               '\tshape=',layer.weight.shape,
               '\tdata.mean=%.6f'%layer.weight.data.mean().item(),
@@ -233,6 +237,12 @@ class modelBaseH(modelBase):
             torch.set_default_tensor_type(torch.cuda.FloatTensor)
         else:
             torch.set_default_tensor_type(torch.FloatTensor)
+
+    @staticmethod
+    def compute_dim_xy(input_dim_x,input_dim_y,kernel_size,strides,padding):
+        out_dim_x = np.floor((input_dim_x - kernel_size + 2 * padding) / strides) + 1
+        out_dim_y = np.floor((input_dim_y - kernel_size + 2 * padding) / strides) + 1
+        return out_dim_x,out_dim_y
 
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
