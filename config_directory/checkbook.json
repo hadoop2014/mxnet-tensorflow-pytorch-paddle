@@ -180,6 +180,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train":{
+        "model":"modelkeras.lenetModelK",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      }
     }
   },
 

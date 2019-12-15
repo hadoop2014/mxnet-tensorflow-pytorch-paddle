@@ -140,16 +140,22 @@ class modelBaseH(modelBase):
         if info is not None:
             print('debug:%s'%info)
             return
-        for layer in self.net.children():
-            self.debug(layer)
+        for (key,layer) in self.net.named_children():
+            self.debug(layer,':'.join([key,layer._get_name()]))
         print('\n')
         return
 
     def debug(self,layer,name=''):
-        if len(layer.children()) != 0:
-            for block in layer.children():
-                self.debug(block, layer.name)
-        #for param in layer.params:
+        for (key,block) in layer.named_children():
+            self.debug(block,":".join([name,key,block._get_name()]))
+        for (key,parameter) in layer.named_parameters():
+            print('\tdebug:%s(%s)' % (name, key),
+                  '\tshape=', parameter.shape,
+                  '\tdata.mean=%.6f' % parameter.data.mean().item(),
+                  '\tgrad.mean=%.6f' % parameter.grad.mean().item(),
+                  '\tdata.std=%.6f' % parameter.data.std(),
+                  '\tgrad.std=%.6f' % parameter.grad.std())
+        '''
         print('\tdebug:%s(%s):weight' % (name,layer._get_name()),
               '\tshape=',layer.weight.shape,
               '\tdata.mean=%.6f'%layer.weight.data.mean().item(),
@@ -162,7 +168,7 @@ class modelBaseH(modelBase):
               '\tgrad.mean=%.6f' % layer.bias.grad.mean().item(),
               '\tdata.std=%.6f' % layer.bias.data.std(),
               '\tgrad.std=%.6f' % layer.bias.grad.std())
-
+        '''
     def image_record(self,global_step,tag,input_image):
         if global_step < self.gConfig['num_samples']:
             self.writer.add_image(tag,input_image,global_step)

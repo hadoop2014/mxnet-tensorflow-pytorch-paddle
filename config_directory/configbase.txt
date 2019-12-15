@@ -6,8 +6,8 @@
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog,pikachu
 #ctxlist = cpu,gpu
 mode = train
-taskname = alexnet
-framework = pytorch
+taskname = lenet
+framework =keras
 dataset = mnist
 ctx =gpu
 
@@ -64,7 +64,7 @@ modelist = train,pretrain
 tasknamelist = regression,lenet,alexnet,vgg,capsnet,resnet,nin,rnn,ssd
 optimizerlist = sgd,adam,rmsprop,adagrad,adadelta,momentum
 datasetlist = mnist,fashionmnist,cifar10,houseprice,lyric,hotdog,pikachu
-frameworklist = mxnet,tensorflow,paddle,pytorch
+frameworklist = mxnet,tensorflow,paddle,pytorch,keras
 activationlist = sigmoid,relu,tanh
 initializerlist = normal,xavier,kaiming,constant,uniform
 ctxlist = gpu,cpu

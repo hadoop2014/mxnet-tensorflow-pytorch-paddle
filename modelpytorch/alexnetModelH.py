@@ -43,65 +43,86 @@ class alexnet(nn.Module):
         dense3_hiddens = self.gConfig['dense3_hiddens']  # 10
         class_num = self.gConfig['class_num']  # 10
 
-        self.activation =activation # sigmoid
-        self.conv1 = nn.Conv2d(in_channels=input_channels,out_channels=conv1_channels,
-                               kernel_size=conv1_kernel_size,stride=conv1_strides,
-                               padding=conv1_padding)
+        #self.activation =activation # sigmoid
+        #self.conv1 = nn.Conv2d(in_channels=input_channels,out_channels=conv1_channels,
+        #                       kernel_size=conv1_kernel_size,stride=conv1_strides,
+        #                       padding=conv1_padding)
         out_dim_x,out_dim_y = compute_dim_xy(input_dim_x,input_dim_y,conv1_kernel_size,conv1_strides,conv1_padding)
-        self.pool1 = nn.MaxPool2d(kernel_size=pool1_size,stride=pool1_strides,
-                         padding=pool1_padding)
+        #self.pool1 = nn.MaxPool2d(kernel_size=pool1_size,stride=pool1_strides,
+        #                 padding=pool1_padding)
         out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,pool1_size,pool1_strides,pool1_padding)
-        self.conv2 = nn.Conv2d(in_channels=conv1_channels,out_channels=conv2_channels,
-                               kernel_size=conv2_kernel_size,stride=conv2_strides,
-                               padding=conv2_padding)
+        #self.conv2 = nn.Conv2d(in_channels=conv1_channels,out_channels=conv2_channels,
+        #                       kernel_size=conv2_kernel_size,stride=conv2_strides,
+        #                       padding=conv2_padding)
         out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,conv2_kernel_size,conv2_strides,conv2_padding)
-        self.pool2 = nn.MaxPool2d(kernel_size=pool2_size,stride=pool2_strides,
-                         padding=pool2_padding)
+        #self.pool2 = nn.MaxPool2d(kernel_size=pool2_size,stride=pool2_strides,
+        #                 padding=pool2_padding)
         out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,pool2_size,pool2_strides,pool2_padding)
-        self.conv3 = nn.Conv2d(in_channels=conv2_channels,out_channels=conv3_channels,
-                               kernel_size=conv3_kernel_size,stride=conv3_strides,
-                               padding=conv3_padding)
+        #self.conv3 = nn.Conv2d(in_channels=conv2_channels,out_channels=conv3_channels,
+        #                       kernel_size=conv3_kernel_size,stride=conv3_strides,
+        #                       padding=conv3_padding)
         out_dim_x,out_dim_y = compute_dim_xy(out_dim_x,out_dim_y,conv3_kernel_size,conv3_strides,conv3_padding)
-        self.conv4 = nn.Conv2d(in_channels=conv3_channels, out_channels=conv4_channels,
-                               kernel_size=conv4_kernel_size, stride=conv4_strides,
-                               padding=conv4_padding)
+        #self.conv4 = nn.Conv2d(in_channels=conv3_channels, out_channels=conv4_channels,
+        #                       kernel_size=conv4_kernel_size, stride=conv4_strides,
+        #                       padding=conv4_padding)
         out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv4_kernel_size, conv4_strides, conv4_padding)
-        self.conv5 = nn.Conv2d(in_channels=conv4_channels, out_channels=conv5_channels,
-                               kernel_size=conv5_kernel_size, stride=conv5_strides,
-                               padding=conv5_padding)
+        #self.conv5 = nn.Conv2d(in_channels=conv4_channels, out_channels=conv5_channels,
+        #                       kernel_size=conv5_kernel_size, stride=conv5_strides,
+        #                       padding=conv5_padding)
         out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv5_kernel_size, conv5_strides, conv5_padding)
-        self.pool3 = nn.MaxPool2d( kernel_size=pool3_size, stride=pool3_strides,
-                             padding=pool3_padding)
+        #self.pool3 = nn.MaxPool2d( kernel_size=pool3_size, stride=pool3_strides,
+        #                     padding=pool3_padding)
         out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, pool3_size, pool3_strides, pool3_padding)
         self.conv = nn.Sequential(
-            self.conv1,
-            self.activation,
-            self.pool1,
-            self.conv2,
-            self.activation,
-            self.pool2,
-            self.conv3,
-            self.activation,
-            self.conv4,
-            self.activation,
-            self.conv5,
-            self.activation,
-            self.pool3
+            nn.Conv2d(in_channels=input_channels, out_channels=conv1_channels,
+                      kernel_size=conv1_kernel_size, stride=conv1_strides,
+                      padding=conv1_padding),
+            activation,
+            nn.MaxPool2d(kernel_size=pool1_size, stride=pool1_strides,
+                         padding=pool1_padding),
+            nn.Conv2d(in_channels=conv1_channels, out_channels=conv2_channels,
+                      kernel_size=conv2_kernel_size, stride=conv2_strides,
+                      padding=conv2_padding),
+            activation,
+            nn.MaxPool2d(kernel_size=pool2_size, stride=pool2_strides,
+                         padding=pool2_padding),
+            nn.Conv2d(in_channels=conv2_channels,out_channels=conv3_channels,
+                               kernel_size=conv3_kernel_size,stride=conv3_strides,
+                               padding=conv3_padding),
+            activation,
+            nn.Conv2d(in_channels=conv3_channels, out_channels=conv4_channels,
+                      kernel_size=conv4_kernel_size, stride=conv4_strides,
+                      padding=conv4_padding),
+            activation,
+            nn.Conv2d(in_channels=conv4_channels, out_channels=conv5_channels,
+                      kernel_size=conv5_kernel_size, stride=conv5_strides,
+                      padding=conv5_padding),
+            activation,
+            nn.MaxPool2d(kernel_size=pool3_size, stride=pool3_strides,
+                         padding=pool3_padding)
         )
+        out_dim_x, out_dim_y = compute_dim_xy(input_dim_x, input_dim_y, conv1_kernel_size, conv1_strides, conv1_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, pool1_size, pool1_strides, pool1_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv2_kernel_size, conv2_strides, conv2_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, pool2_size, pool2_strides, pool2_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv3_kernel_size, conv3_strides, conv3_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv4_kernel_size, conv4_strides, conv4_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, conv5_kernel_size, conv5_strides, conv5_padding)
+        out_dim_x, out_dim_y = compute_dim_xy(out_dim_x, out_dim_y, pool3_size, pool3_strides, pool3_padding)
         in_features = int(out_dim_x*out_dim_y*conv2_channels)
-        self.dense1 = nn.Linear(in_features=in_features,out_features=dense1_hiddens)
-        self.drop1 = nn.Dropout(drop1_rate)
-        self.dense2 = nn.Linear(in_features=dense1_hiddens,out_features=dense2_hiddens)
-        self.drop2 = nn.Dropout(drop2_rate)
-        self.dense3 = nn.Linear(in_features=dense2_hiddens,out_features=dense3_hiddens)
+        #self.dense1 = nn.Linear(in_features=in_features,out_features=dense1_hiddens)
+        #self.drop1 = nn.Dropout(drop1_rate)
+        #self.dense2 = nn.Linear(in_features=dense1_hiddens,out_features=dense2_hiddens)
+        #self.drop2 = nn.Dropout(drop2_rate)
+        #self.dense3 = nn.Linear(in_features=dense2_hiddens,out_features=dense3_hiddens)
         self.fc = nn.Sequential(
-            self.dense1,
-            self.activation,
-            self.drop1,
-            self.dense2,
-            self.activation,
-            self.drop2,
-            self.dense3
+            nn.Linear(in_features=in_features,out_features=dense1_hiddens),
+            activation,
+            nn.Dropout(drop1_rate),
+            nn.Linear(in_features=dense1_hiddens,out_features=dense2_hiddens),
+            activation,
+            nn.Dropout(drop2_rate),
+            nn.Linear(in_features=dense2_hiddens,out_features=dense3_hiddens)
         )
 
     def forward(self, x):
@@ -133,8 +154,8 @@ class alexnetModel(modelBaseH):
         y_hat = self.net(X)
         loss = self.loss(y_hat, y).sum()
         loss.backward()
-        if self.global_step == 0 or self.global_step == 1:
-            self.debug_info()
+        #if self.global_step == 0 or self.global_step == 1:
+        #    self.debug_info()
         self.optimizer.step()
         loss = loss.item()
         acc= (y_hat.argmax(dim=1) == y).sum().item()
