@@ -155,20 +155,7 @@ class modelBaseH(modelBase):
                   '\tgrad.mean=%.6f' % parameter.grad.mean().item(),
                   '\tdata.std=%.6f' % parameter.data.std(),
                   '\tgrad.std=%.6f' % parameter.grad.std())
-        '''
-        print('\tdebug:%s(%s):weight' % (name,layer._get_name()),
-              '\tshape=',layer.weight.shape,
-              '\tdata.mean=%.6f'%layer.weight.data.mean().item(),
-              '\tgrad.mean=%.6f' % layer.weight.grad.mean().item(),
-              '\tdata.std=%.6f'%layer.weight.data.std(),
-              '\tgrad.std=%.6f' % layer.weight.grad.std())
-        print('\tdebug:%s(%s):bias' % (name, layer._get_name()),
-              '\tshape=', layer.bias.shape,
-              '\t\tdata.mean=%.6f' % layer.bias.data.mean().item(),
-              '\tgrad.mean=%.6f' % layer.bias.grad.mean().item(),
-              '\tdata.std=%.6f' % layer.bias.data.std(),
-              '\tgrad.std=%.6f' % layer.bias.grad.std())
-        '''
+
     def image_record(self,global_step,tag,input_image):
         if global_step < self.gConfig['num_samples']:
             self.writer.add_image(tag,input_image,global_step)

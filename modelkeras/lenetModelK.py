@@ -1,5 +1,6 @@
 from modelBaseClassK import *
 
+'''
 class lenet(keras.Model):
     def __init__(self,gConfig,activation,classnum,get_padding,**kwargs):
         super(lenet,self).__init__(**kwargs)
@@ -48,7 +49,7 @@ class lenet(keras.Model):
         x = self.dense2(x)
         #x = self.activation(x)
         x = self.dense3(x)
-
+'''
 class lenetModelK(modelBaseK):
     def __init__(self,gConfig,getdataClass):
         super(lenetModelK,self).__init__(gConfig)
@@ -59,7 +60,6 @@ class lenetModelK(modelBaseK):
         self.metrics = keras.metrics.SparseCategoricalAccuracy()
         self.get_net()
         self.input_shape = (self.batch_size,self.resizedshape[1],self.resizedshape[2],self.resizedshape[0])
-        #self.merged = tf.summary.merge_all()
 
     def get_net(self):
         activation = self.gConfig['activation']#sigmoid
@@ -96,39 +96,30 @@ class lenetModelK(modelBaseK):
         self.net.add(keras.layers.Dense(dense2_hiddens,activation=activation))
         self.net.add(keras.layers.Dense(dense3_hiddens))
         #self.net = lenet(self.gConfig, activation, self.classnum, self.get_padding())
-        #self.net.compile(optimizer=self.optimizer,  # Optimizer
-        #              # Loss function to minimize
-        #              loss=self.loss,
-        #              # List of metrics to monitor
-        #              metrics=self.metrics)
+        self.net.compile(optimizer=self.optimizer,  # Optimizer
+                      # Loss function to minimize
+                      loss=self.loss,
+                      # List of metrics to monitor
+                      metrics=self.metrics)
 
 
     def run_train_loss_acc(self,X,y,keeps):
-        #if self.global_step.eval() == 0:
-        #    self.debug_info(X,y)
-        #loss,acc = self.net.train_on_batch(X,y)
         with tf.GradientTape() as tape:
             y_hat = self.net(X,training=True)
             loss = self.loss(y, y_hat)
-
         grads = tape.gradient(loss, self.net.trainable_variables)
+        if self.global_step == 0 or self.global_step == 1:
+            self.debug_info(self.net,grads)
         self.optimizer.apply_gradients(zip(grads, self.net.trainable_variables))
         acc = self.metrics.update_state(y,y_hat)
-        #if self.global_step.eval() == 0 or self.global_step.eval() == 1:
-        #    self.debug_info()
         return loss.numpy(),acc
 
     def run_eval_loss_acc(self, X, y, keeps=1.0):
-        loss,acc = self.net.evaluate(X,y)
-        #loss,acc = self.session.run([self.loss,self.accuracy],
-        #                           feed_dict={self.X_input:X,self.t_input:y,self.keep_prop:float(keeps)})
-        return loss,acc
-
-    def run_gradient(self,trainable_vars,X,y,keeps):
-        grads = tf.gradients(self.loss, trainable_vars)
-        grads_value = self.session.run(grads,feed_dict={self.X_input: X, self.t_input: y,
-                                                   self.keep_prop: float(keeps)})
-        return grads_value
+        #loss,acc = self.net.evaluate(X,y)
+        y_hat = self.net(X,training=False)
+        loss = self.loss(y,y_hat)
+        acc = self.metrics.update_state(y,y_hat)
+        return loss.numpy(),acc
 
     def get_input_shape(self):
         return self.input_shape
