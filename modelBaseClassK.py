@@ -209,7 +209,7 @@ class modelBaseK(modelBase):
         #tf.gfile.DeleteRecursively(self.logging_directory)
         self.write = tf.summary.create_file_writer(os.path.join(self.logging_directory,self.log_savefile))
         #self.init_op = tf.global_variables_initializer()
-        self.checkpoint = tf.train.Checkpoint(model=self.net)
+        self.checkpoint = tf.train.Checkpoint(model=self.net,variable=self.global_step)
         self.manager = tf.train.CheckpointManager(self.checkpoint, directory=self.working_directory,
                                              checkpoint_name=self.checkpoint_filename, max_to_keep=self.max_to_keep)
 
@@ -217,14 +217,16 @@ class modelBaseK(modelBase):
             self.saver.restore(self.session, self.gConfig['pretrained_model'])
         #ckpt = tf.train.get_checkpoint_state(self.gConfig['working_directory'])
         ckpt = tf.train.latest_checkpoint(self.working_directory)
-        if ckpt and ckpt.model_checkpoint_path and ckpt_used:
-            print("Reading model parameters from %s" % ckpt.model_checkpoint_path)
+        #if ckpt and ckpt.model_checkpoint_path and ckpt_used:
+        if ckpt and ckpt_used:
+            print("Reading model parameters from %s" % ckpt)
             #self.net.load_models(self.model_savefile)
             #tf.train.Checkpoint(x=self.global_step).restore(tf.train.latest_checkpoint(self.working_directory))
-            self.manager.restore(ckpt)
+            #self.manager.restore(ckpt)
+            self.checkpoint.restore(ckpt)
+            self.net.build(input_shape=self.get_input_shape())
         else:
             print("Created model with fresh parameters.")
-            #self.session.run(self.init_op)
             self.global_step = tf.constant([0])
             self.net.build(input_shape=self.get_input_shape())
             #删除旧的log

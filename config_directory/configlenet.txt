@@ -54,7 +54,7 @@ keeps = 1.0
 
 
 [bools]
-ckpt_used = False
+ckpt_used = True
 debugIsOn =　True
 viewIsOn =False
 tfdbgIsOn = False

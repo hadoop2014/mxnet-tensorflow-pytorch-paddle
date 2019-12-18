@@ -111,15 +111,17 @@ class lenetModelK(modelBaseK):
         if self.global_step == 0 or self.global_step == 1:
             self.debug_info(self.net,grads)
         self.optimizer.apply_gradients(zip(grads, self.net.trainable_variables))
-        acc = self.metrics.update_state(y,y_hat)
-        return loss.numpy(),acc
+        self.metrics.update_state(y,y_hat)
+        acc = self.metrics.result()
+        return loss.numpy(),acc.numpy()
 
     def run_eval_loss_acc(self, X, y, keeps=1.0):
         #loss,acc = self.net.evaluate(X,y)
         y_hat = self.net(X,training=False)
         loss = self.loss(y,y_hat)
-        acc = self.metrics.update_state(y,y_hat)
-        return loss.numpy(),acc
+        self.metrics.update_state(y,y_hat)
+        acc = self.metrics.result()
+        return loss.numpy(),acc.numpy()
 
     def get_input_shape(self):
         return self.input_shape
