@@ -51,7 +51,8 @@ class_selector = {
     "mxnet":getPikachuDataM,
     "tensorflow":getPikachuDataM,
     "pytorch":getPikachuDataM,
-    "paddle":getPikachuDataM
+    "paddle":getPikachuDataM,
+    "keras": getPikachuDataM
 }
 
 def create_model(gConfig):

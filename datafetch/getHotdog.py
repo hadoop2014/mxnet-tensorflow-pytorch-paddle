@@ -36,7 +36,8 @@ class_selector = {
     "mxnet":getHotdogDataM,
     "tensorflow":getHotdogDataM,
     "pytorch":getHotdogDataM,
-    "paddle":getHotdogDataM
+    "paddle":getHotdogDataM,
+    "keras": getHotdogDataM
 }
 
 def create_model(gConfig):

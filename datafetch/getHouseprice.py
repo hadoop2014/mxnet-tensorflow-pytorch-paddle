@@ -93,7 +93,8 @@ class_selector = {
     "mxnet":getHousepriceDataM,
     "tensorflow":getHousepriceDataM,
     "pytorch":getHousepriceDataM,
-    "paddle":getHousepriceDataM
+    "paddle":getHousepriceDataM,
+    "keras": getHousepriceDataM
 }
 
 def create_model(gConfig):

@@ -164,7 +164,8 @@ class_selector = {
     "mxnet":getLyricDataM,
     "tensorflow":getLyricDataM,
     "pytorch":getLyricDataM,
-    "paddle":getLyricDataM
+    "paddle":getLyricDataM,
+    "keras": getLyricDataM
 }
 
 def create_model(gConfig):

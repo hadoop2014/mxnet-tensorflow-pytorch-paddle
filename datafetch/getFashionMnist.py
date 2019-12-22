@@ -15,7 +15,8 @@ class_selector = {
     "mxnet":getFashionMnistDataM,
     "tensorflow":getFashionMnistDataM,
     "pytorch":getFashionMnistDataH,
-    "paddle":getFashionMnistDataM
+    "paddle":getFashionMnistDataM,
+    "keras": getFashionMnistDataM
 }
 
 

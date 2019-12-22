@@ -95,7 +95,8 @@ class_selector = {
     "mxnet":getCifar10DataM,
     "tensorflow":getCifar10DataP,
     "pytorch":getCifar10DataH,
-    "paddle":getCifar10DataP
+    "paddle":getCifar10DataP,
+    "keras": getCifar10DataM
 }
 
 def create_model(gConfig):
