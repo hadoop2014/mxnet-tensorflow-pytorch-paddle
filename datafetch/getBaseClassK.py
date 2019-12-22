@@ -48,6 +48,7 @@ class getdataBaseK(getdataBase):
         def resized(x,y):
             if len(x.shape) < 3:
                 x = tf.expand_dims(x,-1)
+                #x = tf.transpose(x,[2,0,1])
             x = tf.image.resize(x,(resize,resize))
             #x = tf.transpose(x,perm=[2,0,1])
             return (x,y)

@@ -82,27 +82,33 @@ class lenetModelK(modelBaseK):
         dense2_hiddens = self.gConfig['dense2_hiddens']  # 84
         dense3_hiddens = self.gConfig['dense3_hiddens']  # 10
         dense3_hiddens = self.classnum
+        weight_initializer = self.get_initializer(self.initializer)
+        bias_initializer = self.get_initializer('constant')
         input_channels, input_dim_x, input_dim_y = self.resizedshape
         self.net.add(keras.layers.Conv2D(filters=conv1_channels,kernel_size=conv1_kernel_size,strides=conv1_strides,
-                                         padding=self.get_padding()(conv1_padding),activation=activation))
+                                         padding=self.get_padding()(conv1_padding),activation=activation,
+                                         kernel_initializer=weight_initializer,bias_initializer=bias_initializer))
         self.net.add(keras.layers.MaxPool2D(pool_size=pool1_size, strides=pool1_strides,
                                    padding=self.get_padding()(pool1_padding)))
         self.net.add(keras.layers.Conv2D(filters=conv2_channels,kernel_size=conv2_kernel_size,strides=conv2_strides,
-                                         padding=self.get_padding()(conv2_padding),activation=activation))
+                                         padding=self.get_padding()(conv2_padding),activation=activation,
+                                         kernel_initializer=weight_initializer,bias_initializer=bias_initializer))
         self.net.add(keras.layers.MaxPool2D(pool_size=pool2_size,strides=pool2_strides,
                                             padding=self.get_padding()(pool2_padding)))
         self.net.add(keras.layers.Flatten(name='Flatten'))
-        self.net.add(keras.layers.Dense(dense1_hiddens,activation=activation))
-        self.net.add(keras.layers.Dense(dense2_hiddens,activation=activation))
-        self.net.add(keras.layers.Dense(dense3_hiddens))
+        self.net.add(keras.layers.Dense(dense1_hiddens,activation=activation,
+                                        kernel_initializer=weight_initializer,bias_initializer=bias_initializer))
+        self.net.add(keras.layers.Dense(dense2_hiddens,activation=activation,
+                                        kernel_initializer=weight_initializer,bias_initializer=bias_initializer))
+        self.net.add(keras.layers.Dense(dense3_hiddens,
+                                        kernel_initializer=weight_initializer,bias_initializer=bias_initializer))
         #self.net = lenet(self.gConfig, activation, self.classnum, self.get_padding())
-        self.net.compile(optimizer=self.optimizer,  # Optimizer
-                      # Loss function to minimize
-                      loss=self.loss,
-                      # List of metrics to monitor
-                      metrics=self.metrics)
-
-
+        #self.net.compile(optimizer=self.optimizer,  # Optimizer
+        #              # Loss function to minimize
+        #              loss=self.loss,
+        #              # List of metrics to monitor
+        #              metrics=self.metrics)
+    #@tf.function
     def run_train_loss_acc(self,X,y,keeps):
         with tf.GradientTape() as tape:
             y_hat = self.net(X,training=True)
@@ -113,6 +119,7 @@ class lenetModelK(modelBaseK):
         self.optimizer.apply_gradients(zip(grads, self.net.trainable_variables))
         self.metrics.update_state(y,y_hat)
         acc = self.metrics.result()
+        self.metrics.reset_states()
         return loss.numpy(),acc.numpy()
 
     def run_eval_loss_acc(self, X, y, keeps=1.0):
@@ -121,6 +128,7 @@ class lenetModelK(modelBaseK):
         loss = self.loss(y,y_hat)
         self.metrics.update_state(y,y_hat)
         acc = self.metrics.result()
+        self.metrics.reset_states()
         return loss.numpy(),acc.numpy()
 
     def get_input_shape(self):

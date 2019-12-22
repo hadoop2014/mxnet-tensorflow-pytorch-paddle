@@ -88,6 +88,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
     }
   },
 
@@ -294,6 +316,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train": {
+        "model": "",
+        "cifar10": true,
+        "mnist": true,
+        "fashionmnist": true,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": true,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
     }
   },
 
@@ -367,6 +411,28 @@
       }
     },
     "pytorch": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
+    },
+    "keras": {
       "train": {
         "model": "",
         "cifar10": false,
@@ -479,6 +545,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
     }
   },
 
@@ -551,6 +639,28 @@
       }
     },
     "pytorch": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
+    },
+    "keras": {
       "train": {
         "model": "",
         "cifar10": false,
@@ -663,6 +773,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
     }
   },
 
@@ -755,6 +887,28 @@
         "hotdog": false,
         "pikachu":false
       }
+    },
+    "keras": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
     }
   },
   "ssd":{
@@ -826,6 +980,28 @@
       }
     },
     "pytorch": {
+      "train": {
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      },
+      "pretrain":{
+        "model": "",
+        "cifar10": false,
+        "mnist": false,
+        "fashionmnist": false,
+        "houseprice": false,
+        "lyric": false,
+        "hotdog": false,
+        "pikachu":false
+      }
+    },
+    "keras": {
       "train": {
         "model": "",
         "cifar10": false,

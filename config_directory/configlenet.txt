@@ -14,10 +14,10 @@ activation =sigmoid
 #mnist和fashionmnist都是28*28*1,cifar10为32*32*3,hotdog为224*224*3,其中hotdog很容易导致gpu溢出
 resize = 28　　
 #训练迭代次数
-train_num_epoch =3
+train_num_epoch =6
 batch_size = 56
 
-epochs_per_checkpoint = 10
+epochs_per_checkpoint = 5
 
 
 #lenet parameter
@@ -54,7 +54,7 @@ keeps = 1.0
 
 
 [bools]
-ckpt_used = True
+ckpt_used = False
 debugIsOn =　True
 viewIsOn =False
 tfdbgIsOn = False
