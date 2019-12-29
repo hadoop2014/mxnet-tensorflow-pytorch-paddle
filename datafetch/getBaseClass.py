@@ -14,6 +14,7 @@ class getdataBase():
         self.rawshape = self.get_rawshape(self.gConfig)
         self.resizedshape = self.rawshape
         self.classnum = self.get_classnum(self.gConfig)  #每个数据集的类别数
+        self.classes = []
         self.cpu_num = self.gConfig['cpu_num']
         self.train_iter=None
         self.test_iter=None

@@ -121,6 +121,7 @@ class modelBaseM(modelBase):
         for epoch in range(num_epochs):
             self.run_epoch(getdataClass,epoch)
 
+        self.saveCheckpoint()
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
@@ -232,8 +233,17 @@ class modelBaseM(modelBase):
             model = getattr(module,className)(**kwargs)
         return model
 
-    def get_classnum(self):
+    def get_classes(self):
         pass
+
+    def transfer_learning(self):
+        pretrained_net = self.get_pretrain_model(pretrained=True, ctx=self.ctx,
+                                                 root=self.working_directory, classes=self.get_classes())
+        net = self.get_pretrain_model(classes=self.get_classes())
+        net.features = pretrained_net.features
+        net.output.initialize(self.weight_initializer, ctx=self.ctx)
+        net.output.collect_params().setattr('lr_mult', self.lr_mult)
+        return net
 
     def initialize(self,ckpt_used):
         if os.path.exists(self.logging_directory) == False:
@@ -241,13 +251,10 @@ class modelBaseM(modelBase):
         if os.path.exists(self.working_directory) == False:
             os.makedirs(self.working_directory)
         ckpt = self.getSaveFile()
+        #model_zoo.ssd_512_resnet50_v1_voc
+        #model_zoo．ssd_512_resnet18_v1_custom
         if self.gConfig['mode'] == 'pretrain' :
-            pretrained_net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,
-                                                     root=self.working_directory)
-            self.net = self.get_pretrain_model(classes=self.get_classnum())
-            self.net.features = pretrained_net.features
-            self.net.output.initialize(self.weight_initializer,ctx=self.ctx)
-            self.net.output.collect_params().setattr('lr_mult', self.lr_mult)
+            self.net = self.transfer_learning()
             #self.net.features.collect_params().setattr('grad_req', 'null') #所有的features的梯度不再更新
             #weight = pretrained_net.output.weight
             #hotdog_w = nd.split(weight.data(), 1000, axis=0)[713]  ＃713即为imagenet中hotdog的分类

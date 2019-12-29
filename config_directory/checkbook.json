@@ -303,7 +303,7 @@
         "fashionmnist": true,
         "houseprice": false,
         "lyric": false,
-        "hotdog": true,
+        "hotdog": false,
         "pikachu":false
       },
       "pretrain":{
@@ -925,7 +925,7 @@
         "pikachu":true
       },
       "pretrain":{
-        "model": "gluoncv.model_zoo.ssd_512_resnet50_v1_voc",
+        "model": "gluoncv.model_zoo.ssd_512_resnet50_v1_custom",
         "cifar10": false,
         "mnist": false,
         "fashionmnist": false,

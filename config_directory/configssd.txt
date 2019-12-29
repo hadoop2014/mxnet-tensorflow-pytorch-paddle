@@ -6,7 +6,7 @@ activation = relu
 [ints]
 resize = 0
 #训练迭代次数
-train_num_epoch = 5
+train_num_epoch = 10
 batch_size = 32
 
 epochs_per_checkpoint =5
@@ -18,13 +18,13 @@ num_channels = 128
 [floats]
 init_sigma = 0.01
 init_bias = 0.0
-learning_rate = 0.0005
+learning_rate = 0.2
 learning_rate_decay_factor = 0.9
 keeps = 0.6
 test_percent = 0.1
 clip_gradient = 1e-2
 weight_decay = 5e-4
-predict_threshold = 0.7
+predict_threshold = 0.3
 
 [bools]
 ckpt_used =False

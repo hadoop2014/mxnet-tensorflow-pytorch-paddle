@@ -65,7 +65,7 @@ class vggModel(modelBaseM):
     def get_input_shape(self):
         return self.input_shape
 
-    def get_classnum(self):
+    def get_classes(self):
         return self.classnum
 
 def create_model(gConfig,ckpt_used,getdataClass):

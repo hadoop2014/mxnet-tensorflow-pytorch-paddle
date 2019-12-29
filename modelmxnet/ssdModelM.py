@@ -3,7 +3,8 @@
 from mxnet.gluon import loss as gloss
 from mxnet.ndarray import NDArray
 from mxnet import contrib,image
-from datafetch import commFunction
+from datafetch import  commFunction
+#import d2lzh as commFunction
 from modelBaseClassM import *
 
 class TinySSD(nn.HybridBlock):
@@ -49,9 +50,9 @@ class TinySSD(nn.HybridBlock):
                                    getattr(self,'class_predictor_%d'%i),
                                    getattr(self,'bbox_predictor_%d'%i),F_module)
 
-        return (F.concat(*anchors,dim=1),
-                self.concat_predictors(class_predictors,F).reshape(shape=(0,-1,self.num_classes + 1)),
-                self.concat_predictors(bbox_predictors,F))
+        return (self.concat_predictors(class_predictors,F).reshape(shape=(0,-1,self.num_classes + 1)),
+                self.concat_predictors(bbox_predictors,F).reshape((0,-1,4)),
+                F.concat(*anchors,dim=1))
 
     def concat_predictors(self,preds,F):
         return F.concat(*[self.flatten_pred(p) for p in preds], dim=1)
@@ -92,15 +93,6 @@ class TinySSD(nn.HybridBlock):
         block.add(nn.MaxPool2D(pool_size=2))
         return block
 
-    def down_sample_blk(num_channels):
-        blk = nn.HybridSequential()
-        for _ in range(2):
-            blk.add(nn.Conv2D(num_channels, kernel_size=3, padding=1),
-                    nn.BatchNorm(in_channels=num_channels),
-                    nn.Activation('relu'))
-        blk.add(nn.MaxPool2D(2))
-        return blk
-
 
 class ssdModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
@@ -108,6 +100,7 @@ class ssdModel(modelBaseM):
         self.loss = gloss.SoftmaxCrossEntropyLoss()
         self.bbox_loss = gloss.L1Loss()
         self.resizedshape = getdataClass.resizedshape
+        self.classes = getdataClass.classes
         self.activation = self.get_activation(self.gConfig['activation'])
         self.classnum = getdataClass.classnum
         self.predict_images = self.gConfig['predict_images']
@@ -131,14 +124,16 @@ class ssdModel(modelBaseM):
 
     def run_train_loss_acc(self, X, y):
         with autograd.record():
-            anchors, cls_preds, bbox_preds = self.net(X)
+            cls_preds, bbox_preds, anchors = self.net(X)
+            #anchors, cls_preds, bbox_preds = self.net(X)
             bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
                 anchors, y, cls_preds.transpose((0, 2, 1)))
             loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
                           bbox_masks)
-        loss.backward()
-        if self.global_step == 0:
+        if self.global_step == 0 or self.global_step == 1:
             self.debug_info()
+        loss.backward()
+
         self.trainer.step(self.batch_size)
         loss = loss.sum().asscalar()
         n = cls_labels.shape[0]
@@ -147,22 +142,8 @@ class ssdModel(modelBaseM):
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         return loss, acc * n
 
-    def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
-        cls = self.loss(cls_preds, cls_labels)
-        bbox = self.bbox_loss(bbox_preds * bbox_masks, bbox_labels * bbox_masks)
-        #print('calc_loss=%.6f,bbox_loss=%.6f ' % (cls.sum().asscalar(), bbox.sum().asscalar()))
-        return cls + bbox
-
-    def bbox_eval(self,bbox_preds,bbox_labels,bbox_masks):
-        return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
-
-    def run_matrix(self, loss_train, loss_test):
-        print('global_step %d, mae_train %.6f, mae_test %.6f' %
-              (self.global_step.asscalar(), self.mae_train,self.mae_test))
-        return self.mae_train,self.mae_test
-
     def run_eval_loss_acc(self, X, y):
-        anchors, cls_preds, bbox_preds = self.net(X)
+        cls_preds, bbox_preds,anchors = self.net(X)
         bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
             anchors, y, cls_preds.transpose((0, 2, 1)))
         n = cls_labels.shape[0]
@@ -172,22 +153,42 @@ class ssdModel(modelBaseM):
         loss = loss.sum().asscalar()
         self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         return loss, acc * n
-        #return self.mae_test * n,acc * n
+
+    def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
+        cls = self.loss(cls_preds, cls_labels)
+        bbox_preds = bbox_preds.reshape((0,-1))
+        bbox = self.bbox_loss(bbox_preds * bbox_masks, bbox_labels * bbox_masks)
+        #print('calc_loss=%.6f,bbox_loss=%.6f ' % (cls.sum().asscalar(), bbox.sum().asscalar()))
+        return cls + bbox
+
+
+    def bbox_eval(self,bbox_preds,bbox_labels,bbox_masks):
+        bbox_preds = bbox_preds.reshape((0, -1))
+        return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
+
+    def run_matrix(self, loss_train, loss_test):
+        print('global_step %d, mae_train %.6f, mae_test %.6f' %
+              (self.global_step.asscalar(), self.mae_train,self.mae_test))
+        return self.mae_train,self.mae_test
 
     def predict(self, model):
         for image_file in self.predict_images:
             img = image.imread(os.path.join(self.data_directory,image_file))
             feature = image.imresize(img,*self.resizedshape[1:]).astype('float32')
             X = feature.transpose((2, 0, 1)).expand_dims(axis=0)
-            anchors, cls_preds, bbox_preds = model(X.as_in_context(self.ctx))
+            cls_preds, bbox_preds,anchors = model(X.as_in_context(self.ctx))
             cls_probs = cls_preds.softmax().transpose((0, 2, 1))
+            bbox_preds = bbox_preds.reshape((0,-1))
             output = contrib.nd.MultiBoxDetection(cls_probs, bbox_preds, anchors)
             idx = [i for i, row in enumerate(output[0]) if row[0].asscalar() != -1]
             output = output[0, idx]
+            #print('output.std=', output.asnumpy().std(), 'output.mean=', output.mean().asscalar())
             commFunction.set_figsize((5,5))
             self.display(img,output,threshold=self.predict_threshold)
 
     def display(self,img, output, threshold):
+        commFunction.plt.clf() #清楚之前的图片
+        commFunction.plt.close()#关闭之前图形
         fig = commFunction.plt.imshow(img.asnumpy())
         for row in output:
             score = row[1].asscalar()
@@ -200,11 +201,14 @@ class ssdModel(modelBaseM):
     def get_input_shape(self):
         return self.input_shape
 
-    def get_classnum(self):
-        return self.classnum
+    def get_classes(self):
+        return self.classes
 
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
+            return
+        if self.gConfig['mode'] == 'pretrain':
+            pass
             return
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
@@ -212,8 +216,14 @@ class ssdModel(modelBaseM):
         for net in nets:
             mx.viz.plot_network(net, title=title + '.' + str(net), save_format='png', hide_weights=False,
                             shape=input_shape) \
-                .view(directory=self.logging_directory)
+                .view(directory=self.logging_directory,filename='.'.join([self.get_model_name(self.gConfig),net.name,
+                                                                          'gv']))
         return
+
+    def transfer_learning(self):
+        net = self.get_pretrain_model(pretrained=True, ctx=self.ctx,
+                                      root=self.working_directory, classes=self.get_classes(),transfer='coco')
+        return net
 
 def create_model(gConfig,ckpt_used,getdataClass):
     model=ssdModel(gConfig=gConfig,getdataClass=getdataClass)

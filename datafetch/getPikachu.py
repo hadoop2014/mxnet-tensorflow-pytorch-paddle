@@ -3,6 +3,7 @@ from datafetch.getBaseClassM import  *
 class getPikachuDataM(getdataBaseM):
     def __init__(self,gConfig):
         super(getPikachuDataM, self).__init__(gConfig)
+        self.classes = ['pikachu']
 
     def load_data(self,root=""):
         from mxnet import image

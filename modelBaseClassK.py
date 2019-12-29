@@ -20,7 +20,8 @@ class modelBaseK(modelBase):
         self.optimizer = self.gConfig['optimizer']
         self.tfdbgIsOn = self.gConfig['tfdbgIsOn'.lower()]
         self.keeps =self.gConfig['keeps']
-        self.log_savefile='.'.join([self.get_model_name(gConfig),'log'])
+        self.init_framework()
+        #self.log_savefile='.'.join([self.get_model_name(gConfig),'log'])
         self.global_step = tf.Variable(0, trainable=False, name='global_step',dtype=tf.int64)
         with tf.name_scope('learning_rate'):
             self.learning_rate = tf.Variable(float(self.learning_rate_value), trainable=False, name='learning_rate')
@@ -29,11 +30,26 @@ class modelBaseK(modelBase):
                                                                     name='learning_rate_decay')
             #self.learning_rate = tf.train.exponential_decay(self.learning_rate_value,self.global_step,self.decay_steps,
             #                                                self.learning_rate_decay_factor,staircase=True)
+
+        self.writer = tf.summary.create_file_writer(self.logging_directory)
+        with self.writer.as_default():
+            tf.summary.trace_on()
         self.net = keras.Sequential()
 
     def get_net(self):
         return
 
+    def init_framework(self):
+        gpus = tf.config.experimental.list_physical_devices('GPU')
+        for gpu in gpus:
+            try:
+                tf.config.experimental.set_memory_growth(gpu, True)
+                tf.config.experimental.set_visible_devices(gpu, 'GPU')
+                logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+                print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
+            except RuntimeError as e:
+                # Visible devices must be set before GPUs have been initialized
+                print(e)
 
     def get_initializer(self, initializer):
         assert initializer in self.gConfig['initializerlist'],'initializer(%s) is invalid,it must one of %s' % \
@@ -169,8 +185,9 @@ class modelBaseK(modelBase):
                 X = np.transpose(X, axes=[0, 2, 3, 1])
                 y = y.asnumpy()
             except:
-                X = np.array(X)
-                y = np.array(y)
+                #X = np.array(X)
+                #y = np.array(y)
+                pass
             self.image_record(self.global_step, 'input/image', X)
             loss, acc = self.run_train_loss_acc(X, y,self.keeps)
             with self.writer.as_default():
@@ -195,8 +212,9 @@ class modelBaseK(modelBase):
                 y = y.asnumpy()
             except:
                 #由其他框架读入的数据通过numpy转换
-                X = np.array(X)
-                y = np.array(y)
+                #X = np.array(X)
+                #y = np.array(y)
+                pass
             loss,acc = self.run_eval_loss_acc(X, y)
             batch_size = y.shape[0]
             loss_sum += loss * batch_size
@@ -224,9 +242,6 @@ class modelBaseK(modelBase):
         if os.path.exists(self.working_directory) == False:
             os.makedirs(self.working_directory)
         #tf.gfile.DeleteRecursively(self.logging_directory)
-        self.writer = tf.summary.create_file_writer(os.path.join(self.logging_directory,self.log_savefile))
-        with self.writer.as_default():
-            tf.summary.trace_on()
         self.checkpoint = tf.train.Checkpoint(model=self.net,optimizer = self.optimizer)#varible=self.global_step)
         self.manager = tf.train.CheckpointManager(self.checkpoint, directory=self.working_directory,
                                                   checkpoint_name=self.checkpoint_filename, max_to_keep=self.max_to_keep)
@@ -244,7 +259,6 @@ class modelBaseK(modelBase):
             self.checkpoint.restore(ckpt)
             #self.net.load_weights(ckpt)
             self.global_step = self.optimizer.iterations
-            self.global_step = self.optimizer
             self.net.build(input_shape=self.get_input_shape())
             #self.net = keras.models.load_model(ckpt)
         else:
