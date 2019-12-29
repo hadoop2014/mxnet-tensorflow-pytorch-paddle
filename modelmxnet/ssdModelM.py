@@ -126,6 +126,7 @@ class ssdModel(modelBaseM):
         with autograd.record():
             cls_preds, bbox_preds, anchors = self.net(X)
             #anchors, cls_preds, bbox_preds = self.net(X)
+            anchors = anchors/self.ssd_image_size
             bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
                 anchors, y, cls_preds.transpose((0, 2, 1)))
             loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
@@ -144,6 +145,7 @@ class ssdModel(modelBaseM):
 
     def run_eval_loss_acc(self, X, y):
         cls_preds, bbox_preds,anchors = self.net(X)
+        anchors = anchors / self.ssd_image_size   #ssd_image_size默认为１,在调用retrain的ssd模型时，需要归一化为１
         bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
             anchors, y, cls_preds.transpose((0, 2, 1)))
         n = cls_labels.shape[0]
@@ -177,6 +179,7 @@ class ssdModel(modelBaseM):
             feature = image.imresize(img,*self.resizedshape[1:]).astype('float32')
             X = feature.transpose((2, 0, 1)).expand_dims(axis=0)
             cls_preds, bbox_preds,anchors = model(X.as_in_context(self.ctx))
+            anchors = anchors / self.ssd_image_size
             cls_probs = cls_preds.softmax().transpose((0, 2, 1))
             bbox_preds = bbox_preds.reshape((0,-1))
             output = contrib.nd.MultiBoxDetection(cls_probs, bbox_preds, anchors)
@@ -188,7 +191,7 @@ class ssdModel(modelBaseM):
 
     def display(self,img, output, threshold):
         commFunction.plt.clf() #清楚之前的图片
-        commFunction.plt.close()#关闭之前图形
+        #commFunction.plt.close()#关闭之前图形
         fig = commFunction.plt.imshow(img.asnumpy())
         for row in output:
             score = row[1].asscalar()

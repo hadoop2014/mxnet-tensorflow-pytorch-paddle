@@ -25,6 +25,7 @@ class modelBaseM(modelBase):
         self.bias_initializer = self.get_initializer('constant')
         self.global_step = nd.array([0],self.ctx)
         self.state = None #用于rnn,lstm等
+        self.ssd_image_size = 1 #仅用于ssd 的pretrain模式,默认情况下设置为１
         self.net = nn.HybridSequential()
 
     def get_net(self):
@@ -229,6 +230,11 @@ class modelBaseM(modelBase):
         module = __import__(moduleName,fromlist=(moduleName.split('.')[-1]))
         if firstName == 'gluoncv':
             model = getattr(module,'get_model')(name=className,**kwargs)
+            try:
+                self.ssd_image_size=int(re.findall('ssd_([0-9]*)_',className).pop())
+            except:
+                print('image_size is only used in ssd task of pretrain mode,other task(%s) has just ignored!',
+                      self.gConfig['taskname'])
         else:
             model = getattr(module,className)(**kwargs)
         return model
@@ -252,7 +258,7 @@ class modelBaseM(modelBase):
             os.makedirs(self.working_directory)
         ckpt = self.getSaveFile()
         #model_zoo.ssd_512_resnet50_v1_voc
-        #model_zoo．ssd_512_resnet18_v1_custom
+        #model_zoo.ssd_512_resnet18_v1_custom
         if self.gConfig['mode'] == 'pretrain' :
             self.net = self.transfer_learning()
             #self.net.features.collect_params().setattr('grad_req', 'null') #所有的features的梯度不再更新
