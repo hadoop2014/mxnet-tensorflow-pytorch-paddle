@@ -10,6 +10,27 @@ class getPikachuDataM(getdataBaseM):
         root = os.path.expanduser(root)
         train_data = self.dataset_selector[self.dataset_name](root=root,train=True)
         test_data = self.dataset_selector[self.dataset_name](root=root,train=False)
+        '''
+        import gluoncv as gcv
+        from mxnet import gluon,ndarray as nd
+        from gluoncv.utils import viz
+        from gluoncv.data.batchify import Tuple,Stack
+        from gluoncv.data.transforms.presets.ssd import SSDDefaultTrainTransform
+        dataset = gcv.data.RecordFileDetection(train_data.path_rec)
+        classes = ['pikachu']
+        image, label = dataset[0]
+        print('label:', label)
+        # display image and label
+        #ax = viz.plot_bbox(image, bboxes=label[:, :4], labels=label[:, 4:5], class_names=classes)
+        plt.show()
+        width, height = self.rawshape[-1],self.rawshape[-1]
+        num_workers = self.cpu_num
+        anchors = nd.zeros((1,4096,4))
+        batchify_fn = Tuple(Stack(), Stack(), Stack())  # stack image, cls_targets, box_targets
+        train_loader = gluon.data.DataLoader(
+            dataset.transform(SSDDefaultTrainTransform(width, height, anchors)),
+            self.batch_size, True, batchify_fn=batchify_fn, last_batch='rollover', num_workers=num_workers)
+        '''
         self.resizedshape = self.rawshape
         self.train_data = image.ImageDetIter(
             path_imgrec=train_data.path_rec,

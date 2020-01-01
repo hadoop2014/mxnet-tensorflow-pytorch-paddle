@@ -2,12 +2,10 @@ from mxnet.gluon import nn
 from mxnet import nd, gluon,autograd,init
 import mxnet as mx
 import numpy as np
-from mxnet.gluon import model_zoo
 from modelBaseClass import  *
 import datafetch.commFunction as commFunc
 import mxnet.gluon.model_zoo.vision
-from gluoncv import model_zoo,utils,data
-#model_zoo.get_model()
+
 #深度学习模型的基类
 class modelBaseM(modelBase):
     def __init__(self,gConfig):
@@ -85,7 +83,6 @@ class modelBaseM(modelBase):
     def show_net(self,input_shape = None):
         if self.viewIsOn == False:
             return
-        #print(self.net)
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         net = self.net(input_symbol)
@@ -206,11 +203,8 @@ class modelBaseM(modelBase):
 
     def run_step(self,epoch,train_iter,valid_iter,test_iter, epoch_per_print):
         loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test=0,0,None,None,0,0
-        #nd.waitall()
         loss_train,acc_train = self.train_loss_acc(train_iter)
-        #loss_test, acc_test = self.evaluate_loss_acc(test_iter) #对于rnn的情况，该函数放在if外面较合适
         if epoch % epoch_per_print == 0:
-            #loss_test,acc_test = self.evaluate_loss_acc(test_iter)
             loss_test, acc_test = self.evaluate_loss_acc(test_iter)
             self.run_matrix(loss_train, loss_test)   #仅用于rnn,lstm,ssd等
             self.predict(self.net)    #仅用于rnn,lstm,ssd等
@@ -247,8 +241,12 @@ class modelBaseM(modelBase):
                                                  root=self.working_directory, classes=self.get_classes())
         net = self.get_pretrain_model(classes=self.get_classes())
         net.features = pretrained_net.features
+        #net.features.collect_params().setattr('grad_req', 'null') #所有的features的梯度不再更新
         net.output.initialize(self.weight_initializer, ctx=self.ctx)
         net.output.collect_params().setattr('lr_mult', self.lr_mult)
+        # weight = pretrained_net.output.weight
+        # hotdog_w = nd.split(weight.data(), 1000, axis=0)[713]  ＃713即为imagenet中hotdog的分类
+        # self.net.output.weight.data()[1]= hotdog_w
         return net
 
     def initialize(self,ckpt_used):
@@ -257,14 +255,8 @@ class modelBaseM(modelBase):
         if os.path.exists(self.working_directory) == False:
             os.makedirs(self.working_directory)
         ckpt = self.getSaveFile()
-        #model_zoo.ssd_512_resnet50_v1_voc
-        #model_zoo.ssd_512_resnet18_v1_custom
         if self.gConfig['mode'] == 'pretrain' :
             self.net = self.transfer_learning()
-            #self.net.features.collect_params().setattr('grad_req', 'null') #所有的features的梯度不再更新
-            #weight = pretrained_net.output.weight
-            #hotdog_w = nd.split(weight.data(), 1000, axis=0)[713]  ＃713即为imagenet中hotdog的分类
-            #self.net.output.weight.data()[1]= hotdog_w
             self.trainer = gluon.Trainer(self.net.collect_params(), self.optimizer,
                                          {'learning_rate': self.learning_rate})
             self.global_step = nd.array([0], ctx=self.ctx)

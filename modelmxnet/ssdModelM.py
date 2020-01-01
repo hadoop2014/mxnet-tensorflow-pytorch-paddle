@@ -2,10 +2,13 @@
 #author by wu.wenhua at 2019/10/20
 from mxnet.gluon import loss as gloss
 from mxnet.ndarray import NDArray
-from mxnet import contrib,image
+from mxnet import contrib,image,autograd,metric
 from datafetch import  commFunction
-#import d2lzh as commFunction
+from gluoncv.data.transforms.presets.ssd import SSDDefaultTrainTransform
+from gluoncv.data import batchify
 from modelBaseClassM import *
+from mxnet.gluon.data.dataset import SimpleDataset
+import gluoncv
 
 class TinySSD(nn.HybridBlock):
     def __init__(self,num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,
@@ -62,7 +65,6 @@ class TinySSD(nn.HybridBlock):
 
     def block_forward(self,X,block,size,ratio,class_predictor,bbox_predictor,F):
         Y = block(X)
-        #anchors = contrib.ndarray.MultiBoxPrior(Y, sizes=size, ratios=ratio)
         anchors = F.MultiBoxPrior(Y, sizes = size, ratios = ratio)
         class_predictors = class_predictor(Y)
         bbox_predictors = bbox_predictor(Y)
@@ -97,20 +99,28 @@ class TinySSD(nn.HybridBlock):
 class ssdModel(modelBaseM):
     def __init__(self,gConfig,getdataClass):
         super(ssdModel,self).__init__(gConfig)
-        self.loss = gloss.SoftmaxCrossEntropyLoss()
+        #self.loss = gloss.SoftmaxCrossEntropyLoss()
+        self.loss = gluoncv.loss.SSDMultiBoxLoss()
         self.bbox_loss = gloss.L1Loss()
+        self.class_metric = metric.Loss('CrossEntropy')
+        self.bbox_metric = metric.Loss('SmoothL1')
         self.resizedshape = getdataClass.resizedshape
         self.classes = getdataClass.classes
-        self.activation = self.get_activation(self.gConfig['activation'])
         self.classnum = getdataClass.classnum
+        self.anchors = None #用于ssd的pretrain模式
+        self.ssd_image_size = self.resizedshape[-1] #获取训练数据集的图片大小
+        self.activation = self.get_activation(self.gConfig['activation'])
         self.predict_images = self.gConfig['predict_images']
         self.weight_decay = self.gConfig['weight_decay']
         self.predict_threshold = self.gConfig['predict_threshold']
+        self.input_shape = (self.batch_size,*self.resizedshape)
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate,'wd':self.weight_decay})
-        self.input_shape = (self.batch_size,*self.resizedshape)
+        with autograd.train_mode():
+            _, _, anchors = self.net(mx.nd.zeros((1, *self.resizedshape),ctx=self.ctx))
+        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)
 
     def get_net(self):
         num_blocks = self.gConfig['num_blocks']
@@ -121,11 +131,10 @@ class ssdModel(modelBaseM):
         activation = self.get_activation(self.gConfig['activation'])
         basenet_filters = self.gConfig['basenet_filters']
         self.net = TinySSD(num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,basenet_filters)
-
+    '''
     def run_train_loss_acc(self, X, y):
         with autograd.record():
             cls_preds, bbox_preds, anchors = self.net(X)
-            #anchors, cls_preds, bbox_preds = self.net(X)
             anchors = anchors/self.ssd_image_size
             bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
                 anchors, y, cls_preds.transpose((0, 2, 1)))
@@ -134,15 +143,13 @@ class ssdModel(modelBaseM):
         if self.global_step == 0 or self.global_step == 1:
             self.debug_info()
         loss.backward()
-
         self.trainer.step(self.batch_size)
         loss = loss.sum().asscalar()
         n = cls_labels.shape[0]
-        #m = bbox_labels.shape[0]
         self.mae_train = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         return loss, acc * n
-
+        
     def run_eval_loss_acc(self, X, y):
         cls_preds, bbox_preds,anchors = self.net(X)
         anchors = anchors / self.ssd_image_size   #ssd_image_size默认为１,在调用retrain的ssd模型时，需要归一化为１
@@ -155,14 +162,68 @@ class ssdModel(modelBaseM):
         loss = loss.sum().asscalar()
         self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         return loss, acc * n
+    '''
+
+    def run_train_loss_acc(self, X, y):
+        with autograd.record():
+            cls_preds, bbox_preds, anchors = self.net(X)
+            #anchors = anchors/self.ssd_image_size
+            #X, cls_labels, bbox_labels =self.ssd_default_train_transform(X,y)
+            dataset = SimpleDataset((X,y))
+            batchify_fn = batchify.Tuple(batchify.Stack(), batchify.Stack(), batchify.Stack())  # stack image, cls_targets, box_targets
+            train_loader = gluon.data.DataLoader(
+                dataset.transform(SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)),
+                self.batch_size, True, batchify_fn=batchify_fn, last_batch='rollover')
+            X,cls_labels,bbox_labels = train_loader.__iter__()
+
+            #X, cls_labels, bbox_labels = batchify.Stack()(map(self.ssd_default_train_transform,X, y))
+            #bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
+            #    anchors, y, cls_preds.transpose((0, 2, 1)))
+            #loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
+            #              bbox_masks)
+            loss, cls_loss, box_loss = self.loss(cls_preds, bbox_preds, cls_labels, bbox_labels)
+        if self.global_step == 0 or self.global_step == 1:
+            self.debug_info()
+        loss.backward()
+        # since we have already normalized the loss, we don't want to normalize
+        # by batch-size anymore
+        self.trainer.step(1)
+        #self.trainer.step(self.batch_size)
+        loss = loss.sum().asscalar()
+        n = cls_labels.shape[0]
+        self.class_metric.update(0, cls_loss * self.batch_size)
+        self.bbox_metric.update(0,box_loss * self.batch_size)
+        name_class, loss_class = self.class_metric.get()
+        name_bbox, loss_bbox = self.bbox_metric.get()
+        #self.mae_train = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
+        self.mae_train = loss_bbox
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
+        return loss, acc * n
+
+    def run_eval_loss_acc(self, X, y):
+        cls_preds, bbox_preds,anchors = self.net(X)
+        X, cls_labels, bbox_labels = self.ssd_default_train_transform(X, y)
+        #anchors = anchors / self.ssd_image_size   #ssd_image_size默认为１,在调用retrain的ssd模型时，需要归一化为１
+        #bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
+        #    anchors, y, cls_preds.transpose((0, 2, 1)))
+        n = cls_labels.shape[0]
+        acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
+        #loss=self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,bbox_masks)
+        loss, cls_loss, box_loss = self.loss(cls_preds, bbox_preds, cls_labels, bbox_labels)
+        loss = loss.sum().asscalar()
+        self.class_metric.update(0, cls_loss * self.batch_size)
+        self.bbox_metric.update(0, box_loss * self.batch_size)
+        name_class, loss_class = self.class_metric.get()
+        name_bbox, loss_bbox = self.bbox_metric.get()
+        #self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
+        self.mae_test = loss_bbox
+        return loss, acc * n
 
     def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
         cls = self.loss(cls_preds, cls_labels)
         bbox_preds = bbox_preds.reshape((0,-1))
         bbox = self.bbox_loss(bbox_preds * bbox_masks, bbox_labels * bbox_masks)
-        #print('calc_loss=%.6f,bbox_loss=%.6f ' % (cls.sum().asscalar(), bbox.sum().asscalar()))
         return cls + bbox
-
 
     def bbox_eval(self,bbox_preds,bbox_labels,bbox_masks):
         bbox_preds = bbox_preds.reshape((0, -1))
@@ -185,13 +246,11 @@ class ssdModel(modelBaseM):
             output = contrib.nd.MultiBoxDetection(cls_probs, bbox_preds, anchors)
             idx = [i for i, row in enumerate(output[0]) if row[0].asscalar() != -1]
             output = output[0, idx]
-            #print('output.std=', output.asnumpy().std(), 'output.mean=', output.mean().asscalar())
             commFunction.set_figsize((5,5))
             self.display(img,output,threshold=self.predict_threshold)
 
     def display(self,img, output, threshold):
         commFunction.plt.clf() #清楚之前的图片
-        #commFunction.plt.close()#关闭之前图形
         fig = commFunction.plt.imshow(img.asnumpy())
         for row in output:
             score = row[1].asscalar()
@@ -212,7 +271,6 @@ class ssdModel(modelBaseM):
             return
         if self.gConfig['mode'] == 'pretrain':
             pass
-            return
         title = self.gConfig['taskname']
         input_symbol = mx.symbol.Variable('input_data')
         nets = self.net(input_symbol)
@@ -224,8 +282,14 @@ class ssdModel(modelBaseM):
         return
 
     def transfer_learning(self):
-        net = self.get_pretrain_model(pretrained=True, ctx=self.ctx,
-                                      root=self.working_directory, classes=self.get_classes(),transfer='coco')
+        #net = self.get_pretrain_model(pretrained=True, ctx=self.ctx,
+        #                              root=self.working_directory, classes=self.get_classes(),transfer='coco')
+        net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,root=self.working_directory)
+        net.reset_class(self.classes)
+        height,width=self.ssd_image_size,self.ssd_image_size
+        with autograd.train_mode():
+            _, _, anchors = net(mx.nd.zeros((1, 3, height, width)))
+        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)
         return net
 
 def create_model(gConfig,ckpt_used,getdataClass):
