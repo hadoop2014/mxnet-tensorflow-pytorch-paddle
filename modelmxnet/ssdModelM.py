@@ -119,8 +119,9 @@ class ssdModel(modelBaseM):
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
                                      {'learning_rate':self.learning_rate,'wd':self.weight_decay})
         with autograd.train_mode():
-            _, _, anchors = self.net(mx.nd.zeros((1, *self.resizedshape),ctx=self.ctx))
-        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)
+            _, _, self.anchors = self.net(mx.nd.zeros((1, *self.resizedshape),ctx=self.ctx))
+        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size,
+                                                                    self.anchors.as_in_context(mx.cpu()))
 
     def get_net(self):
         num_blocks = self.gConfig['num_blocks']
@@ -163,18 +164,83 @@ class ssdModel(modelBaseM):
         self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         return loss, acc * n
     '''
+    def init_state(self):
+        self.bbox_metric.reset()
+        self.class_metric.reset()
+
+    def _transform_label(self,label, height=None, width=None):
+        """transform label .
+
+            Parameters
+            ----------
+            label : ndarray.array
+                label of the dataset for object detection,  witch shape is [N,5] for example [[id, x, y ,h ,w]]
+            height : int
+                height of image.
+            width : int
+                width of image.
+
+            Retrurns
+            --------
+            label:ndarray.array
+                transformed label of the dataset for object detection,  witch shape is [N,5] for example [[x, y ,h ,w, id]]
+            """
+        label_width = label.shape[1]
+        label = np.array(label).ravel()
+        #header_len = int(label[0])  # label header
+        #label_width = int(label[1])  # the label width for each object, >= 5
+        #if label_width < 5:
+        #    raise ValueError(
+        #        "Label info for each object should >= 5, given {}".format(label_width))
+        #min_len = header_len + 5
+        min_len = 5
+        if len(label) < min_len:
+            raise ValueError(
+                "Expected label length >= {}, got {}".format(min_len, len(label)))
+        #if (len(label) - header_len) % label_width:
+        #    raise ValueError(
+        #        "Broken label of size {}, cannot reshape into (N, {}) "
+        #        "if header length {} is excluded".format(len(label), label_width, header_len))
+        gcv_label = label.reshape(-1, label_width)
+        # swap columns, gluon-cv requires [xmin-ymin-xmax-ymax-id-extra0-extra1-xxx]
+        ids = gcv_label[:, 0].copy()
+        gcv_label[:, :4] = gcv_label[:, 1:5]
+        gcv_label[:, 4] = ids
+        # restore to absolute coordinates
+        if height is not None:
+            gcv_label[:, (0, 2)] *= width
+        if width is not None:
+            gcv_label[:, (1, 3)] *= height
+        return gcv_label
+
+    def ssd_data_transform(self,X,y):
+        batchify_fn = batchify.Tuple(batchify.Stack(), batchify.Stack(), batchify.Stack())
+        img = nd.transpose(X, axes=(0, 2, 3, 1)).as_in_context(mx.cpu())
+        label = batchify.Stack()([self._transform_label(t, self.ssd_image_size, self.ssd_image_size) for t in y.asnumpy()])
+        img, cls_labels, bbox_labels = batchify_fn(list(map(self.ssd_default_train_transform,img,label.asnumpy())))
+        return img.as_in_context(self.ctx),cls_labels.as_in_context(self.ctx),bbox_labels.as_in_context(self.ctx)
 
     def run_train_loss_acc(self, X, y):
+        X,cls_labels,bbox_labels=self.ssd_data_transform(X,y)
+
+        #for (img, label) in zip(X, y):
+        #    img = nd.transpose(img,axes=(1,2,0))
+        #    label = label.asnumpy()
+        #    img, cls_labels, bbox_labels = \
+        #        SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, self.anchors)\
+        #            (img, label)
+
         with autograd.record():
             cls_preds, bbox_preds, anchors = self.net(X)
             #anchors = anchors/self.ssd_image_size
             #X, cls_labels, bbox_labels =self.ssd_default_train_transform(X,y)
-            dataset = SimpleDataset((X,y))
-            batchify_fn = batchify.Tuple(batchify.Stack(), batchify.Stack(), batchify.Stack())  # stack image, cls_targets, box_targets
-            train_loader = gluon.data.DataLoader(
-                dataset.transform(SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)),
-                self.batch_size, True, batchify_fn=batchify_fn, last_batch='rollover')
-            X,cls_labels,bbox_labels = train_loader.__iter__()
+
+            #dataset = SimpleDataset((X,y))
+            #batchify_fn = batchify.Tuple(batchify.Stack(), batchify.Stack(), batchify.Stack())  # stack image, cls_targets, box_targets
+            #train_loader = gluon.data.DataLoader(
+            #    dataset.transform(SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)),
+            #    self.batch_size, True, batchify_fn=batchify_fn, last_batch='rollover')
+            #X,cls_labels,bbox_labels = train_loader.__iter__()
 
             #X, cls_labels, bbox_labels = batchify.Stack()(map(self.ssd_default_train_transform,X, y))
             #bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
@@ -182,14 +248,15 @@ class ssdModel(modelBaseM):
             #loss = self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,
             #              bbox_masks)
             loss, cls_loss, box_loss = self.loss(cls_preds, bbox_preds, cls_labels, bbox_labels)
+            autograd.backward(loss)
         if self.global_step == 0 or self.global_step == 1:
             self.debug_info()
-        loss.backward()
+        #loss.backward()
         # since we have already normalized the loss, we don't want to normalize
         # by batch-size anymore
         self.trainer.step(1)
         #self.trainer.step(self.batch_size)
-        loss = loss.sum().asscalar()
+        loss = loss[0].sum().asscalar()
         n = cls_labels.shape[0]
         self.class_metric.update(0, cls_loss * self.batch_size)
         self.bbox_metric.update(0,box_loss * self.batch_size)
@@ -201,8 +268,9 @@ class ssdModel(modelBaseM):
         return loss, acc * n
 
     def run_eval_loss_acc(self, X, y):
+        X, cls_labels, bbox_labels = self.ssd_data_transform(X, y)
         cls_preds, bbox_preds,anchors = self.net(X)
-        X, cls_labels, bbox_labels = self.ssd_default_train_transform(X, y)
+        #X, cls_labels, bbox_labels = self.ssd_default_train_transform(X, y)
         #anchors = anchors / self.ssd_image_size   #ssd_image_size默认为１,在调用retrain的ssd模型时，需要归一化为１
         #bbox_labels, bbox_masks, cls_labels = contrib.ndarray.MultiBoxTarget(
         #    anchors, y, cls_preds.transpose((0, 2, 1)))
@@ -210,7 +278,7 @@ class ssdModel(modelBaseM):
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
         #loss=self.calc_loss(cls_preds, cls_labels, bbox_preds, bbox_labels,bbox_masks)
         loss, cls_loss, box_loss = self.loss(cls_preds, bbox_preds, cls_labels, bbox_labels)
-        loss = loss.sum().asscalar()
+        loss = loss[0].sum().asscalar()
         self.class_metric.update(0, cls_loss * self.batch_size)
         self.bbox_metric.update(0, box_loss * self.batch_size)
         name_class, loss_class = self.class_metric.get()
