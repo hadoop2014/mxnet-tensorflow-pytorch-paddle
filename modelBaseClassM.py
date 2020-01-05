@@ -118,8 +118,8 @@ class modelBaseM(modelBase):
     def train(self,model_eval,getdataClass,gConfig,num_epochs):
         for epoch in range(num_epochs):
             self.run_epoch(getdataClass,epoch)
-
         self.saveCheckpoint()
+        self.predict_cv(self.net)
         return self.losses_train,self.acces_train,self.losses_valid,self.acces_valid,\
                self.losses_test,self.acces_test
 
@@ -147,8 +147,12 @@ class modelBaseM(modelBase):
                       '\tdata.std=%.6f' % parameter.data().asnumpy().std(),
                       '\tgrad.std=%.6f' % parameter.grad().asnumpy().std())
 
-    def predict(self, model):
+    def predict_nlp(self, model):
         #仅用于rnn网络的句子预测
+        pass
+
+    def predict_cv(self,model):
+        #用于图像相关的任务的预测
         pass
 
     def image_record(self,global_step,tag,input_image):
@@ -207,7 +211,7 @@ class modelBaseM(modelBase):
         if epoch % epoch_per_print == 0:
             loss_test, acc_test = self.evaluate_loss_acc(test_iter)
             self.run_matrix(loss_train, loss_test)   #仅用于rnn,lstm,ssd等
-            self.predict(self.net)    #仅用于rnn,lstm,ssd等
+            self.predict_nlp(self.net)    #仅用于rnn,lstm,ssd等
         return loss_train, acc_train,loss_valid,acc_valid,loss_test,acc_test
 
     def summary(self):
@@ -218,9 +222,13 @@ class modelBaseM(modelBase):
 
     def get_pretrain_model(self,**kwargs):
         moduleName = self.check_book[self.gConfig['taskName']][self.gConfig['framework']]['pretrain']['model']
-        className = moduleName.split('.')[-1]
-        firstName = moduleName.split('.')[0]
-        moduleName = '.'.join(moduleName.split('.')[:-1])
+        moduleNameList = moduleName.split('.')
+        assert len(moduleNameList) >=3 ,'the len of moduleNameList must be lager then 3!'
+        index = moduleNameList.index('model_zoo')  #处理gluoncv.model_zoo.ssd_512_mobilenet1.0_voc的情况
+        assert index == 1 , 'module name must be xxxx.model_zoo!'
+        firstName = moduleNameList[0]
+        moduleName = '.'.join(moduleNameList[:(index + 1)])
+        className = '.'.join(moduleNameList[(index + 1):])
         module = __import__(moduleName,fromlist=(moduleName.split('.')[-1]))
         if firstName == 'gluoncv':
             model = getattr(module,'get_model')(name=className,**kwargs)

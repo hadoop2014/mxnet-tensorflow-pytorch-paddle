@@ -925,7 +925,7 @@
         "pikachu":true
       },
       "pretrain":{
-        "model": "gluoncv.model_zoo.ssd_512_mobilenet1.0_voc",
+        "model": "gluoncv.model_zoo.ssd_512_mobilenet1.0_custom",
         "cifar10": false,
         "mnist": false,
         "fashionmnist": false,
@@ -1033,7 +1033,26 @@
     "lyric": "datafetch.getLyric",
     "hotdog": "datafetch.getHotdog",
     "pikachu": "datafetch.getPikachu"
+  },
+  "ssd_pretrain_model": {
+    "ssd_300_vgg16_atrous_voc":"gluoncv.model_zoo.ssd_300_vgg16_atrous_voc",
+    "ssd_300_vgg16_atrous_coco":"gluoncv.model_zoo.ssd_300_vgg16_atrous_coco",
+    "ssd_300_vgg16_atrous_custom": "gluoncv.model_zoo.ssd_300_vgg16_atrous_custom",
+    "ssd_512_vgg16_atrous_voc": "gluoncv.model_zoo.ssd_512_vgg16_atrous_voc",
+    "ssd_512_vgg16_atrous_coco": "gluoncv.model_zoo.ssd_512_vgg16_atrous_coco",
+    "ssd_512_vgg16_atrous_custom": "gluoncv.model_zoo.ssd_512_vgg16_atrous_custom",
+    "ssd_512_resnet18_v1_voc": "gluoncv.model_zoo.ssd_512_resnet18_v1_voc",
+    "ssd_512_resnet18_v1_coco": "gluoncv.model_zoo.ssd_512_resnet18_v1_coco",
+    "ssd_512_resnet50_v1_voc": "gluoncv.model_zoo.ssd_512_resnet50_v1_voc",
+    "ssd_512_resnet50_v1_coco": "gluoncv.model_zoo.ssd_512_resnet50_v1_coco",
+    "ssd_512_resnet50_v1_custom": "gluoncv.model_zoo.ssd_512_resnet50_v1_custom",
+    "ssd_512_resnet101_v2_voc": "gluoncv.model_zoo.ssd_512_resnet101_v2_voc",
+    "ssd_512_resnet152_v2_voc": "gluoncv.model_zoo.ssd_512_resnet152_v2_voc",
+    "ssd_512_mobilenet1.0_voc": "gluoncv.model_zoo.ssd_512_mobilenet1.0_voc",
+    "ssd_512_mobilenet1.0_coco": "gluoncv.model_zoo.ssd_512_mobilenet1.0_coco",
+    "ssd_512_mobilenet1.0_custom": "gluoncv.model_zoo.ssd_512_mobilenet1.0_custom",
+    "ssd_300_mobilenet0.25_voc": "gluoncv.model_zoo.ssd_300_mobilenet0.25_voc",
+    "ssd_300_mobilenet0.25_coco": "gluoncv.model_zoo.ssd_300_mobilenet0.25_coco",
+    "ssd_300_mobilenet0.25_custom": "gluoncv.model_zoo.ssd_300_mobilenet0.25_custom"
   }
-
 }
-

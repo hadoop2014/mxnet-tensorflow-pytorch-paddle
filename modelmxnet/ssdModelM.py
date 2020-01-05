@@ -12,7 +12,7 @@ import gluoncv
 
 class TinySSD(nn.HybridBlock):
     def __init__(self,num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,
-                 basenet_filters,**kwargs):
+                 basenet_filters,img_size,**kwargs):
         super(TinySSD,self).__init__(**kwargs)
         self.num_blocks = num_blocks
         self.num_classes = num_classes
@@ -21,6 +21,7 @@ class TinySSD(nn.HybridBlock):
         self.anchor_ratios = anchor_ratios
         self.activation = activation
         self.basenet_filters = basenet_filters
+        self.img_size = img_size
         def class_predictor(num_anchors, num_classes):
             return nn.Conv2D(channels=num_anchors * (num_classes + 1),kernel_size=3,padding=1)
         def bbox_predictor(num_anchors):
@@ -55,7 +56,7 @@ class TinySSD(nn.HybridBlock):
 
         return (self.concat_predictors(class_predictors,F).reshape(shape=(0,-1,self.num_classes + 1)),
                 self.concat_predictors(bbox_predictors,F).reshape((0,-1,4)),
-                F.concat(*anchors,dim=1))
+                F.concat(*anchors,dim=1)*self.img_size)
 
     def concat_predictors(self,preds,F):
         return F.concat(*[self.flatten_pred(p) for p in preds], dim=1)
@@ -69,7 +70,6 @@ class TinySSD(nn.HybridBlock):
         class_predictors = class_predictor(Y)
         bbox_predictors = bbox_predictor(Y)
         return (Y, anchors, class_predictors, bbox_predictors)
-
 
     def get_block(self,block_index):
         if block_index == 0:
@@ -114,14 +114,16 @@ class ssdModel(modelBaseM):
         self.weight_decay = self.gConfig['weight_decay']
         self.predict_threshold = self.gConfig['predict_threshold']
         self.input_shape = (self.batch_size,*self.resizedshape)
+        self.test_image_url = self.gConfig['test_image_url']
+        self.momentum = self.gConfig['momentum']
         self.get_net()
         self.net.initialize(ctx=self.ctx)
         self.trainer = gluon.Trainer(self.net.collect_params(),self.optimizer,
-                                     {'learning_rate':self.learning_rate,'wd':self.weight_decay})
+                                     {'learning_rate':self.learning_rate,'wd':self.weight_decay,'momentum':self.momentum})
         with autograd.train_mode():
-            _, _, self.anchors = self.net(mx.nd.zeros((1, *self.resizedshape),ctx=self.ctx))
+            _, _, anchors = self.net(mx.nd.zeros((1, *self.resizedshape),ctx=self.ctx))
         self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size,
-                                                                    self.anchors.as_in_context(mx.cpu()))
+                                                                    anchors.as_in_context(mx.cpu()))
 
     def get_net(self):
         num_blocks = self.gConfig['num_blocks']
@@ -131,7 +133,7 @@ class ssdModel(modelBaseM):
         anchor_ratios = self.gConfig['anchor_ratios']
         activation = self.get_activation(self.gConfig['activation'])
         basenet_filters = self.gConfig['basenet_filters']
-        self.net = TinySSD(num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,basenet_filters)
+        self.net = TinySSD(num_blocks,num_classes,num_channels,anchor_sizes,anchor_ratios,activation,basenet_filters,self.ssd_image_size)
     '''
     def run_train_loss_acc(self, X, y):
         with autograd.record():
@@ -184,23 +186,13 @@ class ssdModel(modelBaseM):
             --------
             label:ndarray.array
                 transformed label of the dataset for object detection,  witch shape is [N,5] for example [[x, y ,h ,w, id]]
-            """
+        """
         label_width = label.shape[1]
         label = np.array(label).ravel()
-        #header_len = int(label[0])  # label header
-        #label_width = int(label[1])  # the label width for each object, >= 5
-        #if label_width < 5:
-        #    raise ValueError(
-        #        "Label info for each object should >= 5, given {}".format(label_width))
-        #min_len = header_len + 5
         min_len = 5
         if len(label) < min_len:
             raise ValueError(
                 "Expected label length >= {}, got {}".format(min_len, len(label)))
-        #if (len(label) - header_len) % label_width:
-        #    raise ValueError(
-        #        "Broken label of size {}, cannot reshape into (N, {}) "
-        #        "if header length {} is excluded".format(len(label), label_width, header_len))
         gcv_label = label.reshape(-1, label_width)
         # swap columns, gluon-cv requires [xmin-ymin-xmax-ymax-id-extra0-extra1-xxx]
         ids = gcv_label[:, 0].copy()
@@ -222,13 +214,6 @@ class ssdModel(modelBaseM):
 
     def run_train_loss_acc(self, X, y):
         X,cls_labels,bbox_labels=self.ssd_data_transform(X,y)
-
-        #for (img, label) in zip(X, y):
-        #    img = nd.transpose(img,axes=(1,2,0))
-        #    label = label.asnumpy()
-        #    img, cls_labels, bbox_labels = \
-        #        SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, self.anchors)\
-        #            (img, label)
 
         with autograd.record():
             cls_preds, bbox_preds, anchors = self.net(X)
@@ -263,8 +248,9 @@ class ssdModel(modelBaseM):
         name_class, loss_class = self.class_metric.get()
         name_bbox, loss_bbox = self.bbox_metric.get()
         #self.mae_train = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
-        self.mae_train = loss_bbox
         acc = (cls_preds.argmax(axis=-1) == cls_labels).mean().asscalar()
+        self.mae_train = loss_bbox
+        self.ce_train = loss_class
         return loss, acc * n
 
     def run_eval_loss_acc(self, X, y):
@@ -285,6 +271,7 @@ class ssdModel(modelBaseM):
         name_bbox, loss_bbox = self.bbox_metric.get()
         #self.mae_test = self.bbox_eval(bbox_preds, bbox_labels, bbox_masks)/bbox_labels.size
         self.mae_test = loss_bbox
+        self.ce_test = loss_class
         return loss, acc * n
 
     def calc_loss(self,cls_preds,cls_labels,bbox_preds,bbox_labels,bbox_masks):
@@ -298,11 +285,26 @@ class ssdModel(modelBaseM):
         return ((bbox_labels - bbox_preds) * bbox_masks).abs().sum().asscalar()
 
     def run_matrix(self, loss_train, loss_test):
-        print('global_step %d, mae_train %.6f, mae_test %.6f' %
-              (self.global_step.asscalar(), self.mae_train,self.mae_test))
+        print('global_step %d, mae_train %.6f, ce_train %.6f,mae_test %.6f, ce_loss %.6f' %
+              (self.global_step.asscalar(), self.mae_train,self.ce_train,self.mae_test,self.ce_test))
         return self.mae_train,self.mae_test
 
-    def predict(self, model):
+    def predict_cv(self, model):
+        #for image_file in self.predict_images:
+        image_file = os.path.join(self.data_directory,self.predict_images[0])
+        test_url = self.test_image_url # 'https://raw.githubusercontent.com/zackchase/mxnet-the-straight-dope/master/img/pikachu.jpg'
+        gluoncv.utils.download(test_url, image_file)
+        #model = gluoncv.model_zoo.get_model('ssd_512_mobilenet1.0_custom', classes=self.classes, pretrained_base=False,ctx=self.ctx)
+        #self.model_savefile = '/media/wwyandotte/deeplearning/CodeDepository/GluonCV-Turtoials-master/2.GluonCV_Tutorial/0.2 Object Detection/ssd_512_mobilenet1.0_pikachu.params'
+        #model.load_parameters(self.model_savefile,ctx=self.ctx)
+        #self.net.load_parameters('/media/wwyandotte/deeplearning/CodeDepository/GluonCV-Turtoials-master/2.GluonCV_Tutorial/0.2 Object Detection/ssd_512_mobilenet1.0_pikachu.params')
+        x, image = gluoncv.data.transforms.presets.ssd.load_test(image_file, self.ssd_image_size)#default img_size=512
+        cid, score, bbox = model(x.as_in_context(self.ctx))
+        commFunction.plt.clf()  # 清楚之前的图片
+        ax = gluoncv.utils.viz.plot_bbox(image, bbox[0], score[0], cid[0], class_names=self.classes)
+        commFunc.plt.show()
+
+    def predict_v1(self, model):
         for image_file in self.predict_images:
             img = image.imread(os.path.join(self.data_directory,image_file))
             feature = image.imresize(img,*self.resizedshape[1:]).astype('float32')
@@ -350,14 +352,16 @@ class ssdModel(modelBaseM):
         return
 
     def transfer_learning(self):
-        #net = self.get_pretrain_model(pretrained=True, ctx=self.ctx,
-        #                              root=self.working_directory, classes=self.get_classes(),transfer='coco')
-        net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,root=self.working_directory)
+        net = self.get_pretrain_model(ctx=self.ctx,
+                                      root=self.working_directory, classes=self.get_classes(),
+                                      pretrained_base=False, transfer='voc')
+        #net = self.get_pretrain_model(pretrained=True,ctx=self.ctx,root=self.working_directory)
         net.reset_class(self.classes)
         height,width=self.ssd_image_size,self.ssd_image_size
         with autograd.train_mode():
-            _, _, anchors = net(mx.nd.zeros((1, 3, height, width)))
-        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size, anchors)
+            _, _, anchors = net(mx.nd.zeros((1, 3, height, width),ctx=self.ctx))
+        self.ssd_default_train_transform = SSDDefaultTrainTransform(self.ssd_image_size, self.ssd_image_size,
+                                                                    anchors.as_in_context(mx.cpu()))
         return net
 
 def create_model(gConfig,ckpt_used,getdataClass):

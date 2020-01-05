@@ -5,7 +5,7 @@
 #frameworklist = mxnet,tensorflow,paddle,pytorch
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog,pikachu
 #ctxlist = cpu,gpu
-mode = train
+mode = pretrain
 taskname = ssd
 framework = mxnet
 dataset = pikachu
@@ -92,7 +92,9 @@ hotdog.classnum=2
 houseprice.dim = 331
 lyric.dim = 1
 pikachu.channels=3
-pikachu.dim_x=256
-pikachu.dim_y=256
+#pikachu.dim_x=256
+#pikachu.dim_y=256
+pikachu.dim_x=512
+pikachu.dim_y=512
 pikachu.classnum=1
 

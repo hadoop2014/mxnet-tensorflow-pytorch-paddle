@@ -314,7 +314,7 @@ class rnnModel(modelBaseM):
                                                                (cell, self.gConfig['celllist'])
         return cell
 
-    def predict(self, model):
+    def predict_nlp(self, model):
         for prefix in self.prefixes:
             print(' -', self.predict_rnn_gluon(
                 prefix, self.predict_length, model, self.vocab_size, self.ctx, self.idx_to_char,

@@ -3,11 +3,13 @@ optimizer =　sgd
 initializer =xavier
 activation = relu
 
+test_image_url = https://raw.githubusercontent.com/zackchase/mxnet-the-straight-dope/master/img/pikachu.jpg
+
 [ints]
 resize = 0
 #训练迭代次数
-train_num_epoch = 10
-batch_size = 32
+train_num_epoch = 3
+batch_size = 16
 
 epochs_per_checkpoint =5
 
@@ -18,18 +20,19 @@ num_channels = 128
 [floats]
 init_sigma = 0.01
 init_bias = 0.0
-learning_rate = 0.2
+learning_rate = 0.001
 learning_rate_decay_factor = 0.9
 keeps = 0.6
-test_percent = 0.1
+momentum = 0.9
+test_percent = 0.001
 clip_gradient = 1e-2
-weight_decay = 5e-4
+weight_decay = 0.0005
 predict_threshold = 0.3
 
 [bools]
 ckpt_used =False
 debugIsOn =　True
-viewIsOn = True
+viewIsOn = False
 tfdbgIsOn = False
 
 [lists]
@@ -38,4 +41,4 @@ anchor_ratios = [[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5],[1, 2, 0.5]]
 basenet_filters = [16, 32, 64]
 
 [sets]
-predict_images = pikachu.jpg
+predict_images = pikachu_test.jpg
