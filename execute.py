@@ -7,6 +7,7 @@ from threading import Thread
 from datafetch import getConfig
 import json
 import os
+import altair as alt
 
 check_book = None
 

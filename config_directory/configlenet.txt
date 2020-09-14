@@ -56,7 +56,7 @@ keeps = 1.0
 [bools]
 ckpt_used = False
 debugIsOn =　True
-viewIsOn =False
+viewIsOn =True
 tfdbgIsOn = False
 
 [lists]

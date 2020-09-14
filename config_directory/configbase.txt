@@ -5,10 +5,10 @@
 #frameworklist = mxnet,tensorflow,paddle,pytorch
 #datasetlist = cifar10,mnist,fashionmnist,houseprice,lyric,hotdog,pikachu
 #ctxlist = cpu,gpu
-mode = pretrain
-taskname = ssd
+mode = train
+taskname = nin
 framework = mxnet
-dataset = pikachu
+dataset = mnist
 ctx =gpu
 
 working_directory = working_directory/
